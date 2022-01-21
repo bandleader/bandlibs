@@ -1,0 +1,8 @@
+- [ ] Create a version for simple inclusion via a script tag, that doesn't have TS support, but that's fine (the components are still TS classes so that's fine)
+- [ ] Create a simple script to build minified TS that can be pasted into a fiddle
+    - TS can be minified for now simply by removing linebreaks and whitespace
+- [ ] Have our script inject the basic CSS into the page (unless a setting is set)
+- [ ] Have our script initialize the app (unless a setting is set), even adding a `div#app` if it doesn't exist, running a component called called `<home-page>` or `<main-app>`, or the first component initialized otherwise
+- [ ] Include Vug? I think so; for script-tag use it's useful
+- [ ] Automatically load FontAwesome and Bootswatch (unless a setting is set)
+- [ ] Write up some basic docs
