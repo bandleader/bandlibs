@@ -2,7 +2,7 @@
 
 Vug is a concise language for expressing DOM elements, inspired by [Pug](https://pugjs.org/) and [Imba Elements](https://imba.io/docs/tags).
 
-Quick demo available [here](https://jsitor.com/preview/lpF52jP-s).
+A quick demo is available [here](https://jsitor.com/preview/lpF52jP-s).
 
 # Roadmap/TODO
 
@@ -28,6 +28,7 @@ Quick demo available [here](https://jsitor.com/preview/lpF52jP-s).
 - [ ] Can we just auto-detect all possible list of CSS attributes so he doesn't need a `*`? Can still use the `*` for new/obscure ones, and maybe `attr-width` to force non-CSS attribute
 - [ ] Can we do CSS-style syntax to avoid quotes -- p width: 100%; height: 100% -- foo. i.e. if using a colon, the value goes until the next semicolon (or `--` or comment of course)
 - [ ] `//` unbuffered comments -- but the question is does it go before or after the innerHTML part
+- [ ] Real playground app with Monaco and a few examples. And disambiguate between Vue mode and HTML mode...
 
 # Example / "Documentation"
 
