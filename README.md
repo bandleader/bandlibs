@@ -10,6 +10,7 @@ The goal is to have one repo and maintain one script to build them all.
 - **vug** -- concise language for expressing HTML (or Vue templates), similar to [Pug](https://pugjs.org/). (I would really like to set this up for use in Vue SFCs as well.) Inspired in part by [Imba Elements](https://imba.io/docs/tags)
 - **vue-fiddle-helper** -- reduced boilerplate for quick Vue fiddles. Includes navbar, routing, vue-promise-button, vue-async-value, vue-class-plus, Bootstrapm, FontAwesome
 - **vue-class-plus** -- small implementation of vue-class-component with a few tricks (so may be worthwhile even though Vue 3 seems to have some support for class components out of the box).
+- **ferry** -- WIP -- two-way-sync arbitrary Javascript objects -- changes are streamed as patches which the other side applies
 
 ### Libraries I hope to post here soon:
 - **reveal** -- animate HTML elements when they come into view (including easy Vue directive)
