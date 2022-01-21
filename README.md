@@ -2,7 +2,7 @@
 
 A collection of small utilities, mostly for Javascript/Typescript/Vue, that I would like to make available.
 
-The goal is to have one repo and maintain one script to build them all. 
+The goal is to have one repo and maintain one script to build them all. Then, people can download the package using `npm install bandleader/bandlibs`, or use it via a script tag from [jsDelivr](https://www.jsdelivr.com/?docs=gh).
 
 **NOTE**: At the moment, if you need a built version, you will need to build it yourself (using roll-your-lib).
 
