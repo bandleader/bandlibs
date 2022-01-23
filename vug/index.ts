@@ -228,8 +228,8 @@ function processLine(line: string): VugNode {
 }
 export function load(text: string) {
   const nodes = compile(text)
-  const toVueTemplate = () => nodes.map(x => nodeToVue(x)).join("\n")
-  return { nodes, toVueTemplate }
+  const toVueTemplate = (whitespace = false) => nodes.map(x => nodeToVue(x, whitespace)).join(whitespace ? "\n" : "")
+  return { ast: nodes, toVueTemplate }
 }
 function partition<T>(arr: T[], fn: (i: T) => boolean | number) {
   const ret: T[][] = [[], []]
@@ -241,7 +241,7 @@ function partition<T>(arr: T[], fn: (i: T) => boolean | number) {
   }
   return ret
 }
-function nodeToVue(node: VugNode) {
+function nodeToVue(node: VugNode, whitespace = false) {
   const out: string[] = []
   if (node.tag === 'html') {
     out.push(node.innerHtml || "")
@@ -297,11 +297,12 @@ function nodeToVue(node: VugNode) {
     if (node.innerHtml) out.push(node.innerHtml)
   }
   for (const c of node.children) {
-    const lines = nodeToVue(c).split("\n")
-    out.push(...lines.map(l => `\n  ${l}`))
+    let lines = nodeToVue(c, whitespace)
+    if (whitespace) lines = lines.split("\n").map(l => `\n  ${l}`).join("\n")
+    out.push(...lines)
   }
-  if (node.children.length) out.push("\n")
-  // Void tags don't get closed. Also including 'html' because that's my element for raw HTML
+  if (whitespace && node.children.length) out.push("\n")
+  // Close tags except for 'void tags'. That includes 'html' because that's my element for raw HTML
   if (!["html", "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"].includes(node.tag.toLowerCase())) out.push(`</${node.tag}>`)
   return out.join("")
 }
