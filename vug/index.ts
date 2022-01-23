@@ -192,7 +192,8 @@ function processLine(line: string): VugNode {
   line = splitTwo(line, "// ")[0] // ignore comments
   if (line.startsWith("<")) line = "-- " + line //return { tag: "html", attrs: [], innerHtml: line, children: [] }
   if (line.startsWith("-- ")) line = " " + line // so that it gets detected
-  const [wordPart, innerHtml] = splitTwo(line, " -- ").map(x => x.trim())
+  let [wordPart, innerHtml] = splitTwo(line, " -- ")
+  wordPart = wordPart.trim()
   const [tagPart, ...words] = wordPart.match(/(?=\S)[^"\s]*(?:"[^\\"]*(?:\\[\s\S][^\\"]*)*"[^"\s]*)*/g) || [''] // Not 100% sufficient. From https://stackoverflow.com/questions/4031900/split-a-string-by-whitespace-keeping-quoted-segments-allowing-escaped-quotes
   const [__tag, ...classesAttachedToTag] = tagPart.split(".")
   const [_tag, id] = __tag.split("#")
