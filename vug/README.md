@@ -8,7 +8,7 @@ A quick demo is available [here](https://jsitor.com/preview/lpF52jP-s).
 
 TODO, but see the example below, as well as the demo linked above, and you can probably figure it out.
 
-# Example / "Documentation"
+# Example / "Documentation" (quick live demo [here](https://jsitor.com/preview/lpF52jP-s))
 
 ```
 h3 -- Vug Basics
