@@ -3,8 +3,9 @@ export type VugNode = { tag: string, attrs: VugAttr[], innerHtml?: string, child
 
 function compile(text: string) {
   const nodes = text.replace(/\t/g, "        ") // Convert tabs to 8 spaces, like Python 2. People shouldn't mix tabs and spaces anyway
-    .split("\n").filter(x => x.trim())
-    .map(t => ({ text: t.trim(), indent: t.length - t.trimStart().length }))
+    .split("\n")
+    .filter(x => x.trim()) // Remove blank lines
+    .map(t => ({ text: t.trimStart(), indent: t.length - t.trimStart().length })) // Remove indent and mark that. Don't remove spaces at the end of the line as they may be significant.
     .map(info => ({ ...processLine(info.text), info }))
   return childize(nodes, x => x.info.indent)
 }
