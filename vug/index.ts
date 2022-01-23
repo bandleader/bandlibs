@@ -196,13 +196,15 @@ function processLine(line: string): VugNode {
   wordPart = wordPart.trim()
   const [tagPart, ...words] = wordPart.match(/(?=\S)[^"\s]*(?:"[^\\"]*(?:\\[\s\S][^\\"]*)*"[^"\s]*)*/g) || [''] // Not 100% sufficient. From https://stackoverflow.com/questions/4031900/split-a-string-by-whitespace-keeping-quoted-segments-allowing-escaped-quotes
   const [__tag, ...classesAttachedToTag] = tagPart.split(".")
-  const [_tag, id] = __tag.split("#")
+  const [_tag, id] = splitTwo(__tag, "#")
   let tag = _tag || ((classesAttachedToTag.length || wordPart.length) ? 'div' : 'html') // html for lines with no tag only innerHtml
-  if (tag === "d") tag = "div"
-  if (tag === "s") tag = "span"
-  if (tag === "f") { tag = "div"; words.push("display=flex") } // experimental
   for (const x of classesAttachedToTag) { words.push("." + x) }
   if (id) words.push("id=" + id)
+
+  if (tag === "d") tag = "div"
+  else if (tag === "s") tag = "span"
+  else if (tag === "f") { tag = "div"; words.push("display=flex") } // experimental
+  
   const attrs: VugAttr[] = []
   for (const x of words) {
     let [_key, _value] = splitTwo(x, "=")
