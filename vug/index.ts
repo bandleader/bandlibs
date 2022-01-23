@@ -173,7 +173,8 @@ function macros(key: string, value: string): Record<string, string> | null {
   else if (key === "py") return { 'padding-top': value, 'padding-bottom': value }
   else if (key === "mx") return { 'margin-left': value, 'margin-right': value }
   else if (key === "my") return { 'margin-top': value, 'margin-bottom': value }
-  else if (key === "size") return { 'width': value, 'height': value }
+  else if (key === "sz") return { 'width': value, 'height': value } // not 'size' because it's a valid HTML prop
+  else if (key === "circ") return { 'border-radius': '100%' } // not 'round' because might be used by other things
 
   else if (key === "display" && value === "b") return { display: "block" }
   else if (key === "display" && value === "i") return { display: "inline" }

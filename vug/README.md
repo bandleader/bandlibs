@@ -78,8 +78,9 @@ div -- We also support 6 macros:
 ul
   li -- mx, my to set horizontal or vertical margins
   li -- px, py to set horizontal or vertical padding
-  li -- size to set width and height to the same value
-  li -- round to set border-radius to 100%
+  li -- sz to set width and height to the same value
+  li -- circ to set border-radius to 100%
+    span.ms-1 d=ib circ sz=1em bg=teal
 div -- For the 'display' (or 'd') property, we support b, i, and f for block, inline, flex. Similarly, ib and if for inline-block and inline-flex.
 
   
