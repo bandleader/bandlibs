@@ -1,5 +1,5 @@
 
-function prop<T>(def: T, moreOpts: { type?: any } = {}) {
+export function prop<T>(def: T, moreOpts: { type?: any } = {}) {
     // Typescript-wise it returns a T, so you can use it from elsewhere within the component,
     // whereas at runtime it returns a prop object that VueClassPlus knows to put in the right place.
     // You can specify, `required`, `type`, etc. in moreOpts if you like..
@@ -8,14 +8,15 @@ function prop<T>(def: T, moreOpts: { type?: any } = {}) {
     o._isProp = true // This causes VueClassPlus to make it into a prop
     return o as T
 }
-function propRequired<T>(moreOpts: { type?: any } = {}) {
+export function propRequired<T>(moreOpts: { type?: any } = {}) {
     const o = moreOpts as any
     o.required = true
     o._isProp = true
     return o as T
 }
 
-export default function vueClassPlus(cl: any, opts?: Record<string, any>) {
+export default vueClassPlus
+export function vueClassPlus(cl: any, opts?: Record<string, any>) {
     if (typeof cl === 'object') return cl // This is a regular Vue component, just return
     if (typeof cl !== 'function') throw "VueClassPlus: Expected a class, not " + typeof cl
 
