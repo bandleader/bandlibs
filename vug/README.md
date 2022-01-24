@@ -2,9 +2,61 @@
 
 Vug is a concise language for expressing DOM elements, inspired by [Pug](https://pugjs.org/) and [Imba Elements](https://imba.io/docs/tags).
 
-A quick demo is available [here](https://jsitor.com/preview/lpF52jP-s).
+# Getting Started
 
-# Features and Usage
+### Live Demo
+
+A quick demo and playground is available [here](https://jsitor.com/preview/lpF52jP-s).
+
+### Install via npm
+
+```bash
+npm install bandleader/bandlibs
+```
+
+```js
+import * as Vug from "bandlibs/vug"
+const code = "h1 -- Hello world!"
+const result = Vug.load(code).toVueTemplate()
+// VueTemplate can also be used as plain HTML.
+// Vue is only required for calculated values, etc.
+```
+
+### Configure as a Vite plugin
+
+```js
+// vite.config.js
+import { defineConfig } from 'vite'
+import vue from '@vitejs/plugin-vue'
+import * as Vug from 'bandlibs/vue'
+
+export default defineConfig({
+  // Make sure Vug is BEFORE Vue
+  plugins: [Vug.ViteTransformPlugin(), vue()] 
+})
+```
+
+```html
+<!-- Example.vue -->
+<script>
+  ...
+</script>
+
+<template lang="vug">
+  h1 -- Hello world!
+</template>
+```
+
+### Use via CDN
+```html
+<script src="https://cdn.jsdelivr.net/gh/bandleader/bandlibs/dist/vug.browser.min.js"></script>
+<script>
+const code = "h1 -- Hello world!"
+const result = Vug.load(code).toVueTemplate()
+</script>
+```
+
+# Features and Syntax
 
 TODO, but see the example below, as well as the demo linked above, and you can probably figure it out.
 
@@ -89,12 +141,20 @@ div -- For the 'display' (or 'd') property, we support b, i, and f for block, in
 
 # Roadmap/TODO
 
-- [ ] Fix quoting: braces with spaces don't work (although we may deprecate braces in favour of Vue's colon syntax), 2) perhaps we should make our own lexer
-- [x] Experimental: `q` unit which is equal to 0.25rem
 - [ ] Sugar for containers with a single element in them: Separate layers on the same line with `>`.
     - `.col-4 > .card > .card-body > p -- Some text inside it`
     - Can be implemented as a pass looking for word `>`, we keep pushing elements onto the stack, then we take our children and move them to the last element. That way no indentation magic has to happen
-- [ ] Sugar to apply words to all children. I think `*` (if we're not using * for CSS):
+- [ ] Syntax for CSS rules, that allows shorthand. The main point is co-location. There should be a separate method that gets the total style text, and perhaps a method that adds it to the DOM, perhaps given a `window`.
+    - `css .card:hover > .title -- bg=#FFF`
+    - Perhaps children of these elements should also be interpreted as CSS rules but as children of these. A bit hard to parse everything properly...
+      ```
+      css .card
+        .title -- bg=blue
+        :hover -- .title -- bg=red
+      ```
+- [ ] Fix quoting: braces with spaces don't work (although we may deprecate braces in favour of Vue's colon syntax), 2) perhaps we should make our own lexer
+- [x] Experimental: `q` unit which is equal to 0.25rem
+- [ ] Perhaps: Sugar to apply words to all children. I think `*` (if we're not using `*` for CSS):
     ```
     .row
         *.col-md-3 p=0.5em
@@ -102,11 +162,8 @@ div -- For the 'display' (or 'd') property, we support b, i, and f for block, in
         div
         div
     ```
-- [ ] How easily can this be integrated into Vite for use in `<template>` tags in Vue SFCs?
-- CSS and syntax ideas
-    - [x] Can we just auto-detect if an attribute is in a [list of all possible CSS attributes](https://www.w3.org/Style/CSS/all-properties.en.html) (or in [JSON](https://www.w3.org/Style/CSS/all-properties.en.json)) so he doesn't need a `*`? Can still use the `*` for new/obscure ones, and maybe `attr-width` to force non-CSS attribute
-    - [ ] Can we do CSS-style syntax to avoid quotes -- p width: 100%; height: 100% -- foo. i.e. if using a colon, the value goes until the next semicolon (or `--` or comment of course) It's also great for pasting CSS. 
-    - [ ] Should we allow `:` instead of `=`? For CSS I keep typing it that way out of force of habit. Perhaps even don't require `*`
+- [ ] Can we do CSS-style syntax to avoid quotes -- p width: 100%; height: 100% -- foo. i.e. if using a colon, the value goes until the next semicolon (or `--` or comment of course) It's also great for pasting CSS. 
+- [ ] Should we allow `:` instead of `=`? For CSS I keep typing it that way out of force of habit. Although perhaps even don't require `*`
 - [ ] If use cases justify it: option to JSX-style render functions for React and Vue
     - `React.createElement(tagName, attrsObjInclExplode, ...childrenOrTextStrings)`
     -  For multiple root-level notes, create element of type `React.Fragment` (and for Vue what?)
@@ -123,6 +180,5 @@ div -- For the 'display' (or 'd') property, we support b, i, and f for block, in
     - [ ] Tag names that begin with an uppercase letter or include a hyphen should be custom components (instead of a string); in React it has to be in scope so just convert it to a variable name, and for Vue (3) if it's a globally registered component it's `Vue.resolveDynamicComponent(name)`.
 - [ ] Some sort of multiline HTML block
 - [ ] Somehow split arguments onto more than one line. I think pug does `|` at the beginning of the next lines? Not sure it's so good. I would maybe do indent by >=8 spaces?
-- [x] `//` unbuffered comments -- but the question is does it go before or after the innerHTML part. Either way make sure `--` is allowed in comments and `//` is allowed in html URLS -- maybe only ` //`? in HTML you sometimes have `://` and sometimes `"//foo"` or `'//foo'`
 - [ ] Real playground app with Monaco and a few examples. And disambiguate between Vue mode and HTML mode...
-- [ ] Allow real `style` static attribute? Combine with any of ours
+- [ ] Support real `style` and `class` static attributes, combining with any of ours -- not simple for render functions
