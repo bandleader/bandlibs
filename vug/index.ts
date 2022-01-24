@@ -335,9 +335,12 @@ const cssProperties = "--*|-webkit-line-clamp|accent-color|align-content|align-i
 /*
 To get Vug support in Vue templates, there are a few options.
 1) Use `ViteTransformPlugin`. In your vite.config.ts, import Vug and then in `plugins`, add Vug.ViteTransformPlugin() to the list.
-    The downside is that it can't make <template lang="vug"> work. So we use <template vug> instead.
     It transforms the file before Vite even sends it to the template compiler, so it works well.
-    But it seems Vue checks prepreprocessors even before that.
+    Just add it BEFORE the Vue() plugin -- otherwise Vue will already complain that it doesn't know how to process Vug. (Even though I specified `enforce: "pre"`).
+    (Before I figured this out, I used <template vug> instead of <template lang="vug">, and that actually worked quite well.
+    THIS IS THE RECOMMENDED OPTION.
+    IT IS SIMPLEST.
+    It also opens the door to doing fancy stuff later with styles etc.
 2) Use `VueConsolidatePlugin` to add Vug as a supported preprocessor. So you can do <template lang="vug">.
     To get vite to use us, however, you have to override the requirer. Change the vue plugin init as follows:
         vue({
@@ -355,11 +358,18 @@ To get Vug support in Vue templates, there are a few options.
         consolidate['vug'] = Vug.viteRenderer() // no effect :-(
 3) You can however simply patch that copy to add support, but that's messy, and won't work on your build server, and will break when you update vite, etc.
     In your `vite.config.ts`:
-        globalThis.__vugViteRenderer = Vug.VueConsolidatePlugin().render
+        globalThis.Vug = Vug
     In `node_modules/@vue/compiler-sfc/dist/compiler-sfc.cjs.js`:
     Look for `exports.pug =` or (any other language), and add this alongside it:
-        exports.vug = { render(...args) { globalThis.__vugViteRenderer(...args) } }
-    (You can't do just `exports.vug = globalThis.__vugViteRenderer()` I think because it runs before you do)
+        exports.vug = { render(...args) { globalThis.Vug.VueConsolidatePlugin().render(...args) } }
+    (You can't do just `exports.vug = globalThis.Vug.VueConsolidatePlugin()` I think because it runs before you do)
+4) You could maybe fake one of the existing packages?
+    In your `vite.config.ts`, as before:
+        globalThis.Vug = Vug
+    In your node_modules create a `plates/index.js` as follows:
+        module.exports = { bind: text => globalThis.Vug.load(text).toVueTemplate() }
+    That way, when consolidate tries `require('plates')` it'll get your package, and you're following the plates interface. 
+    You would still need to make sure that node_modules/plates ends up on your build server too. You could commit it to the repo. You could make a script that writes it on the spot.
 */
 
 export function ViteTransformPlugin() {
@@ -367,13 +377,15 @@ export function ViteTransformPlugin() {
     name: 'vite-plugin-vue-vug',
     enforce: "pre" as const,
     transform(code: string, id: string) {
-      if (id.endsWith(".vue") && code.includes("<template vug")) {
-        let start = code.indexOf("<template vug"), end = code.lastIndexOf("</template>")
-        start = code.indexOf(">", start) + 1
-        const vugCode = code.substring(start, end)
-        const output = load(vugCode).toVueTemplate()
-        return code.substring(0, start) + output + code.substring(end)
-      }
+      if (!id.endsWith(".vue")) return;
+      const findTemplateTag = /<template lang=['"]?vug['" >]/g.exec(code)
+      if (!findTemplateTag) return;
+      const startOfTemplateTag = findTemplateTag.index
+      const startOfCode = code.indexOf(">", startOfTemplateTag) + 1
+      const endOfCode = code.lastIndexOf("</template>")
+      const vugCode = code.substring(startOfCode, endOfCode)
+      const output = load(vugCode).toVueTemplate()
+      return code.substring(0, startOfTemplateTag) + "<template>" + output + code.substring(endOfCode) // We have to replace the template tag so the SFC compiler doesn't error because it doesn't know how to process Vue
     }
   }
 }
