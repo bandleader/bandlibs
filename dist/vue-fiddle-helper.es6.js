@@ -15932,6 +15932,44 @@ var __assign = function() {
     return __assign.apply(this, arguments);
 };
 
+function __awaiter(thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+}
+
+function __generator(thisArg, body) {
+    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
+    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
+    function verb(n) { return function (v) { return step([n, v]); }; }
+    function step(op) {
+        if (f) throw new TypeError("Generator is already executing.");
+        while (_) try {
+            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
+            if (y = 0, t) op = [op[0] & 2, t.value];
+            switch (op[0]) {
+                case 0: case 1: t = op; break;
+                case 4: _.label++; return { value: op[1], done: false };
+                case 5: _.label++; y = op[1]; op = [0]; continue;
+                case 7: op = _.ops.pop(); _.trys.pop(); continue;
+                default:
+                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
+                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
+                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
+                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
+                    if (t[2]) _.ops.pop();
+                    _.trys.pop(); continue;
+            }
+            op = body.call(thisArg, _);
+        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
+        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
+    }
+}
+
 function __spreadArray(to, from, pack) {
     if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
         if (ar || !(i in from)) {
@@ -16498,7 +16536,7 @@ var Vug = /*#__PURE__*/Object.freeze({
 });
 
 function initApp(Vue) {
-    var _a, _b;
+    var _a, _b, _c, _d;
     if (Vue === void 0) { Vue = window.Vue; }
     var w = window;
     var mainInstance = {
@@ -16544,7 +16582,7 @@ function initApp(Vue) {
         }
         old.apply(void 0, __spreadArray([name, value], args, false));
     }; });
-    // Include two components
+    // Include some components
     w.app.component("async-value", (_a = /** @class */ (function () {
             function class_1() {
                 this.promise = propRequired();
@@ -16585,6 +16623,56 @@ function initApp(Vue) {
         }()),
         _b.template = "<button @click=\"go\" :disabled=\"pending\"><slot /><transition name=\"fade\"><span v-if=\"pending||error||success\"><div v-if=\"pending\" class=\"spinner-border spinner-border-sm ms-2\" style=\"font-size: 0.7em\" role=\"status\" /><span v-else-if=\"error\" :title=\"String(error)\" @click.stop=\"errorClicked\">\u26A0</span><span v-else-if=\"success\">\u2705</span></span></transition></button>",
         _b));
+    w.app.component("use-styles", (_c = /** @class */ (function () {
+            function class_3() {
+                this.bootswatch = prop("lumen");
+                this.bootstrap = prop("5.1.3");
+                this.fontawesome = prop("6.0.0-beta3");
+                this.ready = false;
+            }
+            class_3.prototype.created = function () {
+                return __awaiter(this, void 0, void 0, function () {
+                    var addEl, waitingFor, href, href;
+                    return __generator(this, function (_a) {
+                        switch (_a.label) {
+                            case 0:
+                                addEl = function (type, attrs) { return new Promise(function (res) { return document.head.appendChild(Object.assign(document.createElement(type), attrs, { onload: res })); }); };
+                                waitingFor = [];
+                                if (this.bootstrap) {
+                                    href = this.bootstrap.startsWith("http") ? this.bootstrap
+                                        : this.bootswatch ? "https://cdnjs.cloudflare.com/ajax/libs/bootswatch/".concat(this.bootstrap, "/").concat(this.bootswatch, "/bootstrap.min.css")
+                                            : "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/".concat(this.bootstrap, "/js/bootstrap.min.js");
+                                    waitingFor.push(addEl("link", { rel: "stylesheet", href: href }));
+                                }
+                                if (this.fontawesome) {
+                                    href = this.fontawesome.startsWith("http") ? this.fontawesome
+                                        : "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/".concat(this.fontawesome, "/css/all.min.css");
+                                    waitingFor.push(addEl("link", { rel: "stylesheet", href: href }));
+                                }
+                                return [4 /*yield*/, Promise.all(waitingFor)];
+                            case 1:
+                                _a.sent();
+                                this.ready = true;
+                                return [2 /*return*/];
+                        }
+                    });
+                });
+            };
+            return class_3;
+        }()),
+        _c.template = "<slot v-if=ready /><div v-else style=\"text-align: center; padding: 2em\"><span class=\"super-simple-spinner\" /></div>",
+        _c.css = "\n.super-simple-spinner {\n    display: inline-block;\n    width: 50px;\n    height: 50px;\n    border: 3px solid rgba(127,127,127,.5);\n    border-radius: 50%;\n    border-top-color: #fff;\n    animation: super-simple-spinner-spin 1s ease-in-out infinite;\n    -webkit-animation: super-simple-spinner-spin 1s ease-in-out infinite;\n}\n@keyframes super-simple-spinner-spin {\n    to { -webkit-transform: rotate(360deg); }\n}\n@-webkit-keyframes super-simple-spinner-spin {\n    to { -webkit-transform: rotate(360deg); }\n}\n        ",
+        _c));
+    w.app.component("nav-bar", (_d = /** @class */ (function () {
+            function class_4() {
+                this.links = prop({}); // {href, title}
+                this.heading = prop("Vue Fiddle");
+                this.collapse = true;
+            }
+            return class_4;
+        }()),
+        _d.template = "\n            <nav class=\"navbar navbar-expand-lg navbar-dark bg-primary\">\n                <div class=\"container-fluid\">\n                <a class=\"navbar-brand\" href=\"#\">{{heading}}</a>\n                <button class=\"navbar-toggler\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#navbarColor01\" aria-controls=\"navbarColor01\" aria-expanded=\"false\" aria-label=\"Toggle navigation\" @click=\"collapse=!collapse\">\n                    <span class=\"navbar-toggler-icon\"></span>\n                </button>\n                    <div class=\"navbar-collapse\" :class=\"{collapse}\">\n                    <ul class=\"navbar-nav me-auto\">\n                    <li class=\"nav-item\" v-for=\"(href,title) in links\">\n                        <a class=\"nav-link\" :href=\"href\">{{title}}</a>\n                    </li>\n                    </ul>\n                    <slot />\n                </div>\n                </div>\n            </nav>\n        ",
+        _d));
     setTimeout(function () { return w.app.mount(div); }); // Mount on next tick so all the components are ready
 }
 
