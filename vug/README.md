@@ -145,12 +145,12 @@ div -- For the 'display' (or 'd') property, we support b, i, and f for block, in
     - `.col-4 > .card > .card-body > p -- Some text inside it`
     - Can be implemented as a pass looking for word `>`, we keep pushing elements onto the stack, then we take our children and move them to the last element. That way no indentation magic has to happen
 - [ ] Syntax for CSS rules, that allows shorthand. The main point is co-location. There should be a separate method that gets the total style text, and perhaps a method that adds it to the DOM, perhaps given a `window`.
-    - `css .card:hover > title -- bg=#FFF`
+    - `css .card:hover > .title -- bg=#FFF`
     - Perhaps children of these elements should also be interpreted as CSS rules but as children of these. A bit hard to parse everything properly...
       ```
       css .card
-        title -- bg=blue
-        :hover -- title -- bg=red
+        .title -- bg=blue
+        :hover -- .title -- bg=red
       ```
 - [ ] Fix quoting: braces with spaces don't work (although we may deprecate braces in favour of Vue's colon syntax), 2) perhaps we should make our own lexer
 - [x] Experimental: `q` unit which is equal to 0.25rem
