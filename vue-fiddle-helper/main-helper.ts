@@ -12,7 +12,8 @@ export function initApp(Vue = (window as any).Vue) {
                 this.hash = window.location.hash === '#home' ? '' : window.location.hash // special handling because navigating to # breaks the JSitor IDE; it brings your app preview to the top of the screen
                 window.scrollTo(0, 0)
             })
-        }
+        },
+        template: "<main-app />",
     }
     const div = document.createElement("div")
     document.body.appendChild(div)
@@ -25,6 +26,7 @@ export function initApp(Vue = (window as any).Vue) {
     // Support vug
     hook(w.app, 'component', (old: Function) => (name: string, value: any, ...args: any[]) => {
         if (value.vug) { value.template = Vug.load(value.vug).toVueTemplate(); delete value.vug }
+        old(name, value, ...args)
     })
     
     // Include two components
