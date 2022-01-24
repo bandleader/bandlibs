@@ -302,11 +302,11 @@ function nodeToVue(node: VugNode, whitespace = false) {
     if (node.innerHtml) out.push(node.innerHtml)
   }
   for (const c of node.children) {
-    let lines = nodeToVue(c, whitespace)
-    if (whitespace) lines = lines.split("\n").map(l => `\n  ${l}`).join("\n")
-    out.push(...lines)
+    let txt = nodeToVue(c, whitespace)
+    if (whitespace) txt = txt.split("\n").map(l => `\n  ${l}`).join("\n") // Indent
+    out.push(txt)
   }
-  if (whitespace && node.children.length) out.push("\n")
+  if (whitespace) out.push("\n")
   // Close tags except for 'void tags'. That includes 'html' because that's my element for raw HTML
   if (!["html", "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"].includes(node.tag.toLowerCase())) out.push(`</${node.tag}>`)
   return out.join("")
