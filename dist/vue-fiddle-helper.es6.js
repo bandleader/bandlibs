@@ -16596,6 +16596,7 @@ function initApp(Vue) {
             };
             return class_1;
         }()),
+        // TODO should make this use the included spinner (or rather include it here, so this doesn't need Bootstrap)
         _a.template = "<slot v-if=\"resolved\" v-bind=\"{value}\" /><span v-else-if=\"error\" class=\"text-danger\"><i class=\"fa fa-exclamation-triangle\" /> {{String(error)}}</span><span v-else class=\"text-primary spinner-border spinner-border-sm\" role=\"status\"></span>",
         _a));
     w.app.component("promise-button", (_b = /** @class */ (function () {
@@ -16661,17 +16662,18 @@ function initApp(Vue) {
             return class_3;
         }()),
         _c.template = "<slot v-if=ready /><div v-else style=\"text-align: center; padding: 2em\"><span class=\"super-simple-spinner\" /></div>",
-        _c.css = "\n.super-simple-spinner {\n    display: inline-block;\n    width: 50px;\n    height: 50px;\n    border: 3px solid rgba(127,127,127,.5);\n    border-radius: 50%;\n    border-top-color: #fff;\n    animation: super-simple-spinner-spin 1s ease-in-out infinite;\n    -webkit-animation: super-simple-spinner-spin 1s ease-in-out infinite;\n}\n@keyframes super-simple-spinner-spin {\n    to { -webkit-transform: rotate(360deg); }\n}\n@-webkit-keyframes super-simple-spinner-spin {\n    to { -webkit-transform: rotate(360deg); }\n}\n        ",
+        _c.css = "\n.super-simple-spinner {\n    display: inline-block;\n    width: 50px;\n    height: 50px;\n    border: 3px solid rgba(127,127,127,.5);\n    border-radius: 50%;\n    border-top-color: #fff;\n    animation: super-simple-spinner-spin 1s ease-in-out infinite;\n    -webkit-animation: super-simple-spinner-spin 1s ease-in-out infinite;\n}\n@keyframes super-simple-spinner-spin {\n    to { -webkit-transform: rotate(360deg); }\n}\n@-webkit-keyframes super-simple-spinner-spin {\n    to { -webkit-transform: rotate(360deg); }\n}\n\n.fade-enter-active, .fade-leave-active { transition: opacity 0.5s ease; }\n.fade-enter-from, .fade-leave-to { opacity: 0; }\n        ",
         _c));
     w.app.component("nav-bar", (_d = /** @class */ (function () {
             function class_4() {
                 this.links = prop({}); // {href, title}
                 this.heading = prop("Vue Fiddle");
                 this.collapse = true;
+                this.css = ".includedNavBar .nav-link.active { background: rgba(0, 0, 40, 0.2); border-radius: 0.3em; }";
             }
             return class_4;
         }()),
-        _d.template = "\n            <nav class=\"navbar navbar-expand-lg navbar-dark bg-primary\">\n                <div class=\"container-fluid\">\n                <a class=\"navbar-brand\" href=\"#\">{{heading}}</a>\n                <button class=\"navbar-toggler\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#navbarColor01\" aria-controls=\"navbarColor01\" aria-expanded=\"false\" aria-label=\"Toggle navigation\" @click=\"collapse=!collapse\">\n                    <span class=\"navbar-toggler-icon\"></span>\n                </button>\n                    <div class=\"navbar-collapse\" :class=\"{collapse}\">\n                    <ul class=\"navbar-nav me-auto\">\n                    <li class=\"nav-item\" v-for=\"(href,title) in links\">\n                        <a class=\"nav-link\" :href=\"href\">{{title}}</a>\n                    </li>\n                    </ul>\n                    <slot />\n                </div>\n                </div>\n            </nav>\n        ",
+        _d.template = "\n<nav class=\"includedNavBar navbar navbar-expand-lg navbar-dark bg-primary\">\n    <div class=\"container-fluid\">\n    <a class=\"navbar-brand\" href=\"#\">{{heading}}</a>\n    <button class=\"navbar-toggler\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#navbarColor01\" aria-controls=\"navbarColor01\" aria-expanded=\"false\" aria-label=\"Toggle navigation\" @click=\"collapse=!collapse\">\n        <span class=\"navbar-toggler-icon\"></span>\n    </button>\n        <div class=\"navbar-collapse\" :class=\"{collapse}\">\n        <ul class=\"navbar-nav me-auto\">\n        <li class=\"nav-item\" v-for=\"(href,title) in links\">\n            <a class=\"nav-link\" :href=\"href\">{{title}}</a>\n        </li>\n        </ul>\n        <slot />\n    </div>\n    </div>\n</nav>\n        ",
         _d));
     setTimeout(function () { return w.app.mount(div); }); // Mount on next tick so all the components are ready
 }
