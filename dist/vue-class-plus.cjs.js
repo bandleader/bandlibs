@@ -90,7 +90,7 @@ function classComponent(cl, opts) {
         }
         else if (prop === "css") {
             // Just add it right away. No scoping or waiting till the component is created for now. The point is colocation
-            document.body.appendChild(Object.assign(document.createElement("style"), { type: "text/css", innerText: obj[prop] }));
+            document.head.appendChild(Object.assign(document.createElement("style"), { type: "text/css", innerText: obj[prop] }));
         }
         else if (descriptor && descriptor.get) {
             ret.computed[prop] = {
