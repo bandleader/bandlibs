@@ -15,8 +15,8 @@ export function propRequired<T>(moreOpts: { type?: any } = {}) {
     return o as T
 }
 
-export default vueClassPlus
-export function vueClassPlus(cl: any, opts?: Record<string, any>) {
+export default classComponent
+export function classComponent(cl: any, opts?: Record<string, any>) {
     if (typeof cl === 'object') return cl // This is a regular Vue component, just return
     if (typeof cl !== 'function') throw "VueClassPlus: Expected a class, not " + typeof cl
 

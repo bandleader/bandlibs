@@ -21,7 +21,7 @@ export function initApp(Vue = (window as any).Vue) {
     
     // Support vue-class-plus
     const hook = (obj: any, prop: string, fn: Function) => { const old = obj[prop].bind(obj); obj[prop] = (...args: any[]) => fn.apply(obj, [old]).apply(obj, args) }
-    hook(w.app, 'component', (old: Function) => (name: string, value: any, ...args: any[]) => old(name, VCP.vueClassPlus(value), ...args))
+    hook(w.app, 'component', (old: Function) => (name: string, value: any, ...args: any[]) => old(name, VCP.classComponent(value), ...args))
 
     // Support vug
     hook(w.app, 'component', (old: Function) => (name: string, value: any, ...args: any[]) => {

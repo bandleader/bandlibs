@@ -7,6 +7,7 @@ async function go() {
   try {    
     await build("./vue-fiddle-helper/for-script-tag.ts", "vue-fiddle-helper", "VueFiddle")
     await build("./vug/index.ts", "vug", "Vug")
+    await build("./vue-class-plus/index.ts", "vue-class-plus", "VCP")
   } catch (error) {
     console.error(error)
     process.exit(1)
@@ -45,7 +46,7 @@ async function build(mainFile: string, outFilePrefix: string, iifeName: string) 
         throw "No assets supposed to be here"
       } else {
         // Remove the TSLib 'important' comment
-        const line = "***************************************************************************** */\n"
+        const line = "***************************************************************************** */"
         if (chunkOrAsset.code.includes(line)) chunkOrAsset.code = chunkOrAsset.code.split(line)[1]
         
         // Write file
