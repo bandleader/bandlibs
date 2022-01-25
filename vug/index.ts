@@ -1,4 +1,4 @@
-export type VugAttr = { key: string, value?: string, isExpr: boolean, isLiteral: boolean, kind: string }
+export type VugAttr = { key: string, value?: string, isExpr: boolean, kind: string }
 export type VugNode = { tag: string, attrs: VugAttr[], innerHtml?: string, children: VugNode[] }
 
 function compile(text: string) {
@@ -209,7 +209,7 @@ function processLine(line: string): VugNode {
   const attrs: VugAttr[] = []
   for (const x of words) {
     let [_key, _value] = splitTwo(x, "=")
-    let isExpr = false, isLiteral = false, kind = "attr"
+    let isExpr = false, kind = "attr"
     if (_value?.[0] === '"') _value = _value.slice(1, _value.length - 1) // Remove quotes
     else if (_value?.[0] === '{') { _value = _value.slice(1, _value.length - 1); isExpr = true }
     if (_key[0] === ":") { isExpr = true; _key = _key.slice(1) } // Vue-style :attr
@@ -226,7 +226,7 @@ function processLine(line: string): VugNode {
       if (cssProperties.includes(key) && kind === "attr") kind = "style"
       if (_key.startsWith("attr-")) { kind = "attr"; _key = _key.slice(5) }
       if (kind === "style" && !isExpr && value) value = value.split(" ").map(x => /^-?([0-9]*\.)?[0-9]+q$/.test(x) ? `${parseFloat(x) * 0.25}rem` : x).join(" ") // add support for the "q" unit which is 0.25rem
-      attrs.push({ key, value: value || undefined, isLiteral, isExpr, kind })
+      attrs.push({ key, value: value || undefined, isExpr, kind })
     }
   }
   return { tag, attrs, innerHtml: innerHtml || undefined, children: [] }
