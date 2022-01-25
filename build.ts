@@ -46,8 +46,8 @@ async function build(mainFile: string, outFilePrefix: string, iifeName: string) 
         throw "No assets supposed to be here"
       } else {
         // Remove the TSLib 'important' comment
-        const line = "***************************************************************************** */"
-        if (chunkOrAsset.code.includes(line)) chunkOrAsset.code = chunkOrAsset.code.split(line)[1]
+        const toRemove = "/*! *****************************************************************************\n  Copyright (c) Microsoft Corporation.\n\n  Permission to use, copy, modify, and/or distribute this software for any\n  purpose with or without fee is hereby granted.\n\n  THE SOFTWARE IS PROVIDED \"AS IS\" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH\n  REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY\n  AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,\n  INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM\n  LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR\n  OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR\n  PERFORMANCE OF THIS SOFTWARE.\n  ***************************************************************************** */"
+        while (chunkOrAsset.code.includes(toRemove)) chunkOrAsset.code = chunkOrAsset.code.replace(toRemove, '')
         
         // Write file
         console.info("Writing", chunkOrAsset.name, "to", chunkOrAsset.fileName)        
