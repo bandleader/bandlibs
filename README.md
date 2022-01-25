@@ -3,9 +3,9 @@
 A collection of small utilities, mostly for Javascript/Typescript/Vue, that I would like to make available.
 
 ### Libraries you'll find here in the source:
-- **[vug](vug/)** -- concise language for expressing HTML (or Vue templates), similar to [Pug](https://pugjs.org/). (I would really like to set this up for use in Vue SFCs as well.) Inspired in part by [Imba Elements](https://imba.io/docs/tags)
-- **[vue-class-plus](vue-class-plus/)** -- small implementation of vue-class-component with a few tricks (so may be worthwhile even though Vue 3 seems to have some support for class components out of the box).
-- **[vue-fiddle-helper](vue-fiddle-helper/)** -- reduced boilerplate for quick Vue fiddles. Includes navbar, routing, vue-promise-button, vue-async-value, vue-class-plus, Bootstrapm, FontAwesome
+- **[vug](vug/)** -- concise language for expressing HTML (or Vue templates), inspired by [Pug](https://pugjs.org/) and [Imba Elements](https://imba.io/docs/tags)
+- **[vue-class-plus](vue-class-plus/)** -- small implementation of vue-class-component with a few tricks (so may be worthwhile even though Vue 3 seems to have some support for class components out of the box)
+- **[vue-fiddle-helper](vue-fiddle-helper/)** -- reduced boilerplate for quick Vue fiddles. Includes navbar, routing, vue-promise-button, vue-async-value, vue-class-plus, Bootstrap, FontAwesome
 
 ### Libraries I hope to post here soon:
 - **[ferry](ferry/)** -- WIP -- two-way-sync arbitrary Javascript objects -- changes are streamed as patches which the other side applies
