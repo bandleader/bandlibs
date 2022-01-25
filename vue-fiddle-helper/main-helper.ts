@@ -129,9 +129,15 @@ export function initApp(Vue = (window as any).Vue) {
         css = `.includedNavBar .nav-link.active { background: rgba(0, 0, 40, 0.2); border-radius: 0.3em; }`
     })
       
-    setTimeout(() => {
-        const div = document.createElement("div")
-        document.body.appendChild(div)
-        w.app.mount(div)
-    }) // Mount on next tick so all the components are ready
+    function mountApp() {
+        // Ensure DOM is ready before we append a div. Otherwise body will be null
+        if (document.readyState == 'loading') {
+            document.addEventListener('DOMContentLoaded', mountApp)
+        } else {
+            const div = document.createElement("div")
+            document.body.appendChild(div)
+            w.app.mount(div)
+        }
+    }
+    setTimeout(mountApp) // Mount on next tick so all the components are ready
 }
