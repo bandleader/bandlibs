@@ -16554,8 +16554,6 @@ function initApp(Vue) {
         },
         template: "<main-app />"
     };
-    var div = document.createElement("div");
-    document.body.appendChild(div);
     w.app = Vue.createApp(mainInstance);
     // Support vue-class-plus
     var hook = function (obj, prop, fn) { var old = obj[prop].bind(obj); obj[prop] = function () {
@@ -16677,7 +16675,11 @@ function initApp(Vue) {
         }()),
         _d.template = "\n<nav class=\"includedNavBar navbar navbar-expand-lg navbar-dark bg-primary\">\n    <div class=\"container-fluid\">\n    <a class=\"navbar-brand\" href=\"#\">{{heading}}</a>\n    <button class=\"navbar-toggler\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#navbarColor01\" aria-controls=\"navbarColor01\" aria-expanded=\"false\" aria-label=\"Toggle navigation\" @click=\"collapse=!collapse\">\n        <span class=\"navbar-toggler-icon\"></span>\n    </button>\n        <div class=\"navbar-collapse\" :class=\"{collapse}\">\n        <ul class=\"navbar-nav me-auto\">\n        <li class=\"nav-item\" v-for=\"(href,title) in links\">\n            <a class=\"nav-link\" :href=\"href\">{{title}}</a>\n        </li>\n        </ul>\n        <slot />\n    </div>\n    </div>\n</nav>\n        ",
         _d));
-    setTimeout(function () { return w.app.mount(div); }); // Mount on next tick so all the components are ready
+    setTimeout(function () {
+        var div = document.createElement("div");
+        document.body.appendChild(div);
+        w.app.mount(div);
+    }); // Mount on next tick so all the components are ready
 }
 
 // Expose the included libraries globally

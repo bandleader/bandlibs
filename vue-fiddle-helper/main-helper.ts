@@ -14,9 +14,7 @@ export function initApp(Vue = (window as any).Vue) {
             })
         },
         template: "<main-app />",
-    }
-    const div = document.createElement("div")
-    document.body.appendChild(div)
+    }    
     w.app = Vue.createApp(mainInstance)
     
     // Support vue-class-plus
@@ -131,5 +129,9 @@ export function initApp(Vue = (window as any).Vue) {
         css = `.includedNavBar .nav-link.active { background: rgba(0, 0, 40, 0.2); border-radius: 0.3em; }`
     })
       
-    setTimeout(() => w.app.mount(div)) // Mount on next tick so all the components are ready
+    setTimeout(() => {
+        const div = document.createElement("div")
+        document.body.appendChild(div)
+        w.app.mount(div)
+    }) // Mount on next tick so all the components are ready
 }
