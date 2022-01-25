@@ -8,14 +8,15 @@
 </head>
 <body>
     <div id="app"></div>
-    <script src="../dist/vue-fiddle-helper.browser.min.js"></script>
-    <!-- <script src="https://cdn.jsdelivr.net/gh/bandleader/bandlibs@master/dist/vue-fiddle-helper.browser.min.js"></script> -->
+    <!-- <script src="../dist/vue-fiddle-helper.browser.min.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/gh/bandleader/bandlibs@a4206a3/dist/vue-fiddle-helper.browser.min.js"></script>
     <script>
-        app.component("main-app", {
-            vug: `
+        app.component("main-app", class {
+            static vug = `
                 use-styles
                     nav-bar heading="My App"
-                    h3 -- Hey there
+                    .container.mt-2
+                        h3 -- Hey there
             `
         })
     </script>    
