@@ -168,6 +168,25 @@ function imbaCssShorthand(key: string) {
   return dict[key] || key
 }
 
+function caseChange(txt: string) {
+  let words: string[] = []
+  const isCapital = (ch: string) => ch === ch.toUpperCase()
+  txt.split('').forEach((x,i) => {
+    const xLower = x.toLowerCase(), prevWord = words[words.length - 1], prevLetter = txt[i-1]
+    if (x === "-") return;
+    // We add a word if there's no previous word, or if we're after a hyphen, or if we're a first capital (before us was not a capital)
+    if (!prevWord || prevLetter === "-" || (isCapital(x) && !isCapital(prevLetter))) return words.push(xLower)
+    // Otherwise add to previous word
+    words[words.length - 1] += xLower
+  })
+  const PascalWord = (x: string) => x[0].toUpperCase() + x.slice(1)
+  return {
+    toPascal() { return words.map(PascalWord).join("") },
+    toCamel() { return words.map((x,i) => i ? PascalWord(x) : x).join("") },
+    toSnake() { return words.join("-") },
+  }
+}
+
 function macros(key: string, value: string): Record<string, string> | null {
   if (key === "px") return { 'padding-left': value, 'padding-right': value }
   else if (key === "py") return { 'padding-top': value, 'padding-bottom': value }
@@ -234,7 +253,7 @@ function processLine(line: string): VugNode {
 export function load(text: string) {
   const nodes = compile(text)
   const toVueTemplate = (whitespace = false) => nodes.map(x => nodeToVue(x, whitespace)).join(whitespace ? "\n" : "")
-  return { ast: nodes, toVueTemplate }
+  return { ast: nodes, toVueTemplate, toRenderFunc: () => toRenderFunc(nodes[0]) }
 }
 function partition<T>(arr: T[], fn: (i: T) => boolean | number) {
   const ret: T[][] = [[], []]
@@ -245,6 +264,36 @@ function partition<T>(arr: T[], fn: (i: T) => boolean | number) {
     ret[ind].push(i)
   }
   return ret
+}
+function toRenderFunc(node: VugNode, opts = {ce: "/*#__PURE__*/React.createElement", className: "className"}) {
+  if (node.tag==="html") return JSON.stringify(node.innerHtml || "")
+  const attrExprText = new Map<string, string>()
+  const styleExprText = new Map<string, string>()
+  const classExprText = new Map<string, string>()
+  const mapToObj = (m: Map<string,string>) => ' { ' + [...m.entries()].map(([k,v]) => `${JSON.stringify(k)}: ${v}`).join(", ") + '} '
+  for (const x of node.attrs) {
+    const exprText = x.value === undefined ? 'true' : x.isExpr ? x.value : JSON.stringify(x.value)
+    if (x.kind === "style") {
+      styleExprText.set(caseChange(x.key).toCamel(), exprText)
+      attrExprText.set('style', mapToObj(styleExprText))
+    } else if (x.kind === "class") {
+      classExprText.set(x.key, exprText)
+      attrExprText.set(opts.className, `classNames(${mapToObj(classExprText)})`)
+    } else {
+      attrExprText.set(x.key, exprText)
+    }
+  }
+  const out: string[] = []
+  out.push(`${opts.ce}(${JSON.stringify(node.tag)}, `)
+  if (attrExprText.size) out.push(mapToObj(attrExprText))
+  else out.push("null")
+  // Children
+  if (node.innerHtml) out.push(", " + JSON.stringify(node.innerHtml)) // TODO support interpolation?
+  for (const x of node.children) {
+    out.push(", " + toRenderFunc(x, opts))
+  }
+  out.push(")")
+  return out.join("")
 }
 function nodeToVue(node: VugNode, whitespace = false) {
   const out: string[] = []
@@ -386,6 +435,33 @@ export function ViteTransformPlugin() {
       const vugCode = code.substring(startOfCode, endOfCode)
       const output = load(vugCode).toVueTemplate()
       return code.substring(0, startOfTemplateTag) + "<template>" + output + code.substring(endOfCode) // We have to replace the template tag so the SFC compiler doesn't error because it doesn't know how to process Vue
+    }
+  }
+}
+export function transformVugReact(code: string) {
+  while (true) {
+    const ind = code.indexOf("vugReact`")
+    if (ind<0) break;
+    const end = code.indexOf("`", ind+10)
+    let contents = code.substring(ind+9, end)
+    
+    contents = contents.replace(/@click/g, ':onClick') // temp to support Vue syntax
+    let converted = load(contents).toRenderFunc()
+    converted = converted.replace(/\{\{/g, '" + ') // temp to support Vue syntax
+    converted = converted.replace(/\}\}/g, ' + "') // temp to support Vue syntax
+
+    code = code.slice(0, ind) + converted + code.slice(end+1)
+    console.log(code)
+  }
+  return code
+}
+export function ViteReactPlugin() {
+  return {
+    name: 'vite-plugin-react-vug',
+    enforce: "pre" as const,
+    transform(code: string, id: string) {
+      if (!/\.m?(j|t)sx?$/.test(id)) return;
+      return transformVugReact(code)
     }
   }
 }
