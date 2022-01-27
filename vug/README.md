@@ -141,30 +141,13 @@ div -- For the 'display' (or 'd') property, we support b, i, and f for block, in
 
 # Roadmap/TODO
 
+#### Top
 - [ ] Special if/else/for syntax? can be `if <expr or paren expr>: <element or indent>`
   - This would make render functions much easier, because the output of the actual element shouldn't change because of an if; that's on the parent.
   - Also v-if is stam awkward syntax and is only because HTML.
   - Use an "if" node which has children and also nullable "elseChildren" (which can be another if node). Or even a list of conditions and children, plus optionally elseChildren? That's more flat. 
   - Same for v-for: `for (x,i) in coll:` although coll can have a colon :( but we can say it has to be in parens?
   - [ ] Something should validate that the 2 latter follow a v-if or v-else-if
-- [ ] Remaining work on render functions
-    - [ ] Tag names that begin with an uppercase letter, or include a hyphen, should be custom components (instead of a string); in React it has to be in scope so just convert it to a variable name, and for Vue (3) if it's a globally registered component it's `Vue.resolveDynamicComponent(name)`. BUT how to handle that it can be a nameExpr OR a resolveDynamicComponent passing a string? We *could* do `typeof SomeComp === 'undefined' ? Vue.resolveDynamicComponent(name) : SomeComp`. Or perhaps resolveDynamicComponent returns undefined so we can `||` ? 
-      - The truth is that Vue render functions are of secondary importance anyway.
-  - [ ] Fragments: a function which takes a LIST of nodes, and if it's more than one node, emits React.Fragment (and for Vue what?).
-  - These should perhaps be done in separate lowering passes: (can be called on the fly by the emitter though, to avoid walking trees)
-    - [ ] Events: Convert `v-on:click` and `@click` events to `onClick={$event => { %VALUE }}` (supported by both Vue and React)
-      - [ ] If it's just letters and dots (or maybe if it doesn't end with a right paren?) then DON'T wrap it in a function. Or the reverse -- add parens at the end.
-    - [ ] Convert `v-show` to a style attr
-    - [ ] Convert `v-model` to `:value=modelValue` and `update:modelValue`, but for HTML elements it's a bit harder
-  - [ ] Handle v-bind plain as an explode into the attrs object (support multiple?)
-  - [ ] if/else-if/else, once we finalize syntax. Compile to ternaries, with null if there's no v-else or v-else as next sibling
-  - [ ] for loops
-    - Vue 3 says to put the `key` on the `template v-for` tag itself, I'm not sure why. And we can't do that... I hope it's just sugar for putting it in on all the elements. The template compiler actually *does* throw an error: `<template v-for> key should be placed on the <template> tag.`, but I hope it's just to enforce convenience...
-    - This actually also applies to keys on v-if, though it's less common
-  - `template` tags should be rendered as a Fragment (they can have keys in Vue and hopefully also React); or if they have one child and no keys maybe just render the child
-- [ ] Sugar for containers with a single element in them: Separate layers on the same line with `>`.
-    - `.col-4 > .card > .card-body > p -- Some text inside it`
-    - Can be implemented as a pass looking for word `>`, we keep pushing elements onto the stack, then we take our children and move them to the last element. That way no indentation magic has to happen
 - [ ] Syntax for CSS rules, that allows shorthand. The main point is co-location. There should be a separate method that gets the total style text, and perhaps a method that adds it to the DOM, perhaps given a `window`.
     - `css .card:hover > .title -- bg=#FFF`
     - Perhaps children of these elements should also be interpreted as CSS rules but as children of these. A bit hard to parse everything properly...
@@ -172,8 +155,36 @@ div -- For the 'display' (or 'd') property, we support b, i, and f for block, in
       css .card
         .title -- bg=blue
         :hover -- .title -- bg=red
-      ```      
-- [ ] Fix quoting: braces with spaces don't work (although we may deprecate braces in favour of Vue's colon syntax), 2) perhaps we should make our own lexer
+      ```
+- [ ] Sugar for containers with a single element in them: Separate layers on the same line with `>`.
+    - `.col-4 > .card > .card-body > p -- Some text inside it`
+    - Can be implemented as a pass looking for word `>`, we keep pushing elements onto the stack, then we take our children and move them to the last element. That way no indentation magic has to happen
+- [ ] Fix quoting: braces with spaces don't work (although we may deprecate braces in favour of Vue's colon syntax, or perhaps my syntax `prop=(expr)`), 2) perhaps we should make our own lexer
+- [ ] Real playground app with Monaco and a few examples. And disambiguate between Vue mode and HTML mode...
+
+#### Render functions -- remaining work
+- [ ] Tag names that begin with an uppercase letter, or include a hyphen, should be custom components (instead of a string); in React it has to be in scope so just convert it to a variable name, and for Vue (3) if it's a globally registered component it's `Vue.resolveDynamicComponent(name)`. BUT how to handle that it can be a nameExpr OR a resolveDynamicComponent passing a string? We *could* do `typeof SomeComp === 'undefined' ? Vue.resolveDynamicComponent(name) : SomeComp`. Or perhaps resolveDynamicComponent returns undefined so we can `||` ? 
+    - The truth is that Vue render functions are of secondary importance anyway.
+- [ ] Fragments: a function which takes a LIST of nodes, and if it's more than one node, emits React.Fragment (and for Vue what?).
+- These should perhaps be done in separate lowering passes: (can be called on the fly by the emitter though, to avoid walking trees)
+  - [ ] Events: Convert `v-on:click` and `@click` events to `onClick={$event => { %VALUE }}` (supported by both Vue and React)
+    - [ ] If it's just letters and dots (or maybe if it doesn't end with a right paren?) then DON'T wrap it in a function. Or the reverse -- add parens at the end.
+  - [ ] Convert `v-show` to a style attr
+  - [ ] Convert `v-model` to `:value=modelValue` and `update:modelValue`, but for HTML elements it's a bit harder
+- [ ] Handle v-bind plain as an explode into the attrs object (support multiple?)
+- [ ] if/else-if/else, once we finalize syntax. Compile to ternaries, with null if there's no v-else or v-else as next sibling
+- [ ] for loops
+  - Vue 3 says to put the `key` on the `template v-for` tag itself, I'm not sure why. And we can't do that... I hope it's just sugar for putting it in on all the elements. The template compiler actually *does* throw an error: `<template v-for> key should be placed on the <template> tag.`, but I hope it's just to enforce convenience...
+  - This actually also applies to keys on v-if, though it's less common
+- `template` tags should be rendered as a Fragment (they can have keys in Vue and hopefully also React); or if they have one child and no keys maybe just render the child
+
+#### Syntax improvements/questions
+- [ ] Can we do CSS-style syntax to avoid quotes -- p width: 100%; height: 100% -- foo. i.e. if using a colon, the value goes until the next semicolon (or `--` or comment of course) It's also great for pasting CSS. 
+- [ ] Should we allow `:` instead of `=`? For CSS I keep typing it that way out of force of habit. Although perhaps even don't require `*`
+- [ ] Some sort of multiline HTML block
+- [ ] Somehow split arguments onto more than one line. I think pug does `|` at the beginning of the next lines? Not sure it's so good. I would maybe do indent by >=8 spaces?
+
+#### Other
 - [x] Experimental: `q` unit which is equal to 0.25rem
   - [ ] Perhaps for properties that only take a single measurement we can just make that the default. Like margin/padding (in all its directions), width/height (including max/min), etc 
 - [ ] Perhaps: Sugar to apply words to all children. I think `*` (if we're not using `*` for CSS):
@@ -183,13 +194,6 @@ div -- For the 'display' (or 'd') property, we support b, i, and f for block, in
         div
         div
         div
-    ```
-- [ ] Can we do CSS-style syntax to avoid quotes -- p width: 100%; height: 100% -- foo. i.e. if using a colon, the value goes until the next semicolon (or `--` or comment of course) It's also great for pasting CSS. 
-- [ ] Should we allow `:` instead of `=`? For CSS I keep typing it that way out of force of habit. Although perhaps even don't require `*`
-- [ ] Some sort of multiline HTML block
-- [ ] Somehow split arguments onto more than one line. I think pug does `|` at the beginning of the next lines? Not sure it's so good. I would maybe do indent by >=8 spaces?
-- [ ] Real playground app with Monaco and a few examples. And disambiguate between Vue mode and HTML mode...
+    ```    
 - [ ] Support real `style` and `class` static attributes, combining with any of ours -- not simple for render functions
-- [ ] So far we only handle the template/render function. If we eventually decide to emit a whole component, i.e. maybe do SFCs, then we need to think about scope. Vue does a whole bunch of tricks, but all you *really* need is to put the script in setup() and return the render function, which has access to the scope. (In React it's just a single render function, and run any setup code conditionally on first render (not built-in, but can useEffect with an array with a single dummy value so it never changes). For props in React we can make the function we're emitting take first arguments `({any, arg, names})` so they're in scope. But for Vue the render function takes no arguments; I think they're on `this`. Perhaps `with (this)` is necessary. What Vue SFC does is  I think that's legal in Vue render functions too (maybe even in setup functions?), just not Solid.js render functions as it will register a dependency for everything.)
-- [ ]     - *(I think just use regular expressions, let them handle the rest, except obviously Vue SFCs where where just transform the template and Vue handles the rest)* How to handle scope? Depends on the use cases. If we're emitting a single render expression as text, then it's your responsibility. If we're emitting a full render function (or function expression) (either at build-time or at runtime), the function should just take a single arguments `props`, as is idiomatic for React and [Vue 3 setup too](https://v3.vuejs.org/guide/composition-api-setup.html) (since destructuring removes reactivity). For Vue, there's a second argument `context`.
-      - [ ] Optionally we should put the whole function in a a `with(this)` for Vue and `with(props)` for React.    
+- [ ] So far we only handle the template/render function. If we eventually decide to emit a whole component, i.e. maybe do SFCs, then we need to think about scope. Vue does a whole bunch of tricks, but all you *really* need is to put the script in setup() and return the render function, which has access to the scope. (In React it's just a single render function, and run any setup code conditionally on first render (not built-in, but can useEffect with an array with a single dummy value so it never changes). For props in React we can make the function we're emitting take first arguments `({any, arg, names})` so they're in scope. But for Vue the render function takes no arguments; I think they're on `this`. Perhaps `with (this)` is necessary. Vue's SFC compiler actually just references the setup() scope; doesn't use `this`. We can do that too except 1) need to shallow-unwrap `.value` -- I assume Vue does this for the instance itself and not just in the template?, 2) need to know props and convert them to props.foo, or put a destructuring somewhere -- I think that's OK if it's in the render function, just [not in the setup function](https://v3.vuejs.org/guide/composition-api-setup.html).
