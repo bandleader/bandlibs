@@ -21,20 +21,22 @@ export function isVisible(el: HTMLElement, partial = true) {
     if (!done) window.addEventListener('scroll', check)
   }
   
+  const vueDirectiveMounted = function mounted(el: HTMLElement, {value, modifiers}: {value: any, modifiers: any}) { 
+    if (isVisible(el) && modifiers.noimm) return;
+    const els = modifiers.children ? (Array.from(el.children) as HTMLElement[]) : [el]
+    const getKeyArg = (prefix: string) => {
+      const findKey = Object.keys(modifiers).find(x => x.startsWith(prefix + "-"))
+      if (!findKey) return null
+      return findKey.slice(prefix.length + 1)
+    }
+    const parseSpeed = (str: string) => { let ms = parseFloat(str); return ms < 20 ? ms * 1000 : ms }
+    const staggerChildren = getKeyArg('stagger') ? parseSpeed(getKeyArg('stagger')) : undefined
+    const delay = getKeyArg('delay') ? parseSpeed(getKeyArg('delay')!) : undefined
+    const speed = getKeyArg('speed') ? parseSpeed(getKeyArg('speed')!) : undefined
+    reveal(els, value, speed, staggerChildren, delay)
+  } 
   export const vueDirective = {
-    mounted(el: HTMLElement, {value, modifiers}: {value: any, modifiers: any}) { 
-      if (isVisible(el) && modifiers.noimm) return;
-      const els = modifiers.children ? (Array.from(el.children) as HTMLElement[]) : [el]
-      const getKeyArg = (prefix: string) => {
-        const findKey = Object.keys(modifiers).find(x => x.startsWith(prefix + "-"))
-        if (!findKey) return null
-        return findKey.slice(prefix.length + 1)
-      }
-      const parseSpeed = (str: string) => { let ms = parseFloat(str); return ms < 20 ? ms * 1000 : ms }
-      const staggerChildren = getKeyArg('stagger') ? parseSpeed(getKeyArg('stagger')) : undefined
-      const delay = getKeyArg('delay') ? parseSpeed(getKeyArg('delay')!) : undefined
-      const speed = getKeyArg('speed') ? parseSpeed(getKeyArg('speed')!) : undefined
-      reveal(els, value, speed, staggerChildren, delay)
-    } 
+    inserted: vueDirectiveMounted, // for Vue 2
+    mounted: vueDirectiveMounted, // for Vue 3
   }
   
