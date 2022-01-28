@@ -5,7 +5,7 @@ export function isVisible(el: HTMLElement, partial = true) {
         _bottom = _top + el.offsetHeight,
         compareTop = partial ? _bottom : _top,
         compareBottom = partial ? _top : _bottom;
-    return ((compareBottom <= viewBottom) && (compareTop >= viewTop))
+    return (compareBottom <= viewBottom) && (compareTop >= viewTop)
   }
   
   export default function reveal(els: HTMLElement[], effect?: object, speed = 500, staggerChildren = 500, delay = 0) {
