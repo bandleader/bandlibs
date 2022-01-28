@@ -66,12 +66,12 @@ export function initApp(Vue = (window as any).Vue) {
                 const href = this.bootstrap.startsWith("http") ? this.bootstrap 
                             : this.bootswatch ? `https://cdnjs.cloudflare.com/ajax/libs/bootswatch/${this.bootstrap}/${this.bootswatch}/bootstrap.min.css`
                             : `https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/${this.bootstrap}/js/bootstrap.min.js`
-                waitingFor.push(Utils.addEl(document.head, "link", { rel: "stylesheet", href }).loaded)
+                waitingFor.push(Utils.addEl(document.head, "link", { rel: "stylesheet", href }).loadPromise())
             }
             if (this.fontawesome) {
                 const href = this.fontawesome.startsWith("http") ? this.fontawesome                             
                             : `https://cdnjs.cloudflare.com/ajax/libs/font-awesome/${this.fontawesome}/css/all.min.css`
-                waitingFor.push(Utils.addEl(document.head, "link", { rel: "stylesheet", href }).loaded)
+                waitingFor.push(Utils.addEl(document.head, "link", { rel: "stylesheet", href }).loadPromise())
             }
             await Promise.all(waitingFor)
             this.ready = true

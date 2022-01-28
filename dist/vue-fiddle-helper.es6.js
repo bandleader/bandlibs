@@ -16627,28 +16627,24 @@ var Vug = /*#__PURE__*/Object.freeze({
 });
 
 function addEl(where, tagName, attrs) {
-    if (attrs === void 0) { attrs = {}; }
-    // Returns the newly created element, with a 'loaded' property set to a Promise.
+    // Returns newly created element, plus a method 'loadPromise' that returns a Promise for the onLoad event.
+    // Not doing the promise automatically, because most elements never fire onLoad, and that will cause an [unhandled] rejected Promise.
     var el = document.createElement(tagName);
-    var loaded = new Promise(function (res, rej) {
-        Object.assign(el, attrs);
-        if ('onload' in el) { // I think every element supports onload
-            var oldOnload_1 = el.onload;
-            el.onload = function (e) { try {
-                res();
-            }
-            finally {
-                oldOnload_1 === null || oldOnload_1 === void 0 ? void 0 : oldOnload_1.call(el, e);
-            } };
-            setTimeout(function () { return rej('The added element timed out while waiting to load: ' + attrs.src); }, 10000);
+    var where2 = typeof where === 'string' ? document.querySelector(where) : where;
+    where2.appendChild(el);
+    return Object.assign(el, { loadPromise: function () { return waitForLoad(el); } });
+}
+function waitForLoad(el) {
+    return new Promise(function (res, rej) {
+        var oldOnload = el.onload;
+        el.onload = function (e) { try {
+            res();
         }
-        else {
-            setTimeout(res);
-        } // Resolve next tick
-        var where2 = typeof where === 'string' ? document.querySelector(where) : where;
-        where2.appendChild(el);
+        finally {
+            oldOnload === null || oldOnload === void 0 ? void 0 : oldOnload.call(el, e);
+        } };
+        setTimeout(function () { return rej('The added element timed out while waiting to load: ' + el.src); }, 10000);
     });
-    return Object.assign(el, { loaded: loaded });
 }
 
 var _a$1;
@@ -16757,21 +16753,21 @@ function initApp(Vue) {
             }
             class_1.prototype.created = function () {
                 return __awaiter(this, void 0, void 0, function () {
-                    var waitingFor, href, href;
+                    var waitingFor;
                     return __generator(this, function (_a) {
                         switch (_a.label) {
                             case 0:
                                 waitingFor = [];
                                 if (this.bootstrap) {
-                                    href = this.bootstrap.startsWith("http") ? this.bootstrap
+                                    this.bootstrap.startsWith("http") ? this.bootstrap
                                         : this.bootswatch ? "https://cdnjs.cloudflare.com/ajax/libs/bootswatch/".concat(this.bootstrap, "/").concat(this.bootswatch, "/bootstrap.min.css")
                                             : "https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/".concat(this.bootstrap, "/js/bootstrap.min.js");
-                                    waitingFor.push(addEl(document.head, "link", { rel: "stylesheet", href: href }).loaded);
+                                    waitingFor.push(addEl(document.head, "link").loadPromise());
                                 }
                                 if (this.fontawesome) {
-                                    href = this.fontawesome.startsWith("http") ? this.fontawesome
+                                    this.fontawesome.startsWith("http") ? this.fontawesome
                                         : "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/".concat(this.fontawesome, "/css/all.min.css");
-                                    waitingFor.push(addEl(document.head, "link", { rel: "stylesheet", href: href }).loaded);
+                                    waitingFor.push(addEl(document.head, "link").loadPromise());
                                 }
                                 return [4 /*yield*/, Promise.all(waitingFor)];
                             case 1:
