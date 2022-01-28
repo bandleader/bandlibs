@@ -16653,8 +16653,57 @@ function addEl(where, tagName, attrs) {
     return Object.assign(el, { loaded: loaded });
 }
 
+var _a$1;
+// Should work with either Vue 2 or 3
+// TODO: remove dependency on VCP, and remove dependency on the template compiler (although that means we need separate functions for Vue 2 and 3, and also for Vue 3 render functions need to import Vue itself)
+var AsyncValue = classComponent((_a$1 = /** @class */ (function () {
+        function AsyncValue() {
+            this.promise = propRequired();
+            this.resolved = false;
+            this.value = null;
+            this.error = null;
+        }
+        AsyncValue.prototype.created = function () {
+            var _this = this;
+            this.promise.then(function (x) { _this.value = x; _this.resolved = true; }, function (err) { return _this.error = err; });
+        };
+        return AsyncValue;
+    }()),
+    // TODO should make this use the included spinner (or rather include it here, so this doesn't need Bootstrap)
+    _a$1.template = "<slot v-if=\"resolved\" v-bind=\"{value}\" /><span v-else-if=\"error\" class=\"text-danger\"><i class=\"fa fa-exclamation-triangle\" /> {{String(error)}}</span><span v-else class=\"text-primary spinner-border spinner-border-sm\" role=\"status\"></span>",
+    _a$1));
+
+var _a;
+// Should work with either Vue 2 or 3
+// TODO: remove dependency on VCP, and remove dependency on the template compiler (although that means we need separate functions for Vue 2 and 3, and also for Vue 3 render functions need to import Vue itself)
+var PromiseButton = classComponent((_a = /** @class */ (function () {
+        function PromiseButton() {
+            this.action = propRequired();
+            this.pending = false;
+            this.success = false;
+            this.error = null;
+        }
+        PromiseButton.prototype.errorClicked = function () {
+            alert(this.error);
+        };
+        PromiseButton.prototype.go = function (ev) {
+            var _this = this;
+            this.pending = true;
+            this.error = null;
+            this.success = false;
+            this.action(ev).then(function (x) {
+                _this.pending = false;
+                _this.success = true;
+                setTimeout(function () { return _this.success = false; }, 2000);
+            }, function (e) { _this.pending = false; _this.error = e; });
+        };
+        return PromiseButton;
+    }()),
+    _a.template = "<button @click=\"go\" :disabled=\"pending\"><slot /><transition name=\"fade\"><span v-if=\"pending||error||success\"><div v-if=\"pending\" class=\"spinner-border spinner-border-sm ms-2\" style=\"font-size: 0.7em\" role=\"status\" /><span v-else-if=\"error\" :title=\"String(error)\" @click.stop=\"errorClicked\">\u26A0</span><span v-else-if=\"success\">\u2705</span></span></transition></button>",
+    _a));
+
 function initApp(Vue) {
-    var _a, _b, _c, _d;
+    var _a, _b;
     if (Vue === void 0) { Vue = window.Vue; }
     var w = window;
     var mainInstance = {
@@ -16699,55 +16748,16 @@ function initApp(Vue) {
         old.apply(void 0, __spreadArray([name, value], args, false));
     }; });
     // Include some components
-    w.app.component("async-value", (_a = /** @class */ (function () {
+    w.app.component("async-value", AsyncValue);
+    w.app.component("promise-button", PromiseButton);
+    w.app.component("use-styles", (_a = /** @class */ (function () {
             function class_1() {
-                this.promise = propRequired();
-                this.resolved = false;
-                this.value = null;
-                this.error = null;
-            }
-            class_1.prototype.created = function () {
-                var _this = this;
-                this.promise.then(function (x) { _this.value = x; _this.resolved = true; }, function (err) { return _this.error = err; });
-            };
-            return class_1;
-        }()),
-        // TODO should make this use the included spinner (or rather include it here, so this doesn't need Bootstrap)
-        _a.template = "<slot v-if=\"resolved\" v-bind=\"{value}\" /><span v-else-if=\"error\" class=\"text-danger\"><i class=\"fa fa-exclamation-triangle\" /> {{String(error)}}</span><span v-else class=\"text-primary spinner-border spinner-border-sm\" role=\"status\"></span>",
-        _a));
-    w.app.component("promise-button", (_b = /** @class */ (function () {
-            function class_2() {
-                this.action = propRequired();
-                this.pending = false;
-                this.success = false;
-                this.error = null;
-            }
-            class_2.prototype.errorClicked = function () {
-                alert(this.error);
-            };
-            class_2.prototype.go = function (ev) {
-                var _this = this;
-                this.pending = true;
-                this.error = null;
-                this.success = false;
-                this.action(ev).then(function (x) {
-                    _this.pending = false;
-                    _this.success = true;
-                    setTimeout(function () { return _this.success = false; }, 2000);
-                }, function (e) { _this.pending = false; _this.error = e; });
-            };
-            return class_2;
-        }()),
-        _b.template = "<button @click=\"go\" :disabled=\"pending\"><slot /><transition name=\"fade\"><span v-if=\"pending||error||success\"><div v-if=\"pending\" class=\"spinner-border spinner-border-sm ms-2\" style=\"font-size: 0.7em\" role=\"status\" /><span v-else-if=\"error\" :title=\"String(error)\" @click.stop=\"errorClicked\">\u26A0</span><span v-else-if=\"success\">\u2705</span></span></transition></button>",
-        _b));
-    w.app.component("use-styles", (_c = /** @class */ (function () {
-            function class_3() {
                 this.bootswatch = prop("lumen");
                 this.bootstrap = prop("5.1.3");
                 this.fontawesome = prop("6.0.0-beta3");
                 this.ready = false;
             }
-            class_3.prototype.created = function () {
+            class_1.prototype.created = function () {
                 return __awaiter(this, void 0, void 0, function () {
                     var waitingFor, href, href;
                     return __generator(this, function (_a) {
@@ -16774,22 +16784,22 @@ function initApp(Vue) {
                     });
                 });
             };
-            return class_3;
+            return class_1;
         }()),
-        _c.template = "<slot v-if=ready /><div v-else style=\"text-align: center; padding: 2em\"><span class=\"super-simple-spinner\" /></div>",
-        _c.css = "\n.super-simple-spinner {\n    display: inline-block;\n    width: 50px;\n    height: 50px;\n    border: 3px solid rgba(127,127,127,.5);\n    border-radius: 50%;\n    border-top-color: #fff;\n    animation: super-simple-spinner-spin 1s ease-in-out infinite;\n    -webkit-animation: super-simple-spinner-spin 1s ease-in-out infinite;\n}\n@keyframes super-simple-spinner-spin {\n    to { -webkit-transform: rotate(360deg); }\n}\n@-webkit-keyframes super-simple-spinner-spin {\n    to { -webkit-transform: rotate(360deg); }\n}\n\n.fade-enter-active, .fade-leave-active { transition: opacity 0.5s ease; }\n.fade-enter-from, .fade-leave-to { opacity: 0; }\n        ",
-        _c));
-    w.app.component("nav-bar", (_d = /** @class */ (function () {
-            function class_4() {
+        _a.template = "<slot v-if=ready /><div v-else style=\"text-align: center; padding: 2em\"><span class=\"super-simple-spinner\" /></div>",
+        _a.css = "\n.super-simple-spinner {\n    display: inline-block;\n    width: 50px;\n    height: 50px;\n    border: 3px solid rgba(127,127,127,.5);\n    border-radius: 50%;\n    border-top-color: #fff;\n    animation: super-simple-spinner-spin 1s ease-in-out infinite;\n    -webkit-animation: super-simple-spinner-spin 1s ease-in-out infinite;\n}\n@keyframes super-simple-spinner-spin {\n    to { -webkit-transform: rotate(360deg); }\n}\n@-webkit-keyframes super-simple-spinner-spin {\n    to { -webkit-transform: rotate(360deg); }\n}\n\n.fade-enter-active, .fade-leave-active { transition: opacity 0.5s ease; }\n.fade-enter-from, .fade-leave-to { opacity: 0; }\n        ",
+        _a));
+    w.app.component("nav-bar", (_b = /** @class */ (function () {
+            function class_2() {
                 this.links = prop({}); // {href, title}
                 this.heading = prop("Vue Fiddle");
                 this.collapse = true;
                 this.css = ".includedNavBar .nav-link.active { background: rgba(0, 0, 40, 0.2); border-radius: 0.3em; }";
             }
-            return class_4;
+            return class_2;
         }()),
-        _d.template = "\n<nav class=\"includedNavBar navbar navbar-expand-lg navbar-dark bg-primary\">\n    <div class=\"container-fluid\">\n    <a class=\"navbar-brand\" href=\"#\">{{heading}}</a>\n    <button class=\"navbar-toggler\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#navbarColor01\" aria-controls=\"navbarColor01\" aria-expanded=\"false\" aria-label=\"Toggle navigation\" @click=\"collapse=!collapse\">\n        <span class=\"navbar-toggler-icon\"></span>\n    </button>\n        <div class=\"navbar-collapse\" :class=\"{collapse}\">\n        <ul class=\"navbar-nav me-auto\">\n        <li class=\"nav-item\" v-for=\"(href,title) in links\">\n            <a class=\"nav-link\" :href=\"href\">{{title}}</a>\n        </li>\n        </ul>\n        <slot />\n    </div>\n    </div>\n</nav>\n        ",
-        _d));
+        _b.template = "\n<nav class=\"includedNavBar navbar navbar-expand-lg navbar-dark bg-primary\">\n    <div class=\"container-fluid\">\n    <a class=\"navbar-brand\" href=\"#\">{{heading}}</a>\n    <button class=\"navbar-toggler\" type=\"button\" data-bs-toggle=\"collapse\" data-bs-target=\"#navbarColor01\" aria-controls=\"navbarColor01\" aria-expanded=\"false\" aria-label=\"Toggle navigation\" @click=\"collapse=!collapse\">\n        <span class=\"navbar-toggler-icon\"></span>\n    </button>\n        <div class=\"navbar-collapse\" :class=\"{collapse}\">\n        <ul class=\"navbar-nav me-auto\">\n        <li class=\"nav-item\" v-for=\"(href,title) in links\">\n            <a class=\"nav-link\" :href=\"href\">{{title}}</a>\n        </li>\n        </ul>\n        <slot />\n    </div>\n    </div>\n</nav>\n        ",
+        _b));
     function mountApp() {
         // Ensure DOM is ready before we append a div. Otherwise body will be null
         if (document.readyState == 'loading') {

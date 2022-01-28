@@ -1,6 +1,8 @@
 import * as VCP from '../vue-class-plus'
 import * as Vug from '../vug'
 import * as Utils from '../utils'
+import AsyncValue from '../vue-async-value'
+import PromiseButton from '../vue-promise-button'
 
 export function initApp(Vue = (window as any).Vue) {
     const w: any = window
@@ -29,37 +31,8 @@ export function initApp(Vue = (window as any).Vue) {
     })
     
     // Include some components
-    w.app.component("async-value", class { 
-        promise = VCP.propRequired<Promise<any>>()
-        resolved = false
-        value: any = null
-        error: any = null
-        created() { 
-            this.promise.then(x => { this.value = x; this.resolved = true }, err => this.error = err)
-        }            
-        // TODO should make this use the included spinner (or rather include it here, so this doesn't need Bootstrap)
-        static template = `<slot v-if="resolved" v-bind="{value}" /><span v-else-if="error" class="text-danger"><i class="fa fa-exclamation-triangle" /> {{String(error)}}</span><span v-else class="text-primary spinner-border spinner-border-sm" role="status"></span>`
-    })
-    w.app.component("promise-button", class {
-        action = VCP.propRequired<((ev: Event) => Promise<any>)>()
-        pending = false
-        success = false
-        error: any = null
-        errorClicked() { 
-            alert(this.error) 
-        }
-        go(ev: Event) {
-            this.pending = true
-            this.error = null
-            this.success = false
-            this.action(ev).then(x => {
-                this.pending = false
-                this.success = true
-                setTimeout(() => this.success = false, 2000)
-            }, e => { this.pending = false; this.error = e })
-        }
-        static template = `<button @click="go" :disabled="pending"><slot /><transition name="fade"><span v-if="pending||error||success"><div v-if="pending" class="spinner-border spinner-border-sm ms-2" style="font-size: 0.7em" role="status" /><span v-else-if="error" :title="String(error)" @click.stop="errorClicked">⚠</span><span v-else-if="success">✅</span></span></transition></button>`
-    })
+    w.app.component("async-value", AsyncValue)
+    w.app.component("promise-button", PromiseButton)
     w.app.component("use-styles", class {
         bootswatch = VCP.prop("lumen")
         bootstrap = VCP.prop("5.1.3")
