@@ -1,5 +1,6 @@
 import * as VCP from '../vue-class-plus'
 import * as Vug from '../vug'
+import * as Utils from '../utils'
 
 export function initApp(Vue = (window as any).Vue) {
     const w: any = window
@@ -87,18 +88,17 @@ export function initApp(Vue = (window as any).Vue) {
         `
         ready = false
         async created() {
-            const addEl = (type: string, attrs: any) => new Promise(res => document.head.appendChild(Object.assign(document.createElement(type), attrs, { onload: res })))
             const waitingFor: Promise<any>[] = []
             if (this.bootstrap) {
                 const href = this.bootstrap.startsWith("http") ? this.bootstrap 
                             : this.bootswatch ? `https://cdnjs.cloudflare.com/ajax/libs/bootswatch/${this.bootstrap}/${this.bootswatch}/bootstrap.min.css`
                             : `https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/${this.bootstrap}/js/bootstrap.min.js`
-                waitingFor.push(addEl("link", { rel: "stylesheet", href }))
+                waitingFor.push(Utils.addEl(document.head, "link", { rel: "stylesheet", href }).loaded)
             }
             if (this.fontawesome) {
                 const href = this.fontawesome.startsWith("http") ? this.fontawesome                             
                             : `https://cdnjs.cloudflare.com/ajax/libs/font-awesome/${this.fontawesome}/css/all.min.css`
-                waitingFor.push(addEl("link", { rel: "stylesheet", href }))
+                waitingFor.push(Utils.addEl(document.head, "link", { rel: "stylesheet", href }).loaded)
             }
             await Promise.all(waitingFor)
             this.ready = true
