@@ -5,7 +5,7 @@ Use Vue to write small apps in fiddles with nearly no boilerplate. [Demo on JSit
 A single script file includes Vue 3, sets `window.app` to a new Vue app that you can add components to, and mounts your app to a new div on next tick. All you have to do is define a component called `main-app`:
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/bandleader/bandlibs@885a640/dist/vue-fiddle-helper.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/bandleader/bandlibs@5e4913a/dist/vue-fiddle-helper.browser.min.js"></script>
 <script>
     app.component("main-app", {
         data: () => ({
