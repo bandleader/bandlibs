@@ -166,6 +166,26 @@ function imbaCssShorthand(key) {
     };
     return dict[key] || key;
 }
+function caseChange(txt) {
+    var words = [];
+    var isCapital = function (ch) { return ch === ch.toUpperCase(); };
+    txt.split('').forEach(function (x, i) {
+        var xLower = x.toLowerCase(), prevWord = words[words.length - 1], prevLetter = txt[i - 1];
+        if (x === "-")
+            return;
+        // We add a word if there's no previous word, or if we're after a hyphen, or if we're a first capital (before us was not a capital)
+        if (!prevWord || prevLetter === "-" || (isCapital(x) && !isCapital(prevLetter)))
+            return words.push(xLower);
+        // Otherwise add to previous word
+        words[words.length - 1] += xLower;
+    });
+    var PascalWord = function (x) { return x[0].toUpperCase() + x.slice(1); };
+    return {
+        toPascal: function () { return words.map(PascalWord).join(""); },
+        toCamel: function () { return words.map(function (x, i) { return i ? PascalWord(x) : x; }).join(""); },
+        toSnake: function () { return words.join("-"); }
+    };
+}
 function macros(key, value) {
     var _a;
     if (key === "px")
@@ -225,7 +245,7 @@ function processLine(line) {
     for (var _e = 0, words_1 = words; _e < words_1.length; _e++) {
         var x = words_1[_e];
         var _f = splitTwo(x, "="), _key = _f[0], _value = _f[1];
-        var isExpr = false, isLiteral = false, kind = "attr";
+        var isExpr = false, kind = "attr";
         if ((_value === null || _value === void 0 ? void 0 : _value[0]) === '"')
             _value = _value.slice(1, _value.length - 1); // Remove quotes
         else if ((_value === null || _value === void 0 ? void 0 : _value[0]) === '{') {
@@ -261,7 +281,7 @@ function processLine(line) {
             }
             if (kind === "style" && !isExpr && value)
                 value = value.split(" ").map(function (x) { return /^-?([0-9]*\.)?[0-9]+q$/.test(x) ? "".concat(parseFloat(x) * 0.25, "rem") : x; }).join(" "); // add support for the "q" unit which is 0.25rem
-            attrs.push({ key: key, value: value || undefined, isLiteral: isLiteral, isExpr: isExpr, kind: kind });
+            attrs.push({ key: key, value: value || undefined, isExpr: isExpr, kind: kind });
         }
     }
     return { tag: tag, attrs: attrs, innerHtml: innerHtml || undefined, children: [] };
@@ -272,7 +292,7 @@ function load(text) {
         if (whitespace === void 0) { whitespace = false; }
         return nodes.map(function (x) { return nodeToVue(x, whitespace); }).join(whitespace ? "\n" : "");
     };
-    return { ast: nodes, toVueTemplate: toVueTemplate };
+    return { ast: nodes, toVueTemplate: toVueTemplate, toRenderFunc: function () { return toRenderFunc(nodes[0]); } };
 }
 function partition(arr, fn) {
     var ret = [[], []];
@@ -285,6 +305,48 @@ function partition(arr, fn) {
         ret[ind].push(i);
     }
     return ret;
+}
+function toRenderFunc(node, opts) {
+    if (opts === void 0) { opts = { ce: "/*#__PURE__*/React.createElement", className: "className" }; }
+    if (node.tag === "html")
+        return JSON.stringify(node.innerHtml || "");
+    var attrExprText = new Map();
+    var styleExprText = new Map();
+    var classExprText = new Map();
+    var mapToObj = function (m) { return ' { ' + Array.from(m.entries()).map(function (_a) {
+        var k = _a[0], v = _a[1];
+        return "".concat(JSON.stringify(k), ": ").concat(v);
+    }).join(", ") + '} '; };
+    for (var _i = 0, _a = node.attrs; _i < _a.length; _i++) {
+        var x = _a[_i];
+        var exprText = x.value === undefined ? 'true' : x.isExpr ? x.value : JSON.stringify(x.value);
+        if (x.kind === "style") {
+            styleExprText.set(caseChange(x.key).toCamel(), exprText);
+            attrExprText.set('style', mapToObj(styleExprText));
+        }
+        else if (x.kind === "class") {
+            classExprText.set(x.key, exprText);
+            attrExprText.set(opts.className, "classNames(".concat(mapToObj(classExprText), ")"));
+        }
+        else {
+            attrExprText.set(x.key, exprText);
+        }
+    }
+    var out = [];
+    out.push("".concat(opts.ce, "(").concat(JSON.stringify(node.tag), ", "));
+    if (attrExprText.size)
+        out.push(mapToObj(attrExprText));
+    else
+        out.push("null");
+    // Children
+    if (node.innerHtml)
+        out.push(", " + JSON.stringify(node.innerHtml)); // TODO support interpolation?
+    for (var _b = 0, _c = node.children; _b < _c.length; _b++) {
+        var x = _c[_b];
+        out.push(", " + toRenderFunc(x, opts));
+    }
+    out.push(")");
+    return out.join("");
 }
 function nodeToVue(node, whitespace) {
     if (whitespace === void 0) { whitespace = false; }
@@ -447,6 +509,33 @@ function ViteTransformPlugin() {
         }
     };
 }
+function transformVugReact(code) {
+    while (true) {
+        var ind = code.indexOf("vugReact`");
+        if (ind < 0)
+            break;
+        var end = code.indexOf("`", ind + 10);
+        var contents = code.substring(ind + 9, end);
+        contents = contents.replace(/@click/g, ':onClick'); // temp to support Vue syntax
+        var converted = load(contents).toRenderFunc();
+        converted = converted.replace(/\{\{/g, '" + '); // temp to support Vue syntax
+        converted = converted.replace(/\}\}/g, ' + "'); // temp to support Vue syntax
+        code = code.slice(0, ind) + converted + code.slice(end + 1);
+        console.log(code);
+    }
+    return code;
+}
+function ViteReactPlugin() {
+    return {
+        name: 'vite-plugin-react-vug',
+        enforce: "pre",
+        transform: function (code, id) {
+            if (!/\.m?(j|t)sx?$/.test(id))
+                return;
+            return transformVugReact(code);
+        }
+    };
+}
 var VueConsolidatePlugin = function () { return ({
     // Implements Vite's `consolidate` interface: https://github.com/vuejs/core/blob/471f66a1f6cd182f3e106184b2e06f7753382996/packages/compiler-sfc/src/compileTemplate.ts#L89  
     render: function (code, data, callback) {
@@ -459,4 +548,4 @@ var VueConsolidatePlugin = function () { return ({
     }
 }); };
 
-export { ViteTransformPlugin, VueConsolidatePlugin, load };
+export { ViteReactPlugin, ViteTransformPlugin, VueConsolidatePlugin, load, transformVugReact };

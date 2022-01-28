@@ -270,7 +270,7 @@ function toRenderFunc(node: VugNode, opts = {ce: "/*#__PURE__*/React.createEleme
   const attrExprText = new Map<string, string>()
   const styleExprText = new Map<string, string>()
   const classExprText = new Map<string, string>()
-  const mapToObj = (m: Map<string,string>) => ' { ' + [...m.entries()].map(([k,v]) => `${JSON.stringify(k)}: ${v}`).join(", ") + '} '
+  const mapToObj = (m: Map<string,string>) => ' { ' + Array.from(m.entries()).map(([k,v]) => `${JSON.stringify(k)}: ${v}`).join(", ") + '} '
   for (const x of node.attrs) {
     const exprText = x.value === undefined ? 'true' : x.isExpr ? x.value : JSON.stringify(x.value)
     if (x.kind === "style") {
