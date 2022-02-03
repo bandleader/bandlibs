@@ -3,6 +3,8 @@
   "version": "0.1.2",
   "description": "A collection of small utilities, mostly for Javascript/Typescript/Vue, that I would like to make available.",
   "dependencies": {
+    "express": "^4.17.2",
+    "vite": "^2.7.13",
     "ts-node-dev": "^1.1.8",
     "tslib": "^2.3.1",
     "typescript": "^4.5.5",
@@ -25,7 +27,6 @@
   "devDependencies": {
     "rollup": "^2.66.0",
     "rollup-plugin-terser": "^7.0.2",
-    "rollup-plugin-typescript2": "^0.31.1",
-    "vite": "^2.7.13"
+    "rollup-plugin-typescript2": "^0.31.1"
   }
 }
