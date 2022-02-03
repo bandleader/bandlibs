@@ -11,9 +11,9 @@ export async function devMiddleware(opts: {pathToIndexHtml: string, pathToMainJs
   })
   app.use(viteServer.middlewares)
   app.use(async (req, res, next) => 
-    !looksLikeHtmlRequest(req)
-        ? next() 
-        : res.send(await TVS.indexHtml(viteServer, req.originalUrl, fs.readFileSync(opts.pathToIndexHtml, { encoding: "utf8" }), opts.pathToMainJsEntrypoint)
+    looksLikeHtmlRequest(req)
+        ? res.send(await TVS.indexHtml(viteServer, req.originalUrl, fs.readFileSync(opts.pathToIndexHtml, { encoding: "utf8" }), opts.pathToMainJsEntrypoint)
+        : next()
     ))
   return app
 }
