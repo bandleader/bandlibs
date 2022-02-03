@@ -15,5 +15,6 @@ A collection of small utilities, mostly for Javascript/Typescript/Vue, that I wo
 ### Libraries I hope to post here soon:
 - **[ferry](ferry/)** -- WIP -- two-way-sync arbitrary Javascript objects -- changes are streamed as patches which the other side applies
 - **roll-your-lib** -- one line to compile your Typescript library for use as a CommonJS module, an ES6 module, or via a script tag. Designed for running as an npm script or via npx
+- **[tiny-vite-ssr](tiny-vite-ssr/)** -- WIP
 - **vue-item-list** -- Vue component to show a list of items, allow selecting them, and perform actions on them
 

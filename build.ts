@@ -8,6 +8,7 @@ async function go() {
     await build("./vue-fiddle-helper/for-script-tag.ts", "vue-fiddle-helper", "VueFiddle")
     await build("./vug/index.ts", "vug", "Vug")
     await build("./vue-class-plus/index.ts", "vue-class-plus", "VCP")
+    await build("./tiny-vite-ssr/index.ts", "tiny-vite-ssr")
   } catch (error) {
     console.error(error)
     process.exit(1)
@@ -15,7 +16,7 @@ async function go() {
 }
 go()
 
-async function build(mainFile: string, outFilePrefix: string, iifeName: string) {
+async function build(mainFile: string, outFilePrefix: string, iifeName?: string) {
   // Create bundle
   console.log("-------------------\nBUILDING", outFilePrefix)
   const bundle = await rollup({
@@ -23,12 +24,6 @@ async function build(mainFile: string, outFilePrefix: string, iifeName: string) 
     input: mainFile
   })
   const outputOptions: OutputOptions[] = [
-    {
-      file: outFilePrefix + ".browser.min.js",
-      format: 'iife',
-      name: iifeName,
-      plugins: [terser()],
-    },
     {
       file: outFilePrefix + ".es6.js",
       format: 'es',
@@ -38,6 +33,12 @@ async function build(mainFile: string, outFilePrefix: string, iifeName: string) 
       format: 'cjs',
     },
   ]
+  if (iifeName) outputOptions.push({
+    file: outFilePrefix + ".browser.min.js",
+    format: 'iife',
+    name: iifeName,
+    plugins: [terser()],
+  })
   for (const outputOption of outputOptions) {
     const { output } = await bundle.generate(outputOption)
 

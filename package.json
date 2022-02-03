@@ -24,5 +24,8 @@
   "bugs": {
     "url": "https://github.com/bandleader/bandlibs/issues"
   },
-  "homepage": "https://github.com/bandleader/bandlibs#readme"
+  "homepage": "https://github.com/bandleader/bandlibs#readme",
+  "devDependencies": {
+    "vite": "^2.7.13"
+  }
 }
