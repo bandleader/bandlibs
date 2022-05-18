@@ -190,6 +190,16 @@ function caseChange(txt) {
         toSnake: function () { return words.join("-"); }
     };
 }
+var flexAlignmentShorthands = {
+    c: "center",
+    fs: "flex-start",
+    fe: "flex-end",
+    s: "start",
+    e: "end",
+    l: "left",
+    r: "right",
+    x: "stretch"
+};
 function macros(key, value) {
     var _a;
     if (key === "px")
@@ -204,21 +214,31 @@ function macros(key, value) {
         return { 'width': value, 'height': value }; // not 'size' because it's a valid HTML prop
     else if (key === "circ")
         return { 'border-radius': '100%' }; // not 'round' because might be used by other things
-    else if (key === "display" && value === "b")
-        return { display: "block" };
-    else if (key === "display" && value === "i")
-        return { display: "inline" };
-    else if (key === "display" && value === "ib")
-        return { display: "inline-block" };
-    else if (key === "display" && value === "f")
-        return { display: "flex" };
-    else if (key === "display" && value === "if")
-        return { display: "inline-flex" };
+    else if (key === "al") { // set justify-content and align-items
+        // syntax: al=center, al=c, al=c.c (the latter sets align-items too)
+        var parts = value.split(".").map(function (x) { return flexAlignmentShorthands[x] || x; });
+        if (parts.length > 2)
+            throw "Can't have >2 parts: al=".concat(value);
+        if (parts[1])
+            return { 'justify-content': parts[0], 'align-items': parts[1] };
+        return { 'justify-content': parts[0] };
+    }
+    else if (key === "display" && cssDisplayShortcuts[value])
+        return { display: cssDisplayShortcuts[value] };
     // Commented out because this will require a further transform later to unify all the 'transform-___' attrs. Note also that some can be exprs and some not
     // const transformFuncs = "matrix|matrix3d|perspective|rotate|rotate3d|rotateX|rotateY|rotateZ|scale|scale3d|scaleX|scaleY|scaleZ|skew|skewX|skewY|translate|translate3d|translateX|translateY|translateZ|transform3d|matrix|matrix3d|perspective|rotate|rotate3d|rotateX|rotateY|rotateZ|scale|scale3d|scaleX|scaleY|scaleZ|skew|skewX|skewY|translate|translate3d|translateX|translateY|translateZ".split("|")
     // if (transformFuncs.includes(key)) return { ['transform-' + key]: value }
     return _a = {}, _a[key] = value, _a;
 }
+var cssDisplayShortcuts = {
+    b: "block",
+    i: "inline",
+    f: "flex",
+    g: "grid",
+    ib: "inline-block",
+    "if": "inline-flex",
+    ig: "inline-grid"
+};
 function processLine(line) {
     line = splitTwo(line, "// ")[0]; // ignore comments
     if (line.startsWith("<"))
@@ -241,9 +261,19 @@ function processLine(line) {
         tag = "div";
     else if (tag === "s")
         tag = "span";
-    else if (tag === "f") {
+    // else if (cssDisplayShortcuts[tag] && tag !== "b" && tag !== "i" && tag !== "if") { tag = "div"; words.push(`display=${cssDisplayShortcuts[tag]}`) } // experimental
+    else if (tag === "f" || tag === "fr") {
         tag = "div";
         words.push("display=flex");
+    } // experimental
+    else if (tag === "fc") {
+        tag = "div";
+        words.push("display=flex");
+        words.push("flex-direction=column");
+    } // experimental
+    else if (tag === "ib") {
+        tag = "div";
+        words.push("display=inline-block");
     } // experimental
     var attrs = [];
     for (var _e = 0, words_1 = words; _e < words_1.length; _e++) {

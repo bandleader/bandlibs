@@ -187,6 +187,17 @@ function caseChange(txt: string) {
   }
 }
 
+const flexAlignmentShorthands = {
+  c: "center",
+  fs: "flex-start",
+  fe: "flex-end",
+  s: "start",
+  e: "end",
+  l: "left",
+  r: "right",
+  x: "stretch",                                    
+}
+
 function macros(key: string, value: string): Record<string, string> | null {
   if (key === "px") return { 'padding-left': value, 'padding-right': value }
   else if (key === "py") return { 'padding-top': value, 'padding-bottom': value }
@@ -194,18 +205,29 @@ function macros(key: string, value: string): Record<string, string> | null {
   else if (key === "my") return { 'margin-top': value, 'margin-bottom': value }
   else if (key === "sz") return { 'width': value, 'height': value } // not 'size' because it's a valid HTML prop
   else if (key === "circ") return { 'border-radius': '100%' } // not 'round' because might be used by other things
-
-  else if (key === "display" && value === "b") return { display: "block" }
-  else if (key === "display" && value === "i") return { display: "inline" }
-  else if (key === "display" && value === "ib") return { display: "inline-block" }
-  else if (key === "display" && value === "f") return { display: "flex" }
-  else if (key === "display" && value === "if") return { display: "inline-flex" }
+  else if (key === "al") { // set justify-content and align-items
+    // syntax: al=center, al=c, al=c.c (the latter sets align-items too)
+    const parts = value.split(".").map(x => flexAlignmentShorthands[x] || x)
+    if (parts.length > 2) throw `Can't have >2 parts: al=${value}`
+    if (parts[1]) return { 'justify-content': parts[0], 'align-items': parts[1] }
+    return { 'justify-content': parts[0] }
+  } else if (key === "display" && cssDisplayShortcuts[value]) return { display: cssDisplayShortcuts[value] }
   
   // Commented out because this will require a further transform later to unify all the 'transform-___' attrs. Note also that some can be exprs and some not
   // const transformFuncs = "matrix|matrix3d|perspective|rotate|rotate3d|rotateX|rotateY|rotateZ|scale|scale3d|scaleX|scaleY|scaleZ|skew|skewX|skewY|translate|translate3d|translateX|translateY|translateZ|transform3d|matrix|matrix3d|perspective|rotate|rotate3d|rotateX|rotateY|rotateZ|scale|scale3d|scaleX|scaleY|scaleZ|skew|skewX|skewY|translate|translate3d|translateX|translateY|translateZ".split("|")
   // if (transformFuncs.includes(key)) return { ['transform-' + key]: value }
 
   return { [key]: value }
+}
+
+const cssDisplayShortcuts = {
+  b: "block", // NOTE: can't be used as a tag (because 'b' is bold), use 'div' instead
+  i: "inline", // NOTE: can't be used as a tag (because 'i' is italics), use 'span' instead
+  f: "flex",
+  g: "grid",
+  ib: "inline-block",
+  if: "inline-flex",
+  ig: "inline-grid",
 }
 
 function processLine(line: string): VugNode {
@@ -223,7 +245,10 @@ function processLine(line: string): VugNode {
 
   if (tag === "d") tag = "div"
   else if (tag === "s") tag = "span"
-  else if (tag === "f") { tag = "div"; words.push("display=flex") } // experimental
+  // else if (cssDisplayShortcuts[tag] && tag !== "b" && tag !== "i" && tag !== "if") { tag = "div"; words.push(`display=${cssDisplayShortcuts[tag]}`) } // experimental
+  else if (tag === "f" || tag === "fr") { tag = "div"; words.push("display=flex") } // experimental
+  else if (tag === "fc") { tag = "div"; words.push("display=flex"); words.push("flex-direction=column") } // experimental
+  else if (tag === "ib") { tag = "div"; words.push("display=inline-block") } // experimental
   
   const attrs: VugAttr[] = []
   for (const x of words) {
