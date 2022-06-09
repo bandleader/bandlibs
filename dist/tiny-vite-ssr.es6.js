@@ -88,14 +88,14 @@ function devMiddleware(opts) {
                         return __generator(this, function (_d) {
                             switch (_d.label) {
                                 case 0:
-                                    if (!!looksLikeHtmlRequest(req)) return [3 /*break*/, 1];
-                                    _a = next();
-                                    return [3 /*break*/, 3];
-                                case 1:
+                                    if (!looksLikeHtmlRequest(req)) return [3 /*break*/, 2];
                                     _c = (_b = res).send;
                                     return [4 /*yield*/, indexHtml(viteServer, req.originalUrl, fs.readFileSync(opts.pathToIndexHtml, { encoding: "utf8" }), opts.pathToMainJsEntrypoint)];
-                                case 2:
+                                case 1:
                                     _a = _c.apply(_b, [_d.sent()]);
+                                    return [3 /*break*/, 3];
+                                case 2:
+                                    _a = next();
                                     _d.label = 3;
                                 case 3: return [2 /*return*/, _a];
                             }
