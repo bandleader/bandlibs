@@ -42,6 +42,28 @@ function splitTwo(text, sep) {
         return [text];
     return [text.substr(0, pos), text.substr(pos + sep.length)];
 }
+// function ourCssShorthand(key: string) {
+//   const dict: Record<string, string> = {
+//     w: "width",
+//     h: "height",
+//     m: "margin",
+//     p: "padding",
+//     l: "left",
+//     r: "right",
+//     b: "bottom",
+//     t: "top",
+//     f: "font",
+//     bd: "border",
+//     bg: "background",
+//     pos: "position",
+//     d: "display",
+//     fw: "font-weight",
+//     ff: "font-family",
+//     fs: "font-size",
+//   }
+//   const result = key.split("-").map(w => dict[w] || w).join("-")
+//   return cssProperties.includes(result) ? result : key
+// }
 function imbaCssShorthand(key) {
     var dict = {
         ac: "align-content",
