@@ -9,6 +9,7 @@ async function go() {
     await build("./vug/index.ts", "vug", "Vug")
     await build("./vue-class-plus/index.ts", "vue-class-plus", "VCP")
     await build("./tiny-vite-ssr/index.ts", "tiny-vite-ssr")
+    await build("./flexible-rpc/index.ts", "flexible-rpc")
   } catch (error) {
     console.error(error)
     process.exit(1)
