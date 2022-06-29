@@ -1,6 +1,7 @@
 export function middleware(callback: (context: {req: any}) => any) {
     return async (req: any, resp: any, next: Function) => {
         const method: string = req.query.method
+        if (!method) return next()
         try {
             const context = { req }
             const backend = callback(context)

@@ -69,6 +69,8 @@ function middleware(callback) {
             switch (_a.label) {
                 case 0:
                     method = req.query.method;
+                    if (!method)
+                        return [2 /*return*/, next()];
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 5, , 6]);
