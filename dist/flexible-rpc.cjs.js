@@ -67,14 +67,12 @@ function __spreadArray(to, from, pack) {
 
 function middleware(callback) {
     var _this = this;
-    return function (req, resp, next) { return __awaiter(_this, void 0, void 0, function () {
+    return function (req, resp) { return __awaiter(_this, void 0, void 0, function () {
         var method, context, backend, args, result, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
                     method = req.query.method;
-                    if (!method)
-                        return [2 /*return*/, next()];
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 5, , 6]);
