@@ -13,7 +13,7 @@ export function isVisible(el: HTMLElement, partial = true) {
   return (compareBottom <= viewBottom) && (compareTop >= viewTop)
 }
   
-  export default function reveal(els: HTMLElement[], effect?: any, speed = 500, staggerChildren = 500, delay = 0) {
+  export function reveal(els: HTMLElement[], effect?: any, speed = 500, staggerChildren = 500, delay = 0) {
     effect = effect || { opacity: 0 }
     if (effect.debug) console.log("Reveal debug:",{effect,speed,staggerChildren,delay})
     const hide = (el: HTMLElement) => Object.assign(el.style, effect)
@@ -27,6 +27,7 @@ export function isVisible(el: HTMLElement, partial = true) {
     setTimeout(constantCheck, 5)
     window.addEventListener('scroll', check)
   }
+  export default reveal
   
   const vueDirectiveMounted = function mounted(el: HTMLElement, {value, modifiers}: {value: any, modifiers: any}) { 
     // Explanation of 'children' modifier ('stagger' is no longer necessary):
