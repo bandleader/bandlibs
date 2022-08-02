@@ -13,8 +13,9 @@ export function isVisible(el: HTMLElement, partial = true) {
   return (compareBottom <= viewBottom) && (compareTop >= viewTop)
 }
   
-  export default function reveal(els: HTMLElement[], effect?: object, speed = 500, staggerChildren = 500, delay = 0) {
+  export default function reveal(els: HTMLElement[], effect?: any, speed = 500, staggerChildren = 500, delay = 0) {
     effect = effect || { opacity: 0 }
+    if (effect.debug) console.log("Reveal debug:",{effect,speed,staggerChildren,delay})
     const hide = (el: HTMLElement) => Object.assign(el.style, effect)
     const reveal = (el: HTMLElement) => { const oldTransition = el.style.transition; el.style.transition = `all ${speed}ms`; Object.keys(effect).forEach(k => el.style[k] = ''); setTimeout(() => el.style.transition = oldTransition, 1000) }
     const revealAll = () => els.forEach((x,i) => setTimeout(() => reveal(x), i * staggerChildren))
@@ -28,18 +29,25 @@ export function isVisible(el: HTMLElement, partial = true) {
   }
   
   const vueDirectiveMounted = function mounted(el: HTMLElement, {value, modifiers}: {value: any, modifiers: any}) { 
+    // Explanation of 'children' modifier ('stagger' is no longer necessary):
+    // v-reveal.children:     animates children staggered by 500ms
+    // v-reveal.children-100: animates children staggered by 100ms
+    // v-reveal.children-0:   animates them simultaneously
+    if (value?.debug) console.log("v-reveal debug:",el,value,modifiers)
     if (isVisible(el) && modifiers.noimm) return;
-    const els = modifiers.children ? (Array.from(el.children) as HTMLElement[]) : [el]
     const getKeyArg = (prefix: string) => {
       const findKey = Object.keys(modifiers).find(x => x.startsWith(prefix + "-"))
       if (!findKey) return null
       return findKey.slice(prefix.length + 1)
     }
+    const wantsToRunOnChildren: boolean = modifiers.children || !!getKeyArg('children')
+    const els = wantsToRunOnChildren ? (Array.from(el.children) as HTMLElement[]) : [el]
     const parseSpeed = (str: string) => { let ms = parseFloat(str); return ms < 20 ? ms * 1000 : ms }
-    const staggerChildren = getKeyArg('stagger') ? parseSpeed(getKeyArg('stagger')) : undefined
     const delay = getKeyArg('delay') ? parseSpeed(getKeyArg('delay')!) : undefined
     const speed = getKeyArg('speed') ? parseSpeed(getKeyArg('speed')!) : undefined
-    reveal(els, value, speed, staggerChildren, delay)
+    const staggerArgForChildren = getKeyArg('stagger') || getKeyArg('children') // accept 'stagger' argument for compatibility reasons, but now we allow you to put it on the 'children' modifier
+    const staggerAmountForChildren = staggerArgForChildren ? parseSpeed(staggerArgForChildren) : undefined
+    reveal(els, value, speed, staggerAmountForChildren, delay)
   } 
   export const vueDirective = {
     inserted: vueDirectiveMounted, // for Vue 2
