@@ -1,12 +1,12 @@
 export function isVisible(el: HTMLElement, partial = true) {
     const viewTop = window.scrollY,
-        viewBottom = viewTop + window.innerHeight,
-        _top = el.offsetTop,
-        _bottom = _top + el.offsetHeight,
-        compareTop = partial ? _bottom : _top,
-        compareBottom = partial ? _top : _bottom;
-    return (compareBottom <= viewBottom) && (compareTop >= viewTop)
-  }
+      viewBottom = viewTop + window.innerHeight,
+      _top = el.getBoundingClientRect().top + window.scrollY,
+      _bottom = el.getBoundingClientRect().bottom + window.scrollY,
+      compareTop = partial ? _bottom : _top,
+      compareBottom = partial ? _top : _bottom;
+  return (compareBottom <= viewBottom) && (compareTop >= viewTop)
+}
   
   export default function reveal(els: HTMLElement[], effect?: object, speed = 500, staggerChildren = 500, delay = 0) {
     effect = effect || { opacity: 0 }
