@@ -1,5 +1,10 @@
+function isVisibleCssWise(el: HTMLElement, ignoreOpacity = true): boolean {
+  const styl = getComputedStyle(el)
+  return styl.display !== 'none' && styl.visibility !== 'hidden' && (ignoreOpacity || styl.opacity !== '0') && (!el.parentElement || isVisibleCssWise(el.parentElement, false))
+}
 export function isVisible(el: HTMLElement, partial = true) {
-    const viewTop = window.scrollY,
+  if (!isVisibleCssWise(el)) return false
+  const viewTop = window.scrollY,
       viewBottom = viewTop + window.innerHeight,
       _top = el.getBoundingClientRect().top + window.scrollY,
       _bottom = el.getBoundingClientRect().bottom + window.scrollY,
@@ -17,8 +22,9 @@ export function isVisible(el: HTMLElement, partial = true) {
     const test = () => isVisible(els[0])
     const check = () => { if (done || !test()) return; done = true; setTimeout(revealAll, delay) }
     els.forEach(hide)
-    setTimeout(check, 5)
-    if (!done) window.addEventListener('scroll', check)
+    const constantCheck = () => { check(); if (!done) { setTimeout(constantCheck, 150) }}
+    setTimeout(constantCheck, 5)
+    window.addEventListener('scroll', check)
   }
   
   const vueDirectiveMounted = function mounted(el: HTMLElement, {value, modifiers}: {value: any, modifiers: any}) { 
