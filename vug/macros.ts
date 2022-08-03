@@ -2,12 +2,12 @@
 // - First while we have the order, do the > operator. Wherever you find it, split off words into a new child node, the first word is the tag name, and then put all our children into the child node.
 // - Handle Vue syntax of calculated words for now -- :foo
 //- Parse .classes and #ids out of the tag name
-    - Later we can have a single argument using div:arg, might be useful for flexes. Can also do tag@arg, etc. Might be useful for position.
+//    - Later we can have a single argument using div:arg, might be useful for flexes. Can also do tag@arg, etc. Might be useful for position.
 // - Recognize CSS shorthand, convert to real property names, beginning with "style_"
 // - Recognize CSS properties, add "style_"
 - Additional macros: mx/my/px/py/sz/circ
-- Flex 'fx' macro: fx=<optional ! to reverse direction><optional pipe or hyphen to set direction><optional justify-content><optional period followed by align-items><optional period followed by align-content>
-- Custom tag types: d/s/f/ib, maybe fr/fc for column/row flex
+// - Flex 'fx' macro: fx=<optional ! to reverse direction><optional pipe or hyphen to set direction><optional justify-content><optional period followed by align-items><optional period followed by align-content>
+// - Custom tag types: d/s/f/ib, maybe fr/fc for column/row flex
 - Custom values for 'display'
 - Custom values for numeric units ending in 'q'
 - Recognize ".foo.bar" and convert to separate words
@@ -18,7 +18,7 @@ import { VugNode, VugWord } from "./parsing"
 
 function clone(node: VugNode, changes: Record<string, string>) {
     const ks = Object.keys(changes).filter(x => x !== "tag")
-    return new VugNode(changes.tag || node.tag, [...node.words.filter(w => !ks.includes(w.key)), ...ks.filter(k => changes[k] !== undefined).map(k => new VugWord(k, changes[k], false))])
+    return new VugNode(changes.tag || node.tag, [...node.words.filter(w => changes[w.key] === undefined /*whereas null will blank it*/), ...ks.filter(k => changes[k] !== null).map(k => new VugWord(k, changes[k], false))])
 }
 function wordTransformer(fn: (w: VugWord) => VugWord) {
     return (n: VugNode) => new VugNode(n.tag, n.words.map(w => fn(w)), n.children)
@@ -168,8 +168,7 @@ const cssRecognize = wordTransformer(w => cssProperties.includes(w.key) ? new Vu
 function customTagTypes(n: VugNode): VugNode {
     if (n.tag === 'd') return clone(n, { tag: "div" })
     if (n.tag === 's') return clone(n, { tag: "span" })
-    if (n.tag === 'f') return clone(n, { tag: "div", display: "flex" })
-    if (n.tag.startsWith("f:")) return clone(n, { tag: "div", display: "flex", fx: n.tag.slice(2) })
+    if (n.tag === 'f') return clone(n, { tag: "div", display: "flex", fx: n.getWord("_mainArg"), _mainArg: null })
     if (n.tag === 'ib') return clone(n, { tag: "div", display: "inline-block" })
     return n
 }
@@ -177,32 +176,53 @@ function customTagTypes(n: VugNode): VugNode {
 function flexMacroFx(n: VugNode): VugNode {
     let value = n.getWordErrIfCalc("fx")
     if (!value) return n
+    
+    // Direction
     let reverse = false, row = false, column = false
     if (value[0] === "!") { reverse = true; value = value.slice(1) }
     if (value[0] === "|") { column = true; value = value.slice(1) }
     if (value[0] === "-") { row = true; value = value.slice(1) }
-    if (value[0] === "!") { reverse = true; value = value.slice(1) }
-    // TODO alignment too
-    let valu = column ? 'column' : (reverse || row) ? 'row' : '' // If reverse was specified, we have to specify row (which is the default)
-    if (reverse) valu += "-reverse"
-    return clone(n, { fx: undefined, display: 'flex', 'style_flex-direction': valu || undefined, orig: `${reverse}${row}${column}` })
+    if (value[0] === "!") { reverse = true; value = value.slice(1) }    
+    let direction = column ? 'column' : (reverse || row) ? 'row' : '' // If reverse was specified, we have to specify row (which is the default)
+    if (reverse) direction += "-reverse"
+    const obj: any = { fx: null, display: 'flex' }
+    if (direction) obj['style_flex-direction'] = direction
+    
+    // Alignment etc
+    const flexAlignmentShorthands = {
+        c: "center",
+        fs: "flex-start",
+        fe: "flex-end",
+        s: "start",
+        e: "end",
+        l: "left",
+        r: "right",
+        x: "stretch",                                    
+    }
+    const [jc, ai, ac] = value.split(".").map(x => flexAlignmentShorthands[x] || x)
+    if (jc) obj['style_justify-content'] = jc
+    if (ai) obj['style_align-items'] = ai
+    if (ac) obj['style_align-content'] = ac
+
+    return clone(n, obj)
 }
 
 function tagNameParser(n: VugNode): VugNode {
-    const parts = n.tag.split('').reduce((list,char) => {
-        if (/[A-Za-z0-9:]/.test(char)) list.slice(-1)[0].text += char
+    const [first, ...args] = n.tag.split(":")
+    const parts = first.split('').reduce((list,char) => {
+        if (/[A-Za-z0-9_|\-]/.test(char)) list.slice(-1)[0].text += char
         else list.push({ prefix: char, text: "" }) //TODO allow double prefixes
         return list
     }, [{ text: '', prefix: '' }]).filter(x => x.text)
     const tag = parts.filter(x => !x.prefix)[0]?.text || 'div'
     const classes = parts.filter(x => x.prefix === '.').map(x => x.text)
     const ids = parts.filter(x => x.prefix === '#').map(x => x.text)
-    // (nah, leaving as part of tag type) TODO perhaps make 'args' out of :, which will be processed by later macros like flex, display etc.
     if (ids.length > 1) throw `Can't have more than 1 ID in tag name: '${n.tag}'`
     // TODO ensure we recognize all parts
     const words = n.words.slice()
     for (const w of classes) words.push(new VugWord("." + w, '', false))
     for (const w of ids) words.push(new VugWord("id", w, false))
+    for (const w of args) words.push(new VugWord("_mainArg", w, false))
     return new VugNode(tag, words, n.children)
 }
 function directChild(n: VugNode): VugNode {
