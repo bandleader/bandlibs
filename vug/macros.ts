@@ -9,7 +9,7 @@
 // - Flex 'fx' macro: fx=<optional ! to reverse direction><optional pipe or hyphen to set direction><optional justify-content><optional period followed by align-items><optional period followed by align-content>
 // - Custom tag types: d/s/f/ib, maybe fr/fc for column/row flex
 - Custom values for 'display'
-- Custom values for numeric units ending in 'q'
+// - Custom values for numeric units ending in 'q'
 // Recognize ".foo.bar" and convert to separate words
 - 
 */
@@ -31,6 +31,7 @@ export function runAll(node: VugNode): VugNode {
     node = flexMacroFx(node)
     node = cssShorthand(node)
     node = cssRecognize(node)
+    node = quickUnits(node)
     return new VugNode(node.tag, node.words, node.children.map(c => runAll(c)))
 }
 
@@ -173,6 +174,8 @@ function customTagTypes(n: VugNode): VugNode {
     if (n.tag === 'ib') return clone(n, { tag: "div", display: "inline-block" })
     return n
 }
+
+const quickUnits = wordTransformer(w => (w.key.startsWith("style_") && !w.isExpr && /^-?([0-9]*\.)?[0-9]+q$/.test(w.value)) ? new VugWord(w.key, parseFloat(w.value) * 0.25 + 'rem', false) : w) // Support the "q" numeric unit which is 0.25rem, similar to Bootstrap
 
 function basicCssMacros(n: VugNode) {
     const words = n.words.flatMap(w => 
