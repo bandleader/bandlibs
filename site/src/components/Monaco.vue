@@ -3,13 +3,13 @@ import { ref, onMounted } from 'vue'
 import { addEl } from '../../../utils'
 const props = defineProps<{modelValue: string, language: string, theme: string}>()
 const emit = defineEmits(['update:modelValue'])
-const monacoContainer = ref<HTMLElement>(null)
+const monacoContainer = ref<HTMLElement>(null as any)
 // TODO: Update Monaco when our modelValue changes
 
 async function initMonaco() {
   await addEl(document.head, 'script', { src: "https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs/loader.min.js" })
   const w: any = window
-  w.require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs' }});
+  w.require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.26.1/min/vs' }})
   w.require(["vs/editor/editor.main"], () => {
     const ed = w.monaco.editor.create(monacoContainer.value, {
       value: props.modelValue,
@@ -18,7 +18,7 @@ async function initMonaco() {
       minimap: { enabled: false },
       automaticLayout: true
     })
-    ed.getModel().onDidChangeContent((event) => {
+    ed.getModel().onDidChangeContent((event: any) => {
       emit('update:modelValue', ed.getValue())
     })
   })
