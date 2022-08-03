@@ -1,4 +1,5 @@
 import * as Macros from "./macros"
+import * as Emit from "./emit"
 
 export class VugNode {
     constructor(public tag: string, public words: VugWord[] = [], public children: VugNode[] = []) {}
@@ -12,6 +13,15 @@ export class VugNode {
 }
 export class VugWord {
     constructor(public key: string, public value: string, public isExpr: boolean) {}
+}
+
+export function compile(text: string){
+    const ast = parseDoc(text)
+    return { 
+        ast, 
+        toAstJson: () => JSON.stringify(ast, undefined, 2), 
+        toVueTemplate: () => ast.map(x => Emit.emitVueTemplate(x, true)).join("\n") 
+    }
 }
 
 function splitTwo(text: string, sep: string) {

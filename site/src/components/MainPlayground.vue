@@ -5,7 +5,7 @@ import * as Vug2 from '../../../vug/parsing'
 
 
 const vugSource = ref('div bg=#EEE p=0.5em\n      h5 fw=bold -- Hello from Vug in React!\n      p -- You clicked {{count}} times\n      button @click="() => setCount(count+1)" -- Increment')
-const outputAst = computed(() => Vug2.parseDoc(vugSource.value))
+const output = computed(() => Vug2.compile(vugSource.value))
 </script>
 
 <template>
@@ -21,7 +21,13 @@ const outputAst = computed(() => Vug2.parseDoc(vugSource.value))
         <div id="preview">Loading</div>
         <br> -->
         <h5>AST</h5>
-        <textarea :value="JSON.stringify(outputAst, undefined, 2)" style="height: 40em" />
+        <textarea :value="output.toAstJson()" style="height: 40em" />
+
+        <h5>Vue template</h5>
+        <textarea :value="output.toVueTemplate()" style="height: 40em" />
+
+        <h5>HTML preview</h5>
+        <div v-html="output.toVueTemplate()" />
       </div>
     </div>
   </div>
