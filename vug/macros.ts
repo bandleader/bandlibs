@@ -8,7 +8,7 @@
 // - Additional macros: mx/my/px/py/sz/circ
 // - Flex 'fx' macro: fx=<optional ! to reverse direction><optional pipe or hyphen to set direction><optional justify-content><optional period followed by align-items><optional period followed by align-content>
 // - Custom tag types: d/s/f/ib, maybe fr/fc for column/row flex
-- Custom values for 'display'
+// - Custom values for 'display'
 // - Custom values for numeric units ending in 'q'
 // Recognize ".foo.bar" and convert to separate words
 - 
@@ -177,6 +177,15 @@ function customTagTypes(n: VugNode): VugNode {
 
 const quickUnits = wordTransformer(w => (w.key.startsWith("style_") && !w.isExpr && /^-?([0-9]*\.)?[0-9]+q$/.test(w.value)) ? new VugWord(w.key, parseFloat(w.value) * 0.25 + 'rem', false) : w) // Support the "q" numeric unit which is 0.25rem, similar to Bootstrap
 
+const cssDisplayShorthand = {
+    b: "block", 
+    i: "inline",
+    f: "flex",
+    g: "grid",
+    ib: "inline-block",
+    if: "inline-flex",
+    ig: "inline-grid",
+}
 function basicCssMacros(n: VugNode) {
     const words = n.words.flatMap(w => 
         w.key === "sz" ? [new VugWord("style_width", w.value, w.isExpr), new VugWord("style_height", w.value, w.isExpr)]  :
@@ -184,7 +193,8 @@ function basicCssMacros(n: VugNode) {
         w.key === "py" ? [new VugWord("style_padding-top", w.value, w.isExpr), new VugWord("style_padding-bottom", w.value, w.isExpr)]  :
         w.key === "mx" ? [new VugWord("style_margin-left", w.value, w.isExpr), new VugWord("style_margin-right", w.value, w.isExpr)]  :
         w.key === "my" ? [new VugWord("style_margin-top", w.value, w.isExpr), new VugWord("style_margin-bottom", w.value, w.isExpr)]  :
-        w.key === "circ" ? [new VugWord("style_border-radius", "100%", w.isExpr)]  :
+        (w.key === "circ" && !w.value && !w.isExpr) ? [new VugWord("style_border-radius", "100%", w.isExpr)]  :
+        (w.key === "d" && !w.isExpr) ? [new VugWord("style_display", cssDisplayShorthand[w.value] || w.value, w.isExpr)]  :
         [w]
     )
     return new VugNode(n.tag, words, n.children)
