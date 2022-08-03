@@ -47,12 +47,12 @@ function parseLine(line: string) {
     return new VugNode(tag, words2, children)
 }
 export function parseDoc(html: string) {
-    const lines = html.split("\n").filter(x => x.trim()).map(ln => {
+    const lines = html.split("\n").map(ln => {
         const trimmed = ln.trimStart()
         const indent = ln.length - trimmed.length
         const node = parseLine(trimmed)
         return { node, indent }
-    })
+    }).filter(x => x.node.tag !== "_html" || (x.node.getWord("_contents") || '').trim()) // Remove empty or comment-only lines. They would be _html elements with blank _contents. (We could remove them before parsing, but the comment logic is in the parser)
     // Now make a tree
     let stack: {node: VugNode, indent: number}[] = []
     const out: VugNode[] = []
