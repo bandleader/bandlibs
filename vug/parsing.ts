@@ -39,6 +39,7 @@ function parseLine(line: string) {
     const [tag, ...words] = _wordPart.trim().match(/(?=\S)[^"\s]*(?:"[^\\"]*(?:\\[\s\S][^\\"]*)*"[^"\s]*)*/g) || [''] // Not 100% sufficient. From https://stackoverflow.com/questions/4031900/split-a-string-by-whitespace-keeping-quoted-segments-allowing-escaped-quotes
     const words2 = words.map(w => {
         let [key, value] = splitTwo(w, "=")
+        if (value[0] === '"') value = value.slice(1, value.length - 1) // Remove quotes
         const isExpr = key[0] === ':'
         if (isExpr) key = key.slice(1)
         return new VugWord(key, value, isExpr)
