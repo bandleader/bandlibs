@@ -170,8 +170,8 @@ const cssRecognize = wordTransformer(w => cssProperties.includes(w.key) ? new Vu
 function customTagTypes(n: VugNode): VugNode {
     if (n.tag === 'd') return clone(n, { tag: "div" })
     if (n.tag === 's') return clone(n, { tag: "span" })
-    if (n.tag === 'f') return clone(n, { tag: "div", display: "flex", fx: n.getWord("_mainArg"), _mainArg: null })
-    if (n.tag === 'ib') return clone(n, { tag: "div", display: "inline-block" })
+    if (n.tag === 'f' || n.tag === 'flex') return clone(n, { tag: "div", display: "flex", fx: n.getWord("_mainArg"), _mainArg: null })
+    if (n.tag === 'ib'|| n.tag === 'inline-block') return clone(n, { tag: "div", display: "inline-block" })
     return n
 }
 
