@@ -281,6 +281,8 @@ export function load(text: string) {
   return { ast: nodes, toVueTemplate, toRenderFunc: () => toRenderFunc(nodes[0]) }
 }
 function partition<T>(arr: T[], fn: (i: T) => boolean | number) {
+  // Usage: const [trueOnes, falseOnes] = partition(arr, x => trueOrFalse)
+  // Or:    const [one, two, three] = partition(arr, x => num)
   const ret: T[][] = [[], []]
   for (const i of arr) {
     const k = fn(i)
