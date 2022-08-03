@@ -7,13 +7,13 @@ export function emitVueTemplate(node: VugNode, whitespace = false) {
       out.push(node.getWord("_contents") || "")
     } else {
       out.push('<', node.tag)
-      const htmlAttrEnc = (x: string, usingApos = false) => x.replace(/&/g, '&amp;').replace(usingApos ? /'/g : /"/g, usingApos ? '&#x27;' : '&quot;').replace(/>/g, '&gt;')
+      const htmlAttrEnc = (x: string, usingApos = false) => x.replace(usingApos ? /'/g : /"/g, usingApos ? '&#x27;' : '&quot;')//.replace(/&/g, '&amp;').replace(/>/g, '&gt;')
       const block = function <T>(items: T[], funcs: { start?: Function, end?: Function, between?: Function, each: (x: T, i: number) => void }) { if (!items.length) return; funcs.start?.(); items.forEach((x, i) => { if (i) funcs.between?.(); funcs.each(x, i) }); funcs.end?.() }
       const [style, klass, attr] = partition(node.words, x => x.key.startsWith("style_") ? 0 : x.key.startsWith(".") ? 1 : 2, 3)
       const [classExpr, classStatic] = partition(klass, x => x.isExpr)
       block(classStatic, {
         start: () => out.push(' class="'),
-        each: x => { out.push(x.key.slice(1)); if (x.value !== undefined) throw "CSS-Class attributes cannot have a static value. For a condition, use curly braces or simply no quotes. -- : " + x.key },
+        each: x => { out.push(x.key.slice(1)); if (x.value) throw "CSS-Class attributes cannot have a static value. For a condition, use curly braces or simply no quotes. -- : " + x.key },
         between: () => out.push(" "),
         end: () => out.push('"')
       })
