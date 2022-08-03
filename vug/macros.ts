@@ -129,8 +129,10 @@ function tagNameParser(n: VugNode): VugNode {
 function directChild(n: VugNode): VugNode {
     const indOfArrow = n.words.findIndex(x => x.key === ">")
     if (indOfArrow < 0) return n
-    const secondTagName = n.words[indOfArrow + 1].key // TODO ensure no value
+    const secondTag = n.words[indOfArrow + 1]
+    if (!secondTag) throw "Tag name expected after >"
+    if (secondTag.value) throw "Tag name after > cannot have a value. It's a tag, obviously"
     const secondTagWords = n.words.slice(indOfArrow + 2)
     const firstTagWords = n.words.slice(0, indOfArrow)
-    return new VugNode(n.tag, firstTagWords, [new VugNode(secondTagName, secondTagWords, n.children.slice())])
+    return new VugNode(n.tag, firstTagWords, [new VugNode(secondTag.key, secondTagWords, n.children.slice())])
 }
