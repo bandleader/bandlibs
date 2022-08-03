@@ -62,7 +62,8 @@ onMounted(() => {
     <div class="row">
       <div class="col-6">
         <h3>React component function</h3>
-        <Monaco v-model="functionText" />
+        <!-- <Monaco v-model="functionText" /> -->
+        <textarea v-model="functionText" style="height: 40em" />
       </div>
       <div class="col-6">
         <h3>Running component</h3>
