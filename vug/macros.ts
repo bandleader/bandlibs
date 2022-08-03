@@ -5,7 +5,7 @@
 //    - Later we can have a single argument using div:arg, might be useful for flexes. Can also do tag@arg, etc. Might be useful for position.
 // - Recognize CSS shorthand, convert to real property names, beginning with "style_"
 // - Recognize CSS properties, add "style_"
-- Additional macros: mx/my/px/py/sz/circ
+// - Additional macros: mx/my/px/py/sz/circ
 // - Flex 'fx' macro: fx=<optional ! to reverse direction><optional pipe or hyphen to set direction><optional justify-content><optional period followed by align-items><optional period followed by align-content>
 // - Custom tag types: d/s/f/ib, maybe fr/fc for column/row flex
 - Custom values for 'display'
@@ -27,6 +27,7 @@ export function runAll(node: VugNode): VugNode {
     node = directChild(node)
     node = tagNameParser(node)
     node = customTagTypes(node)
+    node = basicCssMacros(node)
     node = flexMacroFx(node)
     node = cssShorthand(node)
     node = cssRecognize(node)
@@ -171,6 +172,19 @@ function customTagTypes(n: VugNode): VugNode {
     if (n.tag === 'f') return clone(n, { tag: "div", display: "flex", fx: n.getWord("_mainArg"), _mainArg: null })
     if (n.tag === 'ib') return clone(n, { tag: "div", display: "inline-block" })
     return n
+}
+
+function basicCssMacros(n: VugNode) {
+    const words = n.words.flatMap(w => 
+        w.key === "sz" ? [new VugWord("style_width", w.value, w.isExpr), new VugWord("style_height", w.value, w.isExpr)]  :
+        w.key === "px" ? [new VugWord("style_padding-left", w.value, w.isExpr), new VugWord("style_padding-right", w.value, w.isExpr)]  :
+        w.key === "py" ? [new VugWord("style_padding-top", w.value, w.isExpr), new VugWord("style_padding-bottom", w.value, w.isExpr)]  :
+        w.key === "mx" ? [new VugWord("style_margin-left", w.value, w.isExpr), new VugWord("style_margin-right", w.value, w.isExpr)]  :
+        w.key === "my" ? [new VugWord("style_margin-top", w.value, w.isExpr), new VugWord("style_margin-bottom", w.value, w.isExpr)]  :
+        w.key === "circ" ? [new VugWord("style_border-radius", "100%", w.isExpr)]  :
+        [w]
+    )
+    return new VugNode(n.tag, words, n.children)
 }
 
 function flexMacroFx(n: VugNode): VugNode {
