@@ -19,6 +19,7 @@ import { VugNode, VugWord } from "./parsing"
 let v1compat = true
 
 function clone(node: VugNode, changes: Record<string, string>) {
+    // TODO: throw if overwriting an isExpr word, I think
     const ks = Object.keys(changes).filter(x => x !== "tag")
     return new VugNode(changes.tag || node.tag, [...node.words.filter(w => changes[w.key] === undefined /*whereas null will blank it*/), ...ks.filter(k => changes[k] !== null).map(k => new VugWord(k, changes[k], false))])
 }
