@@ -26,7 +26,7 @@ export function compile(text: string){
 
 function splitTwo(text: string, sep: string) {
     const pos = text.indexOf(sep)
-    if (pos < 0) return [text]
+    if (pos < 0) return [text, '']
     return [text.substr(0, pos), text.substr(pos + sep.length)]
 }
 const htmlNode = (html: string) => new VugNode("_html", [new VugWord("_contents", html, false)])
