@@ -16,6 +16,8 @@
 
 import { VugNode, VugWord } from "./parsing"
 
+let v1compat = true
+
 function clone(node: VugNode, changes: Record<string, string>) {
     const ks = Object.keys(changes).filter(x => x !== "tag")
     return new VugNode(changes.tag || node.tag, [...node.words.filter(w => changes[w.key] === undefined /*whereas null will blank it*/), ...ks.filter(k => changes[k] !== null).map(k => new VugWord(k, changes[k], false))])
@@ -194,7 +196,9 @@ function basicCssMacros(n: VugNode) {
         w.key === "mx" ? [new VugWord("style_margin-left", w.value, w.isExpr), new VugWord("style_margin-right", w.value, w.isExpr)]  :
         w.key === "my" ? [new VugWord("style_margin-top", w.value, w.isExpr), new VugWord("style_margin-bottom", w.value, w.isExpr)]  :
         (w.key === "circ" && !w.value && !w.isExpr) ? [new VugWord("style_border-radius", "100%", w.isExpr)]  :
-        (w.key === "d" && !w.isExpr) ? [new VugWord("style_display", cssDisplayShorthand[w.value] || w.value, w.isExpr)]  :
+        // TODO not sure I want this, perhaps just use tag types, except b/i/if conflict, but can use full form for those.
+        // Or can use mainArg
+        (v1compat && w.key === "d" && !w.isExpr) ? [new VugWord("style_display", cssDisplayShorthand[w.value] || w.value, w.isExpr)]  :
         [w]
     )
     return new VugNode(n.tag, words, n.children)
