@@ -112,7 +112,7 @@ function tagNameParser(n: VugNode): VugNode {
     const [first, ...args] = n.tag.split(":")
     const parts = first.split('').reduce((list,char) => {
         if (/[A-Za-z0-9_|\-]/.test(char)) list.slice(-1)[0].text += char
-        else list.push({ prefix: char, text: "" }) //TODO allow double prefixes
+        else list.push({ prefix: char, text: "" }) //TODO allow prefixes consisting of double special characters, i.e. push onto previous
         return list
     }, [{ text: '', prefix: '' }]).filter(x => x.text)
     const tag = parts.filter(x => !x.prefix)[0]?.text || 'div'
