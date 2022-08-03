@@ -7,7 +7,8 @@
 // - Recognize CSS properties, add "style_"
 // - Additional macros: mx/my/px/py/sz/circ
 // - Flex 'fx' macro: fx=<optional ! to reverse direction><optional pipe or hyphen to set direction><optional justify-content><optional period followed by align-items><optional period followed by align-content>
-// - Custom tag types: d/s/f/ib, maybe fr/fc for column/row flex
+// - Custom tag types: d/s/f/ib
+// - For compatibility reasons, recognize fr/fc for column/row flex
 // - Custom values for 'display'
 // - Custom values for numeric units ending in 'q'
 // Recognize ".foo.bar" and convert to separate words
@@ -48,6 +49,8 @@ function customTagTypes(n: VugNode): VugNode {
     if (n.tag === 'd') return clone(n, { tag: "div" })
     if (n.tag === 's') return clone(n, { tag: "span" })
     if (n.tag === 'f' || n.tag === 'flex') return clone(n, { tag: "div", display: "flex", fx: n.getWord("_mainArg"), _mainArg: null })
+    if (v1compat && n.tag === 'fr') return clone(n, { tag: "div", display: "flex", 'flex-direction': 'row' })
+    if (v1compat && n.tag === 'fc') return clone(n, { tag: "div", display: "flex", 'flex-direction': 'column' })
     if (n.tag === 'ib'|| n.tag === 'inline-block') return clone(n, { tag: "div", display: "inline-block" })
     return n
 }
