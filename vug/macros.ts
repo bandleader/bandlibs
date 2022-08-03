@@ -10,7 +10,7 @@
 // - Custom tag types: d/s/f/ib, maybe fr/fc for column/row flex
 - Custom values for 'display'
 - Custom values for numeric units ending in 'q'
-- Recognize ".foo.bar" and convert to separate words
+// Recognize ".foo.bar" and convert to separate words
 - 
 */
 
