@@ -15,10 +15,10 @@ export function waitForLoad(el: HTMLElement) {
     }) 
 }
 
-export function partition<T>(arr: T[], fn: (i: T) => boolean | number) {
+export function partition<T>(arr: T[], fn: (i: T) => boolean | number, minGroups = 2) {
     // Usage: const [trueOnes, falseOnes] = partition(arr, x => trueOrFalse)
-    // Or:    const [one, two, three] = partition(arr, x => num)
-    const ret: T[][] = [[], []]
+    // Or:    const [one, two, three] = partition(arr, x => num, 3) // use the last argument to create a min number of groups
+    const ret: T[][] = Array.from(Array(minGroups)).map(() => [])
     for (const i of arr) {
       const k = fn(i)
       const ind = typeof k === 'number' ? k : !!k ? 0 : 1
