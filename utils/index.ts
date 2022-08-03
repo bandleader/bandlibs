@@ -14,3 +14,16 @@ export function waitForLoad(el: HTMLElement) {
         setTimeout(() => rej('The added element timed out while waiting to load: ' + (el as any).src), 10000)
     }) 
 }
+
+export function partition<T>(arr: T[], fn: (i: T) => boolean | number) {
+    // Usage: const [trueOnes, falseOnes] = partition(arr, x => trueOrFalse)
+    // Or:    const [one, two, three] = partition(arr, x => num)
+    const ret: T[][] = [[], []]
+    for (const i of arr) {
+      const k = fn(i)
+      const ind = typeof k === 'number' ? k : !!k ? 0 : 1
+      while (ret.length < (ind + 1)) ret.push([])
+      ret[ind].push(i)
+    }
+    return ret
+}

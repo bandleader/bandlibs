@@ -1,3 +1,5 @@
+import { partition } from "../utils"
+
 export type VugAttr = { key: string, value?: string, isExpr: boolean, kind: string }
 export type VugNode = { tag: string, attrs: VugAttr[], innerHtml?: string, children: VugNode[] }
 
@@ -279,18 +281,6 @@ export function load(text: string) {
   const nodes = compile(text)
   const toVueTemplate = (whitespace = false) => nodes.map(x => nodeToVue(x, whitespace)).join(whitespace ? "\n" : "")
   return { ast: nodes, toVueTemplate, toRenderFunc: () => toRenderFunc(nodes[0]) }
-}
-function partition<T>(arr: T[], fn: (i: T) => boolean | number) {
-  // Usage: const [trueOnes, falseOnes] = partition(arr, x => trueOrFalse)
-  // Or:    const [one, two, three] = partition(arr, x => num)
-  const ret: T[][] = [[], []]
-  for (const i of arr) {
-    const k = fn(i)
-    const ind = typeof k === 'number' ? k : !!k ? 0 : 1
-    while (ret.length < (ind + 1)) ret.push([])
-    ret[ind].push(i)
-  }
-  return ret
 }
 function toRenderFunc(node: VugNode, opts = {ce: "/*#__PURE__*/React.createElement", className: "className"}) {
   if (node.tag==="html") return JSON.stringify(node.innerHtml || "")
