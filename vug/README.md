@@ -156,7 +156,7 @@ div -- For the 'display' (or 'd') property, we support b, i, and f for block, in
         .title -- bg=blue
         :hover -- .title -- bg=red
       ```
-- [ ] Sugar for containers with a single element in them: Separate layers on the same line with `>`.
+- [x] Sugar for containers with a single element in them: Separate layers on the same line with `>`.
     - `.col-4 > .card > .card-body > p -- Some text inside it`
     - Can be implemented as a pass looking for word `>`, we keep pushing elements onto the stack, then we take our children and move them to the last element. That way no indentation magic has to happen
 - [ ] Fix quoting: braces with spaces don't work (although we may deprecate braces in favour of Vue's colon syntax, or perhaps my syntax `prop=(expr)`), 2) perhaps we should make our own lexer

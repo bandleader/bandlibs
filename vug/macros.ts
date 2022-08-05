@@ -1,4 +1,38 @@
 /*
+- input:checkbox etc. But if we're going to parse that as an arg, maybe it conflicts with namespaces.
+     - Can use input::checkbox, or a different char like input%checkbox, input+checkbox, input~checkbox, input^checkbox, input$checkbox
+- Same for flex:!|c.c etc (note period will need to be renamed to dash)
+- .foo=bar currently errors in emitter because it's expecting an expression. But in v2 expr has different meaning, it means explicitly :'d.
+- It should be safe to implement cleaner expression syntax for attribute binding:
+    foo=(1 + 2)
+    foo={ bar: true }
+    foo=`Hello ${world}`
+  For directives make sure not to emit :v-if.
+  To ensure consistency, so that quotes are never used for exprs, and so nameExpr always mean strings, we should probably enforce directives etc to use it:
+    v-if=(shown)
+    v-focus=(foo ? 'bar' : 'baz)
+    .foo=(shown)
+  BUT:
+    Is v-for OK? v-for=(x in foo.bar) / v-for=((x, i) in foo.bar)
+    It was very convenient to use v-if=shown and .foo=shown :( Isn't it clear enough?
+    Also I don't want to lose backward compatibility...
+  PERHAPS:
+    Allow the new syntax, and make it into an expr
+    Existing syntax should work too
+    Can warn if a directive/class uses quotes
+    Later can warn if it uses nameExpr, though I think I want that
+    Problem -- foo=(1 + 2) might easily be changed to foo=someVar and that has a different meaning
+  MAYBE:
+    Nothing wrong with :foo=bar, v-if=bar, .foo=bar. In all cases the left side makes clear it's an expr
+    We should give up on foo=(1 + 2) because indeed that doesn't translate well like we said above
+    It'll still be :foo=(1 + 2), we'll just enforce that it should be parens and not quotes
+    And of course {...}, `...` should work too
+
+    
+
+  Should we force v-if=(1 + 2)
+    v-if=foo // not clear it's expression
+
 // - First while we have the order, do the > operator. Wherever you find it, split off words into a new child node, the first word is the tag name, and then put all our children into the child node.
 // - Handle Vue syntax of calculated words for now -- :foo
 //- Parse .classes and #ids out of the tag name
@@ -25,6 +59,8 @@ function clone(node: VugNode, changes: Record<string, string>) {
     return new VugNode(changes.tag || node.tag, [...node.words.filter(w => changes[w.key] === undefined /*whereas null will blank it*/), ...ks.filter(k => changes[k] !== null).map(k => new VugWord(k, changes[k], false))])
 }
 function wordTransformer(fn: (w: VugWord) => VugWord) {
+    // TODO-OPTIMIZE Can check whether any of the nodes were replaced and if not return the original node... or even only copy the array once something was switched.
+    // TODO-OPTIMIZE We can also run all the word transformers in one step, as long as order doesn't matter
     return (n: VugNode) => new VugNode(n.tag, n.words.map(w => fn(w)), n.children)
 }
 export function runAll(node: VugNode): VugNode {
