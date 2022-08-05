@@ -1,4 +1,5 @@
 import { partition } from "../utils"
+import * as V2 from './parsing'
 
 export type VugAttr = { key: string, value?: string, isExpr: boolean, kind: string }
 export type VugNode = { tag: string, attrs: VugAttr[], innerHtml?: string, children: VugNode[] }
@@ -438,7 +439,7 @@ To get Vug support in Vue templates, there are a few options.
     You would still need to make sure that node_modules/plates ends up on your build server too. You could commit it to the repo. You could make a script that writes it on the spot.
 */
 
-export function ViteTransformPlugin() {
+export function ViteTransformPlugin(opts: { _tempLangVersion?: number } = {}) {
   return {
     name: 'vite-plugin-vue-vug',
     enforce: "pre" as const,
@@ -450,11 +451,12 @@ export function ViteTransformPlugin() {
       const startOfCode = code.indexOf(">", startOfTemplateTag) + 1
       const endOfCode = code.lastIndexOf("</template>")
       const vugCode = code.substring(startOfCode, endOfCode)
-      const output = load(vugCode).toVueTemplate()
+      const output = (opts._tempLangVersion||1.2) >= 2 ? V2.compile(vugCode).toVueTemplate() : load(vugCode).toVueTemplate()
       return code.substring(0, startOfTemplateTag) + "<template>" + output + code.substring(endOfCode) // We have to replace the template tag so the SFC compiler doesn't error because it doesn't know how to process Vue
     }
   }
 }
+
 export function transformVugReact(code: string) {
   while (true) {
     const ind = code.indexOf("vugReact`")

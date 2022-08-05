@@ -63,11 +63,36 @@ function wordTransformer(fn: (w: VugWord) => VugWord) {
     // TODO-OPTIMIZE We can also run all the word transformers in one step, as long as order doesn't matter
     return (n: VugNode) => new VugNode(n.tag, n.words.map(w => fn(w)), n.children)
 }
+// TODO arg is just right after the first part. foo:<arg>.<mod:inclthis>
+// function parseArgsAndModifiers(key: string, chars=".:") {
+//     // TODO can use this for tagNameParser too
+//     const ret: {prefix: string, text: string}[] = [{prefix: '', text: ''}]
+//     for (const ch of key) {
+//         const last = ret.slice(-1)[0]
+//         if (!chars.includes(ch)) last.text += ch
+//         else if (!last.text) last.prefix += ch
+//         else ret.push({ prefix: ch, text: '' })
+//     }
+//     return { key: ret[0].text, args: ret.filter((x,i) => i && x.text) }
+// }
+// TODO all these can be combined into one pass which also parses the args and modifiers using parseArgsAndModifiers
+// TODO allow variant '.tick' which inserts $nextTick(() => x)
+// TODO allow multiple, and coexisting with existing 'ref's (Vue cannot do multiple refs)
+const vgDo = wordTransformer(w => w.key === "vg-do" ? new VugWord("ref", `el => { if (!el || el.ranonce) return; el.ranonce = true; ${w.value} }`, true) : w)
+// TODO allow multiple, and maybe create a let in the script setup
+const vgLet = wordTransformer(w => w.key.startsWith("vg-let:") ? new VugWord("v-for", `${w.key.slice(7)} in [${w.value}]`, false) : w)
+// TODO maybe detect multiple levels of nesting and default the variable to it2
+const vgEachSimple = wordTransformer(w => w.key === "vg-each" ? new VugWord("vg-each:it", w.value, false) : w)
+const vgEach = wordTransformer(w => w.key.startsWith("vg-each:") ? new VugWord("v-for", `(${w.key.slice(8)},${w.key.slice(8)}_i) in ${w.value}`, false) : w)
 export function runAll(node: VugNode): VugNode {
     node = directChild(node)
     node = tagNameParser(node)
     node = customTagTypes(node)
     node = basicCssMacros(node)
+    node = vgDo(node)
+    node = vgLet( node)
+    node = vgEachSimple(node)
+    node = vgEach(node)
     node = flexMacroFx(node)
     node = cssShorthand(node)
     node = cssRecognize(node)
