@@ -107,7 +107,7 @@ function partition(arr, fn, minGroups) {
 function clone(node, changes) {
     // TODO: throw if overwriting an isExpr word, I think
     var ks = Object.keys(changes).filter(function (x) { return x !== "tag"; });
-    return new VugNode(changes.tag || node.tag, __spreadArray(__spreadArray([], node.words.filter(function (w) { return changes[w.key] === undefined; } /*whereas null will blank it*/), true), ks.filter(function (k) { return changes[k] !== null; }).map(function (k) { return new VugWord(k, changes[k], false); }), true));
+    return new VugNode(changes.tag || node.tag, __spreadArray(__spreadArray([], node.words.filter(function (w) { return changes[w.key] === undefined; } /*whereas null will blank it*/), true), ks.filter(function (k) { return changes[k] !== null; }).map(function (k) { return new VugWord(k, changes[k], false); }), true), node.children);
 }
 function wordTransformer(fn) {
     // TODO-OPTIMIZE Can check whether any of the nodes were replaced and if not return the original node... or even only copy the array once something was switched.
