@@ -88,7 +88,7 @@ const vgCssComponent = (n: VugNode) => {
         }
         contents = `${arg} { ${contents} }`
     }
-    const id = (Math.random() + 1).toString(36).substring(7)
+    const id = "vg_" + (Math.random() + 1).toString(36).substring(7) // note this has to start with a non-digit of course since we access it as a property name
     if (contents.includes("&")) contents = contents.replace(/&/g, `*[data-${id}]`)
     const script = `var d = $el.ownerDocument; $el.parentElement.dataset.${id} = ''; if (!d.added_${id}) d.added_${id} = d.head.appendChild(Object.assign(d.createElement('style'), { innerText: ${JSON.stringify(contents).replace(/"/g, "&quot;")} }))`
     return new VugNode("noscript", [new VugWord("style_display", "none", false), new VugWord("vg-do", script, false)])

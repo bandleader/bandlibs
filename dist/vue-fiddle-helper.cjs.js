@@ -16210,7 +16210,6 @@ var vgCssComponent = function (n) {
         return n;
     var contents = ((_a = n.children[0]) === null || _a === void 0 ? void 0 : _a.getWord("_contents")) || "";
     var arg = n.getWord("_mainArg") || "";
-    console.log({ arg: arg });
     if (arg) {
         if (contents.includes("{"))
             throw "vg-css: when using an arg, don't include braces in the contents";
@@ -16223,7 +16222,7 @@ var vgCssComponent = function (n) {
         }
         contents = "".concat(arg, " { ").concat(contents, " }");
     }
-    var id = (Math.random() + 1).toString(36).substring(7);
+    var id = "vg_" + (Math.random() + 1).toString(36).substring(7); // note this has to start with a non-digit of course since we access it as a property name
     if (contents.includes("&"))
         contents = contents.replace(/&/g, "*[data-".concat(id, "]"));
     var script = "var d = $el.ownerDocument; $el.parentElement.dataset.".concat(id, " = ''; if (!d.added_").concat(id, ") d.added_").concat(id, " = d.head.appendChild(Object.assign(d.createElement('style'), { innerText: ").concat(JSON.stringify(contents).replace(/"/g, "&quot;"), " }))");
