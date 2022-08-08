@@ -76,7 +76,63 @@ function wordTransformer(fn: (w: VugWord) => VugWord) {
 //     return { key: ret[0].text, args: ret.filter((x,i) => i && x.text) }
 // }
 // TODO all these can be combined into one pass which also parses the args and modifiers using parseArgsAndModifiers
+const conditionalCssToVCss = (n: VugNode) => {
+    let contents = ""
+    function splitTwo(text: string, sep: string) {
+        const pos = text.indexOf(sep)
+        if (pos < 0) return [text, '']
+        return [text.substr(0, pos), text.substr(pos + sep.length)]
+    }
+    const words = n.words.flatMap(w => {
+        let [key, slctr] = splitTwo(w.key,":")
+        if (['hover', 'active', 'focus'].includes(slctr)) slctr = "&:" + slctr // TODO add from https://tailwindcss.com/docs/hover-focus-and-other-states#pseudo-class-reference
+        if (!slctr || !slctr.includes("&")) return [w]
+        if (imbaDict[key]) key = imbaDict[key] // TODO macros, units, etc?
+        contents += `${slctr} { ${key}: ${w.value} } `
+        return [] // skip the word, we've added it to contents
+    })
+    if (!contents) return n
+    return new VugNode(n.tag, [...words, new VugWord('v-css', contents, false)], n.children)
+}
+const compileVCss = (n: VugNode): VugNode => {
+    const contents = n.getWord("v-css") 
+    if (!contents) return n
+    // TODO support args here?
+    // TODO support multi words here?
+    const script = `
+        const d = $el.ownerDocument, st = null;
+        if (!$el.vcssKey) {
+            $el.vcssKey = 'vg_' + String((Math.random()+1).toString(36).slice(7));
+            st = d.head.appendChild(d.createElement('style'));
+            st.dataset[$el.vcssKey] = ''
+            $el.dataset.vcss = $el.vcssKey
+        } else {
+            st = d.querySelector('*[data-' + $el.vcssKey + ']')
+        }
+        st.innerText = ${JSON.stringify(contents)}.replace(/&/g, '*[data-vcss=' + $el.vcssKey + ']')
+    `.replace(/\n/g, '').replace(/[ \t]+/g, ' ').replace(/"/g, "&quot;").replace(/'/g, "&#39;")
+    return clone(n, { "v-css": null, "vg-do": script })
+}
 const vgCssComponent = (n: VugNode) => {
+    /* TODO:
+    - Can work via a single global v-css directive that we include in the package, prob easier
+        - if not, still just compile down v-css directives (or vg-css or similar)
+        - and also: support HMR, same as we did in the Css component, or maybe more easily like we did in the v-css directive, since we're updated every cycle
+    - New syntax:
+        - hover:bg=red, [&:not(hover)]:bg=red
+        - Or: $bg=red $hover:bg=red $&.active:bg=red
+        - Or follow arg syntax: bg:css=rd bg:hover=red bg:[&.active, &.foo]=red
+    - Options are: braces but no arg (simple), arg and no braces (uses arg to adds braces), neither arg nor braces (uses & as arg). Throw if arg and braces.
+        - And as we do, if there are words, contents must be empty to start with (perhaps later we can inject them into the braces.)
+    */
+    const scriptForInjectCss = (css: string) => `
+        var d = $el.ownerDocument; p = $el.parentElement
+        if (!p.pcss) p.pcss = 'vg_' + String((Math.random()+1).toString(36).slice(7));
+        var st = d.querySelector('data-' + p.pcss)
+        if (!st) st = d.head.appendChild(d.createElement('style'))
+        st.dataset[p.pcss] = ''
+        st.innerText = $el.innerText
+    `.replace(/\n/g, '').replace(/[ \t]+/g, ' ')
     if (n.tag !== 'vg-css') return n
     let contents = n.children[0]?.getWord("_contents") || ""
     let arg = n.getWord("_mainArg") || ""
@@ -107,16 +163,18 @@ export function runAll(node: VugNode): VugNode {
     node = tagNameParser(node)
     node = customTagTypes(node)
     node = basicCssMacros(node)
-    node = allowReferencesToGlobals(node)
     node = flexMacroFx(node)
     node = cssShorthand(node)
     node = cssRecognize(node)
     node = quickUnits(node)
     node = vgCssComponent(node)
+    node = conditionalCssToVCss(node)
+    node = compileVCss(node)
     node = vgDo(node)
     node = vgLet( node)
     node = vgEachSimple(node)
     node = vgEach(node)
+    node = allowReferencesToGlobals(node)
     return new VugNode(node.tag, node.words, node.children.map(c => runAll(c)))
 }
 

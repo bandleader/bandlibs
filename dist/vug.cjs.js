@@ -127,6 +127,38 @@ function wordTransformer(fn) {
 //     return { key: ret[0].text, args: ret.filter((x,i) => i && x.text) }
 // }
 // TODO all these can be combined into one pass which also parses the args and modifiers using parseArgsAndModifiers
+var conditionalCssToVCss = function (n) {
+    var contents = "";
+    function splitTwo(text, sep) {
+        var pos = text.indexOf(sep);
+        if (pos < 0)
+            return [text, ''];
+        return [text.substr(0, pos), text.substr(pos + sep.length)];
+    }
+    var words = n.words.flatMap(function (w) {
+        var _a = splitTwo(w.key, ":"), key = _a[0], slctr = _a[1];
+        if (['hover', 'active', 'focus'].includes(slctr))
+            slctr = "&:" + slctr; // TODO add from https://tailwindcss.com/docs/hover-focus-and-other-states#pseudo-class-reference
+        if (!slctr || !slctr.includes("&"))
+            return [w];
+        if (imbaDict[key])
+            key = imbaDict[key]; // TODO macros, units, etc?
+        contents += "".concat(slctr, " { ").concat(key, ": ").concat(w.value, " } ");
+        return []; // skip the word, we've added it to contents
+    });
+    if (!contents)
+        return n;
+    return new VugNode(n.tag, __spreadArray(__spreadArray([], words, true), [new VugWord('v-css', contents, false)], false), n.children);
+};
+var compileVCss = function (n) {
+    var contents = n.getWord("v-css");
+    if (!contents)
+        return n;
+    // TODO support args here?
+    // TODO support multi words here?
+    var script = "\n        const d = $el.ownerDocument, st = null;\n        if (!$el.vcssKey) {\n            $el.vcssKey = 'vg_' + String((Math.random()+1).toString(36).slice(7));\n            st = d.head.appendChild(d.createElement('style'));\n            st.dataset[$el.vcssKey] = ''\n            $el.dataset.vcss = $el.vcssKey\n        } else {\n            st = d.querySelector('*[data-' + $el.vcssKey + ']')\n        }\n        st.innerText = ".concat(JSON.stringify(contents), ".replace(/&/g, '*[data-vcss=' + $el.vcssKey + ']')\n    ").replace(/\n/g, '').replace(/[ \t]+/g, ' ').replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    return clone(n, { "v-css": null, "vg-do": script });
+};
 var vgCssComponent = function (n) {
     var _a;
     if (n.tag !== 'vg-css')
@@ -165,16 +197,18 @@ function runAll(node) {
     node = tagNameParser(node);
     node = customTagTypes(node);
     node = basicCssMacros(node);
-    node = allowReferencesToGlobals(node);
     node = flexMacroFx(node);
     node = cssShorthand(node);
     node = cssRecognize(node);
     node = quickUnits(node);
     node = vgCssComponent(node);
+    node = conditionalCssToVCss(node);
+    node = compileVCss(node);
     node = vgDo(node);
     node = vgLet(node);
     node = vgEachSimple(node);
     node = vgEach(node);
+    node = allowReferencesToGlobals(node);
     return new VugNode(node.tag, node.words, node.children.map(function (c) { return runAll(c); }));
 }
 var imbaDict = { ac: "align-content", ai: "align-items", as: "align-self", b: "bottom", bc: "border-color", bcb: "border-bottom-color", bcl: "border-left-color", bcr: "border-right-color", bct: "border-top-color", bd: "border", bdb: "border-bottom", bdl: "border-left", bdr: "border-right", bdt: "border-top", bg: "background", bga: "background-attachment", bgc: "background-color", bgclip: "background-clip", bcgi: "background-image", bgo: "background-origin", bgp: "background-position", bgr: "background-repeat", bgs: "background-size", bs: "border-style", bsb: "border-bottom-style", bsl: "border-left-style", bsr: "border-right-style", bst: "border-top-style", bw: "border-width", bwb: "border-bottom-width", bwl: "border-left-width", bwr: "border-right-width", bwt: "border-top-width", c: "color", cg: "column-gap", d: "display", e: "ease", ec: "ease-colors", eo: "ease-opacity", et: "ease-transform", ff: "font-family", fl: "flex", flb: "flex-basis", fld: "flex-direction", flf: "flex-flow", flg: "flex-grow", fls: "flex-shrink", flw: "flex-wrap", fs: "font-size", fw: "font-weight", g: "gap", ga: "grid-area", gac: "grid-auto-columns", gaf: "grid-auto-flow", gar: "grid-auto-rows", gc: "grid-column", gce: "grid-column-end", gcg: "grid-column-gap", gcs: "grid-column-start", gr: "grid-row", gre: "grid-row-end", grg: "grid-row-gap", grs: "grid-row-start", gt: "grid-template", gta: "grid-template-areas", gtc: "grid-template-columns", gtr: "grid-template-rows", h: "height", jac: "place-content", jai: "place-items", jas: "place-self", jc: "justify-content", ji: "justify-items", js: "justify-self", l: "left", lh: "line-height", ls: "letter-spacing", m: "margin", mb: "margin-bottom", ml: "margin-left", mr: "margin-right", mt: "margin-top", o: "opacity", of: "overflow", ofa: "overflow-anchor", ofx: "overflow-x", ofy: "overflow-y", origin: "transform-origin", p: "padding", pb: "padding-bottom", pe: "pointer-events", pl: "padding-left", pos: "position", pr: "padding-right", pt: "padding-top", r: "right", rd: "border-radius", rdbl: "border-bottom-left-radius", rdbr: "border-bottom-right-radius", rdtl: "border-top-left-radius", rdtr: "border-top-right-radius", rg: "row-gap", shadow: "box-shadow", t: "top", ta: "text-align", td: "text-decoration", tdc: "text-decoration-color", tdl: "text-decoration-line", tds: "text-decoration-style", tdsi: "text-decoration-skip-ink", tdt: "text-decoration-thickness", te: "text-emphasis", tec: "text-emphasis-color", tep: "text-emphasis-position", tes: "text-emphasis-style", ts: "text-shadow", tt: "text-transform", tween: "transition", us: "user-select", va: "vertical-align", w: "width", ws: "white-space", zi: "z-index" };
