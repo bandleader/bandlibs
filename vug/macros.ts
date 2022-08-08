@@ -77,9 +77,17 @@ function wordTransformer(fn: (w: VugWord) => VugWord) {
 // }
 // TODO all these can be combined into one pass which also parses the args and modifiers using parseArgsAndModifiers
 const vgCssComponent = (n: VugNode) => {
-    if (n.tag !== 'vg-css') return n
+    if (!n.tag.startsWith('vg-css')) return n
     let contents = n.children[0]?.getWord("_contents") || ""
-    if (!contents.includes("{")) contents = `& { ${contents} }`
+    let arg = n.tag.includes(":") ? n.tag.slice(7) : ""
+    if (arg) {
+        if (contents.includes("{")) throw "vg-css: when using an arg, don't include braces in the contents"
+        if (!arg.includes("&")) arg = "&:" + arg
+        for (const w of n.words) {
+            if (w.key.startsWith("style_")) contents = `${w.key}: ${w.value}; ${contents}`
+        }
+        contents = `${arg} { ${contents} }`
+    }
     const id = (Math.random() + 1).toString(36).substring(7)
     if (contents.includes("&")) contents = contents.replace(/&/g, `*[data-${id}]`)
     const script = `var d = $el.ownerDocument; $el.parentElement.dataset.${id} = ''; if (!d.added_${id}) d.added_${id} = d.head.appendChild(Object.assign(d.createElement('style'), { innerText: ${JSON.stringify(contents).replace(/"/g, "&quot;")} }))`
@@ -99,16 +107,16 @@ export function runAll(node: VugNode): VugNode {
     node = tagNameParser(node)
     node = customTagTypes(node)
     node = basicCssMacros(node)
-    node = vgCssComponent(node)
-    node = vgDo(node)
-    node = vgLet( node)
-    node = vgEachSimple(node)
-    node = vgEach(node)
     node = allowReferencesToGlobals(node)
     node = flexMacroFx(node)
     node = cssShorthand(node)
     node = cssRecognize(node)
     node = quickUnits(node)
+    node = vgCssComponent(node)
+    node = vgDo(node)
+    node = vgLet( node)
+    node = vgEachSimple(node)
+    node = vgEach(node)
     return new VugNode(node.tag, node.words, node.children.map(c => runAll(c)))
 }
 

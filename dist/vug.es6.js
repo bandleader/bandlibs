@@ -125,15 +125,26 @@ function wordTransformer(fn) {
 // TODO all these can be combined into one pass which also parses the args and modifiers using parseArgsAndModifiers
 var vgCssComponent = function (n) {
     var _a;
-    if (n.tag !== 'vg-css')
+    if (!n.tag.startsWith('vg-css'))
         return n;
     var contents = ((_a = n.children[0]) === null || _a === void 0 ? void 0 : _a.getWord("_contents")) || "";
-    if (!contents.includes("{"))
-        contents = "& { ".concat(contents, " }");
+    var arg = n.tag.includes(":") ? n.tag.slice(7) : "";
+    if (arg) {
+        if (contents.includes("{"))
+            throw "vg-css: when using an arg, don't include braces in the contents";
+        if (!arg.includes("&"))
+            arg = "&:" + arg;
+        for (var _i = 0, _b = n.words; _i < _b.length; _i++) {
+            var w = _b[_i];
+            if (w.key.startsWith("style_"))
+                contents = "".concat(w.key, ": ").concat(w.value, "; ").concat(contents);
+        }
+        contents = "".concat(arg, " { ").concat(contents, " }");
+    }
     var id = (Math.random() + 1).toString(36).substring(7);
     if (contents.includes("&"))
         contents = contents.replace(/&/g, "*[data-".concat(id, "]"));
-    var script = "var d = $el.ownerDocument; $win.console.log($el,d); $el.parentElement.dataset.".concat(id, " = ''; if (!d.added_").concat(id, ") d.added_").concat(id, " = d.head.appendChild(Object.assign(d.createElement('style'), { innerText: ").concat(JSON.stringify(contents).replace(/"/g, "&quot;"), " }))");
+    var script = "var d = $el.ownerDocument; $el.parentElement.dataset.".concat(id, " = ''; if (!d.added_").concat(id, ") d.added_").concat(id, " = d.head.appendChild(Object.assign(d.createElement('style'), { innerText: ").concat(JSON.stringify(contents).replace(/"/g, "&quot;"), " }))");
     return new VugNode("noscript", [new VugWord("style_display", "none", false), new VugWord("vg-do", script, false)]);
 };
 // TODO allow variant '.tick' which inserts $nextTick(() => x)
@@ -150,16 +161,16 @@ function runAll(node) {
     node = tagNameParser(node);
     node = customTagTypes(node);
     node = basicCssMacros(node);
-    node = vgCssComponent(node);
-    node = vgDo(node);
-    node = vgLet(node);
-    node = vgEachSimple(node);
-    node = vgEach(node);
     node = allowReferencesToGlobals(node);
     node = flexMacroFx(node);
     node = cssShorthand(node);
     node = cssRecognize(node);
     node = quickUnits(node);
+    node = vgCssComponent(node);
+    node = vgDo(node);
+    node = vgLet(node);
+    node = vgEachSimple(node);
+    node = vgEach(node);
     return new VugNode(node.tag, node.words, node.children.map(function (c) { return runAll(c); }));
 }
 var imbaDict = { ac: "align-content", ai: "align-items", as: "align-self", b: "bottom", bc: "border-color", bcb: "border-bottom-color", bcl: "border-left-color", bcr: "border-right-color", bct: "border-top-color", bd: "border", bdb: "border-bottom", bdl: "border-left", bdr: "border-right", bdt: "border-top", bg: "background", bga: "background-attachment", bgc: "background-color", bgclip: "background-clip", bcgi: "background-image", bgo: "background-origin", bgp: "background-position", bgr: "background-repeat", bgs: "background-size", bs: "border-style", bsb: "border-bottom-style", bsl: "border-left-style", bsr: "border-right-style", bst: "border-top-style", bw: "border-width", bwb: "border-bottom-width", bwl: "border-left-width", bwr: "border-right-width", bwt: "border-top-width", c: "color", cg: "column-gap", d: "display", e: "ease", ec: "ease-colors", eo: "ease-opacity", et: "ease-transform", ff: "font-family", fl: "flex", flb: "flex-basis", fld: "flex-direction", flf: "flex-flow", flg: "flex-grow", fls: "flex-shrink", flw: "flex-wrap", fs: "font-size", fw: "font-weight", g: "gap", ga: "grid-area", gac: "grid-auto-columns", gaf: "grid-auto-flow", gar: "grid-auto-rows", gc: "grid-column", gce: "grid-column-end", gcg: "grid-column-gap", gcs: "grid-column-start", gr: "grid-row", gre: "grid-row-end", grg: "grid-row-gap", grs: "grid-row-start", gt: "grid-template", gta: "grid-template-areas", gtc: "grid-template-columns", gtr: "grid-template-rows", h: "height", jac: "place-content", jai: "place-items", jas: "place-self", jc: "justify-content", ji: "justify-items", js: "justify-self", l: "left", lh: "line-height", ls: "letter-spacing", m: "margin", mb: "margin-bottom", ml: "margin-left", mr: "margin-right", mt: "margin-top", o: "opacity", of: "overflow", ofa: "overflow-anchor", ofx: "overflow-x", ofy: "overflow-y", origin: "transform-origin", p: "padding", pb: "padding-bottom", pe: "pointer-events", pl: "padding-left", pos: "position", pr: "padding-right", pt: "padding-top", r: "right", rd: "border-radius", rdbl: "border-bottom-left-radius", rdbr: "border-bottom-right-radius", rdtl: "border-top-left-radius", rdtr: "border-top-right-radius", rg: "row-gap", shadow: "box-shadow", t: "top", ta: "text-align", td: "text-decoration", tdc: "text-decoration-color", tdl: "text-decoration-line", tds: "text-decoration-style", tdsi: "text-decoration-skip-ink", tdt: "text-decoration-thickness", te: "text-emphasis", tec: "text-emphasis-color", tep: "text-emphasis-position", tes: "text-emphasis-style", ts: "text-shadow", tt: "text-transform", tween: "transition", us: "user-select", va: "vertical-align", w: "width", ws: "white-space", zi: "z-index" };
@@ -172,7 +183,7 @@ function customTagTypes(n) {
     if (n.tag === 's')
         return clone(n, { tag: "span" });
     if (n.tag === 'f' || n.tag === 'flex')
-        return clone(n, { tag: "div", style_display: "flex", fx: n.getWord("_mainArg"), _mainArg: null });
+        return clone(n, { tag: "div", style_display: "flex", fx: n.getWord("_mainArg") || "", _mainArg: null });
     if (n.tag === 'fr')
         return clone(n, { tag: "div", style_display: "flex", 'style_flex-direction': 'row' });
     if (n.tag === 'fc')
