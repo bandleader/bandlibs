@@ -16210,6 +16210,7 @@ var vgLet = wordTransformer(function (w) { return w.key.startsWith("vg-let:") ? 
 // TODO maybe detect multiple levels of nesting and default the variable to it2
 var vgEachSimple = wordTransformer(function (w) { return w.key === "vg-each" ? new VugWord("vg-each:it", w.value, false) : w; });
 var vgEach = wordTransformer(function (w) { return w.key.startsWith("vg-each:") ? new VugWord("v-for", "(".concat(w.key.slice(8), ",").concat(w.key.slice(8), "_i) in ").concat(w.value), false) : w; });
+var allowReferencesToGlobals = wordTransformer(function (w) { return w.value.includes("$win") ? new VugWord(w.key, w.value.replace(/\$win/g, "(Array.constructor('return window')())"), w.isExpr) : w; });
 function runAll(node) {
     node = directChild(node);
     node = tagNameParser(node);
@@ -16219,6 +16220,7 @@ function runAll(node) {
     node = vgLet(node);
     node = vgEachSimple(node);
     node = vgEach(node);
+    node = allowReferencesToGlobals(node);
     node = flexMacroFx(node);
     node = cssShorthand(node);
     node = cssRecognize(node);

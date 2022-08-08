@@ -84,6 +84,7 @@ const vgLet = wordTransformer(w => w.key.startsWith("vg-let:") ? new VugWord("v-
 // TODO maybe detect multiple levels of nesting and default the variable to it2
 const vgEachSimple = wordTransformer(w => w.key === "vg-each" ? new VugWord("vg-each:it", w.value, false) : w)
 const vgEach = wordTransformer(w => w.key.startsWith("vg-each:") ? new VugWord("v-for", `(${w.key.slice(8)},${w.key.slice(8)}_i) in ${w.value}`, false) : w)
+const allowReferencesToGlobals = wordTransformer(w => w.value.includes("$win") ? new VugWord(w.key, w.value.replace(/\$win/g, "(Array.constructor('return window')())"), w.isExpr) : w)
 export function runAll(node: VugNode): VugNode {
     node = directChild(node)
     node = tagNameParser(node)
@@ -93,6 +94,7 @@ export function runAll(node: VugNode): VugNode {
     node = vgLet( node)
     node = vgEachSimple(node)
     node = vgEach(node)
+    node = allowReferencesToGlobals(node)
     node = flexMacroFx(node)
     node = cssShorthand(node)
     node = cssRecognize(node)
