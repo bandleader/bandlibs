@@ -16204,10 +16204,11 @@ function wordTransformer(fn) {
 // TODO all these can be combined into one pass which also parses the args and modifiers using parseArgsAndModifiers
 var vgCssComponent = function (n) {
     var _a;
-    if (!n.tag.startsWith('vg-css'))
+    if (n.tag !== 'vg-css')
         return n;
     var contents = ((_a = n.children[0]) === null || _a === void 0 ? void 0 : _a.getWord("_contents")) || "";
-    var arg = n.tag.includes(":") ? n.tag.slice(7) : "";
+    var arg = n.getWord("_mainArg") || "";
+    console.log({ arg: arg });
     if (arg) {
         if (contents.includes("{"))
             throw "vg-css: when using an arg, don't include braces in the contents";
@@ -16216,7 +16217,7 @@ var vgCssComponent = function (n) {
         for (var _i = 0, _b = n.words; _i < _b.length; _i++) {
             var w = _b[_i];
             if (w.key.startsWith("style_"))
-                contents = "".concat(w.key, ": ").concat(w.value, "; ").concat(contents);
+                contents = "".concat(w.key.slice(6), ": ").concat(w.value, "; ").concat(contents);
         }
         contents = "".concat(arg, " { ").concat(contents, " }");
     }

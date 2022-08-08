@@ -3,7 +3,7 @@ import * as Emit from "./emit"
 
 export class VugNode {
     constructor(public tag: string, public words: VugWord[] = [], public children: VugNode[] = []) {}
-    getWord(key: string) { return this.words.find(x => x.key === key)?.value }
+    getWord(key: string): string|void { return this.words.find(x => x.key === key)?.value }
     getWordErrIfCalc(key: string) { 
         const find = this.words.find(x => x.key === key) 
         if (!find) return ""

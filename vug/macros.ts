@@ -77,14 +77,14 @@ function wordTransformer(fn: (w: VugWord) => VugWord) {
 // }
 // TODO all these can be combined into one pass which also parses the args and modifiers using parseArgsAndModifiers
 const vgCssComponent = (n: VugNode) => {
-    if (!n.tag.startsWith('vg-css')) return n
+    if (n.tag !== 'vg-css') return n
     let contents = n.children[0]?.getWord("_contents") || ""
-    let arg = n.tag.includes(":") ? n.tag.slice(7) : ""
+    let arg = n.getWord("_mainArg") || ""
     if (arg) {
         if (contents.includes("{")) throw "vg-css: when using an arg, don't include braces in the contents"
         if (!arg.includes("&")) arg = "&:" + arg
         for (const w of n.words) {
-            if (w.key.startsWith("style_")) contents = `${w.key}: ${w.value}; ${contents}`
+            if (w.key.startsWith("style_")) contents = `${w.key.slice(6)}: ${w.value}; ${contents}`
         }
         contents = `${arg} { ${contents} }`
     }
