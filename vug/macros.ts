@@ -82,7 +82,7 @@ const vgCssComponent = (n: VugNode) => {
     if (!contents.includes("{")) contents = `& { ${contents} }`
     const id = (Math.random() + 1).toString(36).substring(7)
     if (contents.includes("&")) contents = contents.replace(/&/g, `*[data-${id}]`)
-    const script = `var d = $el.ownerDocument; $win.console.log($el,d); $el.parentElement.dataset.${id} = ''; if (!d.added_${id}) d.added_${id} = d.head.appendChild(Object.assign(d.createElement('style'), { innerText: ${JSON.stringify(contents).replace(/"/g, "&quot;")} }))`
+    const script = `var d = $el.ownerDocument; $el.parentElement.dataset.${id} = ''; if (!d.added_${id}) d.added_${id} = d.head.appendChild(Object.assign(d.createElement('style'), { innerText: ${JSON.stringify(contents).replace(/"/g, "&quot;")} }))`
     return new VugNode("noscript", [new VugWord("style_display", "none", false), new VugWord("vg-do", script, false)])
 }
 // TODO allow variant '.tick' which inserts $nextTick(() => x)
