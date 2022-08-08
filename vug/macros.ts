@@ -100,16 +100,17 @@ const compileVCss = (n: VugNode): VugNode => {
     // TODO support args here?
     // TODO support multi words here?
     const script = `
-        const d = $el.ownerDocument, st = null;
+        const d = $el.ownerDocument; 
+        let st = null;
         if (!$el.vcssKey) {
             $el.vcssKey = 'vg_' + String((Math.random()+1).toString(36).slice(7));
             st = d.head.appendChild(d.createElement('style'));
-            st.dataset[$el.vcssKey] = ''
-            $el.dataset.vcss = $el.vcssKey
+            st.dataset[$el.vcssKey] = '';
+            $el.dataset.vcss = $el.vcssKey;
         } else {
-            st = d.querySelector('*[data-' + $el.vcssKey + ']')
+            st = d.querySelector('*[data-' + $el.vcssKey + ']');
         }
-        st.innerText = ${JSON.stringify(contents)}.replace(/&/g, '*[data-vcss=' + $el.vcssKey + ']')
+        st.innerText = ${JSON.stringify(contents)}.replace(/&/g, '*[data-vcss=' + $el.vcssKey + ']');
     `.replace(/\n/g, '').replace(/[ \t]+/g, ' ').replace(/"/g, "&quot;").replace(/'/g, "&#39;")
     return clone(n, { "v-css": null, "vg-do": script })
 }
