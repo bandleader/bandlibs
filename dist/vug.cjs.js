@@ -129,7 +129,7 @@ function wordTransformer(fn) {
 // TODO all these can be combined into one pass which also parses the args and modifiers using parseArgsAndModifiers
 // TODO allow variant '.tick' which inserts $nextTick(() => x)
 // TODO allow multiple, and coexisting with existing 'ref's (Vue cannot do multiple refs)
-var vgDo = wordTransformer(function (w) { return w.key === "vg-do" ? new VugWord("ref", "el => { if (!el || el.ranonce) return; el.ranonce = true; ".concat(w.value, " }"), true) : w; });
+var vgDo = wordTransformer(function (w) { return w.key === "vg-do" ? new VugWord("ref", "$el => { if (!$el || $el.ranonce) return; $el.ranonce = true; ".concat(w.value, " }"), true) : w; });
 // TODO allow multiple, and maybe create a let in the script setup
 var vgLet = wordTransformer(function (w) { return w.key.startsWith("vg-let:") ? new VugWord("v-for", "".concat(w.key.slice(7), " in [").concat(w.value, "]"), false) : w; });
 // TODO maybe detect multiple levels of nesting and default the variable to it2
