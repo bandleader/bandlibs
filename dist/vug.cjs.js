@@ -156,8 +156,9 @@ var compileVCss = function (n) {
         return n;
     // TODO support args here?
     // TODO support multi words here?
-    var script = "\n        const d = $el.ownerDocument, st = null;\n        if (!$el.vcssKey) {\n            $el.vcssKey = 'vg_' + String((Math.random()+1).toString(36).slice(7));\n            st = d.head.appendChild(d.createElement('style'));\n            st.dataset[$el.vcssKey] = ''\n            $el.dataset.vcss = $el.vcssKey\n        } else {\n            st = d.querySelector('*[data-' + $el.vcssKey + ']')\n        }\n        st.innerText = ".concat(JSON.stringify(contents), ".replace(/&/g, '*[data-vcss=' + $el.vcssKey + ']')\n    ").replace(/\n/g, '').replace(/[ \t]+/g, ' ').replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-    return clone(n, { "v-css": null, "vg-do": script });
+    var script = "\n        const d = $el.ownerDocument; \n        let st = null;\n        if (!$el.vcssKey) {\n            $el.vcssKey = 'vg_' + String((Math.random()+1).toString(36).slice(7));\n            st = d.head.appendChild(d.createElement('style'));\n            st.dataset[$el.vcssKey] = '';\n            $el.dataset.vcss = $el.vcssKey;\n        } else {\n            st = d.querySelector('*[data-' + $el.vcssKey + ']');\n        }\n        st.innerText = ".concat(JSON.stringify(contents), ".replace(/&/g, '*[data-vcss=' + $el.vcssKey + ']');\n    ").replace(/\n/g, '').replace(/[ \t]+/g, ' ').replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    // return clone(n, { "v-css": null, "vg-do": script })
+    return clone(n, { "v-css": null, ":ref": "$el => ".concat(script) });
 };
 var vgCssComponent = function (n) {
     var _a;

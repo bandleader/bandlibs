@@ -112,7 +112,8 @@ const compileVCss = (n: VugNode): VugNode => {
         }
         st.innerText = ${JSON.stringify(contents)}.replace(/&/g, '*[data-vcss=' + $el.vcssKey + ']');
     `.replace(/\n/g, '').replace(/[ \t]+/g, ' ').replace(/"/g, "&quot;").replace(/'/g, "&#39;")
-    return clone(n, { "v-css": null, "vg-do": script })
+    // return clone(n, { "v-css": null, "vg-do": script })
+    return clone(n, { "v-css": null, ":ref": `$el => ${script}` })
 }
 const vgCssComponent = (n: VugNode) => {
     /* TODO:
