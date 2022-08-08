@@ -76,6 +76,15 @@ function wordTransformer(fn: (w: VugWord) => VugWord) {
 //     return { key: ret[0].text, args: ret.filter((x,i) => i && x.text) }
 // }
 // TODO all these can be combined into one pass which also parses the args and modifiers using parseArgsAndModifiers
+const vgCssComponent = (n: VugNode) => {
+    if (n.tag !== 'vg-css') return n
+    let contents = n.children[0]?.getWord("_contents") || ""
+    if (!contents.includes("{")) contents = `& { ${contents} }`
+    const id = (Math.random() + 1).toString(36).substring(7)
+    if (contents.includes("&")) contents = contents.replace(/&/g, `*[data-${id}]`)
+    const script = `var d = $el.ownerDocument; $win.console.log($el,d); $el.parentElement.dataset.${id} = ''; if (!d.added_${id}) d.added_${id} = d.head.appendChild(Object.assign(d.createElement('style'), { innerText: ${JSON.stringify(contents).replace(/"/g, "&quot;")} }))`
+    return new VugNode("noscript", [new VugWord("style_display", "none", false), new VugWord("vg-do", script, false)])
+}
 // TODO allow variant '.tick' which inserts $nextTick(() => x)
 // TODO allow multiple, and coexisting with existing 'ref's (Vue cannot do multiple refs)
 const vgDo = wordTransformer(w => w.key === "vg-do" ? new VugWord("ref", `$el => { if (!$el || $el.ranonce) return; $el.ranonce = true; ${w.value} }`, true) : w)
@@ -90,6 +99,7 @@ export function runAll(node: VugNode): VugNode {
     node = tagNameParser(node)
     node = customTagTypes(node)
     node = basicCssMacros(node)
+    node = vgCssComponent(node)
     node = vgDo(node)
     node = vgLet( node)
     node = vgEachSimple(node)

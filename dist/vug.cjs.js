@@ -127,6 +127,19 @@ function wordTransformer(fn) {
 //     return { key: ret[0].text, args: ret.filter((x,i) => i && x.text) }
 // }
 // TODO all these can be combined into one pass which also parses the args and modifiers using parseArgsAndModifiers
+var vgCssComponent = function (n) {
+    var _a;
+    if (n.tag !== 'vg-css')
+        return n;
+    var contents = ((_a = n.children[0]) === null || _a === void 0 ? void 0 : _a.getWord("_contents")) || "";
+    if (!contents.includes("{"))
+        contents = "& { ".concat(contents, " }");
+    var id = (Math.random() + 1).toString(36).substring(7);
+    if (contents.includes("&"))
+        contents = contents.replace(/&/g, "*[data-".concat(id, "]"));
+    var script = "var d = $el.ownerDocument; $win.console.log($el,d); $el.parentElement.dataset.".concat(id, " = ''; if (!d.added_").concat(id, ") d.added_").concat(id, " = d.head.appendChild(Object.assign(d.createElement('style'), { innerText: ").concat(JSON.stringify(contents).replace(/"/g, "&quot;"), " }))");
+    return new VugNode("noscript", [new VugWord("style_display", "none", false), new VugWord("vg-do", script, false)]);
+};
 // TODO allow variant '.tick' which inserts $nextTick(() => x)
 // TODO allow multiple, and coexisting with existing 'ref's (Vue cannot do multiple refs)
 var vgDo = wordTransformer(function (w) { return w.key === "vg-do" ? new VugWord("ref", "$el => { if (!$el || $el.ranonce) return; $el.ranonce = true; ".concat(w.value, " }"), true) : w; });
@@ -141,6 +154,7 @@ function runAll(node) {
     node = tagNameParser(node);
     node = customTagTypes(node);
     node = basicCssMacros(node);
+    node = vgCssComponent(node);
     node = vgDo(node);
     node = vgLet(node);
     node = vgEachSimple(node);
