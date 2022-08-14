@@ -93,7 +93,7 @@ function parseLine(line: string) {
         let [key, value] = splitTwo(w, "=")
         let [isExpr, parsedValue] = parseValue(value)
         if (key[0] === ':') { key = key.slice(1); isExpr = true } // allow Vue-style :attr=expr
-        if (key[0] === '.' || key.startsWith("v-") || key.startsWith("x-") && value) isExpr = true // .foo, v- and x- are always expressions (as long as they have a value)
+        if ((key[0] === '.' || key.startsWith("v-") || key.startsWith("x-")) && value) isExpr = true // .foo, v- and x- are always expressions (as long as they have a value)
         return new VugWord(key, parsedValue, isExpr)
     })
     const children = innerHtml ? [htmlNode(innerHtml)] : []
