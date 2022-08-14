@@ -95,6 +95,9 @@ const conditionalCssToVCss = (n: VugNode) => {
     return new VugNode(n.tag, [...words, new VugWord('v-css', contents, false)], n.children)
 }
 const compileVgCss = (n: VugNode): VugNode => {
+    // TODO later can put this directly in the <style> tag or a new one
+    // TODO we don't need the ad-hoc class if the selector doesn't contain &...
+    // TODO multiple words
     const contents = n.getWord("vg-css") 
     if (!contents) return n
     const script = `
@@ -113,42 +116,44 @@ const compileVgCss = (n: VugNode): VugNode => {
     // return clone(n, { "vg-css": null, "vg-do": script })
     return clone(n, { "vg-css": null, ":ref": `$el => { ${script} }` })
 }
-const vgCssComponent = (n: VugNode) => {
-    /* TODO:
-    - Can work via a single global v-css directive that we include in the package, prob easier
-        - if not, still just compile down v-css directives (or vg-css or similar)
-        - and also: support HMR, same as we did in the Css component, or maybe more easily like we did in the v-css directive, since we're updated every cycle
-    - New syntax:
-        - hover:bg=red, [&:not(hover)]:bg=red
-        - Or: $bg=red $hover:bg=red $&.active:bg=red
-        - Or follow arg syntax: bg:css=rd bg:hover=red bg:[&.active, &.foo]=red
-    - Options are: braces but no arg (simple), arg and no braces (uses arg to adds braces), neither arg nor braces (uses & as arg). Throw if arg and braces.
-        - And as we do, if there are words, contents must be empty to start with (perhaps later we can inject them into the braces.)
-    */
-    const scriptForInjectCss = (css: string) => `
-        var d = $el.ownerDocument; p = $el.parentElement
-        if (!p.pcss) p.pcss = 'vg_' + String((Math.random()+1).toString(36).slice(7));
-        var st = d.querySelector('data-' + p.pcss)
-        if (!st) st = d.head.appendChild(d.createElement('style'))
-        st.dataset[p.pcss] = ''
-        st.innerText = $el.innerText
-    `.replace(/\n/g, '').replace(/[ \t]+/g, ' ')
-    if (n.tag !== 'vg-css') return n
-    let contents = n.children[0]?.getWord("_contents") || ""
-    let arg = n.getWord("_mainArg") || ""
-    if (arg) {
-        if (contents.includes("{")) throw "vg-css: when using an arg, don't include braces in the contents"
-        if (!arg.includes("&")) arg = "&:" + arg
-        for (const w of n.words) {
-            if (w.key.startsWith("style_")) contents = `${w.key.slice(6)}: ${w.value}; ${contents}`
+
+function cssCustomTag(n: VugNode): VugNode {
+    // TODO won't work for top-level CSS tags; we can make that work later once we have a way to put things in the <style> tag, see comment on vg-css. Or we can replace with a <noscript> tag with v-css...
+    function cssStringForCssCustomTag(cssTag: VugNode): string {
+        const selector = cssTag.getWordErrIfCalc("selector") || cssTag.getWordErrIfCalc("s") || '&'
+        // TODO parse arg. const arg = cssTag.tag.split(":")[0] // TODO multipart args
+        let rule = cssTag.children.map(x => x.getWord("_contents")).join(" ")
+        const attrs = cssTag.words.filter(x => x.key !== "selector" && x.key !== "s")
+        if (rule.includes("{")) {
+            if (selector !== "&") throw "Can't have a rule with braces when a selector is specified. '" + selector
+            if (attrs.length) throw "Can't have attributes when a selector is specified." // TODO maybe allow as long as there's %%% etc
+        } else { // no braces. Parse words
+            for (const prop of attrs) {
+                if (prop.isExpr) throw "Props of a CSS tag can't be expressions, since they're inserted as a stylesheet"
+                const x = processCssProp(prop.key, prop.value)
+                if (!x) throw "Unrecognized CSS property (of a CSS tag): " + prop.key
+                for (const k in x) rule = `${k}: ${x[k]}; ${rule}` // TODO reverse really
+            }
+            rule = `${selector} { ${rule} }`
         }
-        contents = `${arg} { ${contents} }`
+        return rule
     }
-    const id = "vg_" + (Math.random() + 1).toString(36).substring(7) // note this has to start with a non-digit of course since we access it as a property name
-    if (contents.includes("&")) contents = contents.replace(/&/g, `*[data-${id}]`)
-    const script = `var d = $el.ownerDocument; $el.parentElement.dataset.${id} = ''; if (!d.added_${id}) d.added_${id} = d.head.appendChild(Object.assign(d.createElement('style'), { innerText: ${JSON.stringify(contents).replace(/"/g, "&quot;")} }))`
-    return new VugNode("noscript", [new VugWord("style_display", "none", false), new VugWord("vg-do", script, false)])
+    const cssChildren = n.children.filter(x => x.tag === "css")
+    if (!cssChildren.length) return n
+    const text = cssChildren.map(cssStringForCssCustomTag).join(" ")
+    return new VugNode(n.tag, [...n.words, new VugWord("vg-css", text, false)], n.children.filter(x => x.tag !== 'css'))
 }
+
+function processCssProp(key: string, value: string): null|Record<string,string> {
+    // Supports shorthands and soon macros, units, etc., meant for running from elsewhere.
+    // TODO run macros, units, etc.
+    // TODO make the regular step sequence use this
+    if (cssProperties.includes(key)) return { [key]: value }
+    if (imbaDict[key]) return { [imbaDict[key]]: value }
+    return null
+}
+
+
 // TODO allow variant '.tick' which inserts $nextTick(() => x)
 // TODO allow multiple, and coexisting with existing 'ref's (Vue cannot do multiple refs)
 const vgDo = wordTransformer(w => w.key === "vg-do" ? new VugWord("ref", `$el => { if (!$el || $el.ranonce) return; $el.ranonce = true; ${w.value} }`, true) : w)
@@ -167,7 +172,7 @@ export function runAll(node: VugNode): VugNode {
     node = cssShorthand(node)
     node = cssRecognize(node)
     node = quickUnits(node)
-    node = vgCssComponent(node)
+    node = cssCustomTag(node)
     node = conditionalCssToVCss(node)
     node = compileVgCss(node)
     node = vgDo(node)
