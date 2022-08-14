@@ -77,6 +77,9 @@ function wordTransformer(fn: (w: VugWord) => VugWord) {
 // }
 // TODO all these can be combined into one pass which also parses the args and modifiers using parseArgsAndModifiers
 const styleSheetCssAttrs = (n: VugNode) => {
+    /* Handles css attributes that are to be converted into stylesheet rules (i.e. `css` custom tag, handled later in the pipeline).
+        div *bg=green *bg:hover=green
+    */
     const newCssTags: VugNode[] = []
     const ourWords = n.words.flatMap(w => {
         if (w.key[0] !== '*') return [w]
@@ -84,7 +87,7 @@ const styleSheetCssAttrs = (n: VugNode) => {
         let newTagKey = "css"
         if (w.key.includes(":")) newTagKey += ":" + w.key.split(":").slice(1).join(":")
         newCssTags.push(new VugNode(newTagKey, [new VugWord(w.key.slice(1).split(":")[0], w.value, false)]))
-        return [] // skip the word, we've added it to contents
+        return [] // skip the word, we've added it to newCssTags
     })
     if (!newCssTags.length) return n
     return new VugNode(n.tag, ourWords, [...newCssTags, ...n.children])
@@ -113,7 +116,18 @@ const compileVgCss = (n: VugNode): VugNode => {
 }
 
 function cssCustomTag(n: VugNode): VugNode {
+    /* Handles lines like:
+    div
+      css -- h1 { background: red }
+      css -- background: red // applies to current element using vg-css's &
+      css bg=red // same
+      css selector="&:hover" bg=red
+      css s="&:hover" bg=red // same
+      css:hover bg=red // same
+    */
     // TODO won't work for top-level CSS tags; we can make that work later once we have a way to put things in the <style> tag, see comment on vg-css. Or we can replace with a <noscript> tag with v-css...
+    // TODO consolidate css tags that have the same selector and args
+    // TODO I don't know how this is catching args, tagNameParser was supposed to take it out and put it under _mainArg
     function cssStringForCssCustomTag(cssTag: VugNode): string {
         const selector = cssTag.getWordErrIfCalc("selector") || cssTag.getWordErrIfCalc("s") || '&'        
         let rule = cssTag.children.map(x => x.getWord("_contents")).join(" ")
@@ -151,6 +165,7 @@ function processCssProp(key: string, value: string): null|Record<string,string> 
 
 function parseStyleVariants(key: string, start = ".foo", attrs = "%%%") {    
     // Returns ".foo:extraThings { %%% }"
+    // `key` is in the format `ignored:someVariant:otherVariant:!negatedVariant:@variant:[& .customTarget]`
     const parts = splitThree(key, ":").slice(1)
     const respBrkpts = { sm: 640, md: 768, lg: 1024, xl: 1280, "2xl": 1536 }
     let sel = start, blocks: string[] = []
