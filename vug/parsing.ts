@@ -30,7 +30,7 @@ export function splitThree(what: string, sepChar = " ") {
     const stack: string[] = []
     let escaping = false
   
-    for (const ch of what) {
+    for (const ch of what.split('')) {
       const starter = `'"({[\``.indexOf(ch)
       if (escaping) {
         ret[ret.length - 1] += ch
