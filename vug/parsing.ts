@@ -66,14 +66,12 @@ function parseValue(value: string): [boolean, string] { // returns [isExpr, valu
         (1 + 2)         (expr)
         {obj: 'foo'}    (expr)
         345.2           (expr)
-    TODO can remove parens
     */
-   
     if (!value.length) return [false, '']
     const first = value[0], last = value[value.length - 1], same = first === last && value.length > 1
     if (same && (first === '"' || first === "'")) return [false, value.slice(1, value.length - 1)] // Quoted values
     const opener = "({`".indexOf(first), closer = ")}`".indexOf(last)
-    if (opener >= 0 && opener === closer && value.length > 1) return [true, value] // parens, objects, template strings
+    if (opener >= 0 && opener === closer && value.length > 1) return [true, (first === '(') ? value.slice(1, value.length - 1) : value] // parens, objects, template strings. Cut off parens
     if (!isNaN(Number(value))) return [true, value] // numbers
     if ("\"'`".indexOf(first) >= 0) throw `Unterminated string quote in value: ${value}`
     return [false, value]
