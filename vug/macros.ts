@@ -53,7 +53,8 @@ const styleSheetCssAttrs = (n: VugNode) => {
 const compileVgCss = (n: VugNode): VugNode => {
     // TODO later can put this directly in the <style> tag or a new one
     // TODO we don't need the ad-hoc class if the selector doesn't contain &...
-    // TODO multiple words
+    // TODO support multiple words
+    // TODO should we support not using braces, and taking an optional arg for the selector here? So far we're not really using this directly, rather CSS custom tags or stylesheet rules
     const contents = n.getWord("vg-css") 
     if (!contents) return n
     const script = `
