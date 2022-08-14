@@ -16650,7 +16650,7 @@ function parseValue(value) {
         345.2           (expr)
     */
     if (!value.length)
-        return [false, ''];
+        return [false, '']; // If there is no value, it's not an expr.
     var first = value[0], last = value[value.length - 1], same = first === last && value.length > 1;
     if (same && (first === '"' || first === "'"))
         return [false, value.slice(1, value.length - 1)]; // Quoted values
@@ -16687,7 +16687,7 @@ function parseLine(line) {
             key = key.slice(1);
             isExpr = true;
         } // allow Vue-style :attr=expr
-        if (key[0] === '.' || key.startsWith("v-") || key.startsWith("x-") && value)
+        if ((key[0] === '.' || key.startsWith("v-") || key.startsWith("x-")) && value)
             isExpr = true; // .foo, v- and x- are always expressions (as long as they have a value)
         return new VugWord(key, parsedValue, isExpr);
     });
