@@ -24,6 +24,36 @@ export function compile(text: string){
     }
 }
 
+export function splitThree(what: string, sep = " ") {
+    const ret: string[] = ['']
+    const stack: string[] = []
+    let escaping = false
+  
+    for (const ch of what) {
+      const starter = `'"({[\``.indexOf(ch)
+      if (escaping) {
+        ret[ret.length - 1] += ch
+        escaping = false
+        continue
+      } else if (ch === '\\') {
+        escaping = true
+        continue
+      }
+      if (ch === stack.slice(-1)[0]) {
+        stack.pop()
+      } else if (starter >= 0) {
+        stack.push(`'")}]\``[starter])
+      } 
+      if (ch === sep && !stack.length) {
+        ret.push('')
+      } else {
+        ret[ret.length - 1] += ch
+      }
+    }
+    // if (stack.length) throw "Unterminated " + stack.slice(-1)[0]
+    return ret
+  }
+
 function splitTwo(text: string, sep: string) {
     const pos = text.indexOf(sep)
     if (pos < 0) return [text, '']
