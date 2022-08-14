@@ -4,7 +4,7 @@ import { cssProperties, imbaDict } from "./styling"
 export type VugAttr = { key: string, value?: string, isExpr: boolean, kind: string }
 export type VugNode = { tag: string, attrs: VugAttr[], innerHtml?: string, children: VugNode[] }
 
-function compile(text: string) {
+export function compile(text: string) {
   const nodes = text.replace(/\t/g, "        ") // Convert tabs to 8 spaces, like Python 2. People shouldn't mix tabs and spaces anyway
     .split("\n")
     .filter(x => x.trim()) // Remove blank lines
