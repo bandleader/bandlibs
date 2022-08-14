@@ -77,13 +77,16 @@ function wordTransformer(fn: (w: VugWord) => VugWord) {
 // }
 // TODO all these can be combined into one pass which also parses the args and modifiers using parseArgsAndModifiers
 const styleSheetCssAttrs = (n: VugNode) => {
-    /* Handles css attributes that are to be converted into stylesheet rules (i.e. `css` custom tag, handled later in the pipeline).
-        div *bg=green *bg:hover=green
+    /*  Handles css attributes that are to be converted into stylesheet rules (i.e. `css` custom tag, handled later in the pipeline).
+            div *bg=green *bg:hover=green
+        - TODO maybe don't require the star, do it wherever it has a colon, and for things without colons, do bg:all, bg:css, bg:*, etc.
+            - OR if there is anything conditional, put styles on that element in a stylesheet by default, UNLESS overridden by a star, or style-, etc.
+            - OR maybe ALWAYS put things in a stylesheet by default, why not? 
     */
     const newCssTags: VugNode[] = []
     const ourWords = n.words.flatMap(w => {
         if (w.key[0] !== '*') return [w]
-        if (w.isExpr) throw "Stylesheet CSS attributes (*...) cannot be an expression"
+        if (w.isExpr) throw `Stylesheet CSS attribute '${w.key}' must be a literal, not an expression like '${w.value}'`
         let newTagKey = "css"
         if (w.key.includes(":")) newTagKey += ":" + w.key.split(":").slice(1).join(":")
         newCssTags.push(new VugNode(newTagKey, [new VugWord(w.key.slice(1).split(":")[0], w.value, false)]))
