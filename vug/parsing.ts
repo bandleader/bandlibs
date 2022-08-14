@@ -54,6 +54,30 @@ export function splitThree(what: string, sep = " ") {
     return ret
   }
 
+
+
+function parseValue(value: string): [boolean, string] { // returns [isExpr, value]
+    /* Supports:
+        foo             (literal)
+        "foo"           (literal)
+        'foo'           (literal)
+        `foo ${}`       (expr)
+        (1 + 2)         (expr)
+        {obj: 'foo'}    (expr)
+        345.2           (expr)
+    TODO can remove parens
+    TODO parens/objs/template strings really require that the parser support not splitting on spaces within them
+    */
+   
+    if (!value.length) return [false, '']
+    const first = value[0], last = value[value.length - 1], same = first === last && value.length > 1
+    if (same && (first === '"' || first === "'")) return [false, value.slice(1, value.length - 1)] // Quoted values
+    const opener = "({`".indexOf(first), closer = ")}`".indexOf(last)
+    if (opener >= 0 && opener === closer && value.length > 1) return [true, value] // parens, objects, template strings
+    if (!isNaN(Number(value))) return [true, value] // numbers
+    if ("\"'`".indexOf(first) >= 0) throw `Unterminated string quote in value: ${value}`
+    return [false, value]
+}  
 function splitTwo(text: string, sep: string) {
     const pos = text.indexOf(sep)
     if (pos < 0) return [text, '']
@@ -69,9 +93,8 @@ function parseLine(line: string) {
     const [tag, ...words] = _wordPart.trim().match(/(?=\S)[^"\s]*(?:"[^\\"]*(?:\\[\s\S][^\\"]*)*"[^"\s]*)*/g) || [''] // Not 100% sufficient. From https://stackoverflow.com/questions/4031900/split-a-string-by-whitespace-keeping-quoted-segments-allowing-escaped-quotes
     const words2 = words.map(w => {
         let [key, value] = splitTwo(w, "=")
-        if (value[0] === '"') value = value.slice(1, value.length - 1) // Remove quotes
-        const isExpr = key[0] === ':'
-        if (isExpr) key = key.slice(1)
+        let [isExpr, parsedValue] = parseValue(value)
+        if (key[0] === ':') { key = key.slice(1); isExpr = true } // allow Vue-style :attr=expr
         return new VugWord(key, value, isExpr)
     })
     const children = innerHtml ? [htmlNode(innerHtml)] : []
