@@ -16287,7 +16287,7 @@ function compileVgCss(n) {
     var contents = n.getWord("vg-css");
     if (!contents)
         return n;
-    var script = "\n        if ($el.$el) $el = $el.el;\n        const d = $el.ownerDocument; \n        let st = null;\n        if (!$el.vgcssKey) {\n            $el.vgcssKey = 'vg_' + String((Math.random()+1).toString(36).slice(7));\n            st = d.head.appendChild(d.createElement('style'));\n            st.dataset[$el.vgcssKey] = '';\n            $el.dataset.vgcss = $el.vgcssKey;\n        } else {\n            st = d.querySelector('*[data-' + $el.vgcssKey + ']');\n        }\n        st.innerText = ".concat(JSON.stringify(contents), ".replace(/&/g, '*[data-vgcss=' + $el.vgcssKey + ']');\n    ").replace(/\n/g, '').replace(/[ \t]+/g, ' ').replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    var script = "\n        if ($el.$el) $el = $el.$el;\n        const d = $el.ownerDocument; \n        let st = null;\n        if (!$el.vgcssKey) {\n            $el.vgcssKey = 'vg_' + String((Math.random()+1).toString(36).slice(7));\n            st = d.head.appendChild(d.createElement('style'));\n            st.dataset[$el.vgcssKey] = '';\n            $el.dataset.vgcss = $el.vgcssKey;\n        } else {\n            st = d.querySelector('*[data-' + $el.vgcssKey + ']');\n        }\n        st.innerText = ".concat(JSON.stringify(contents), ".replace(/&/g, '*[data-vgcss=' + $el.vgcssKey + ']');\n    ").replace(/\n/g, '').replace(/[ \t]+/g, ' ').replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     // return clone(n, { "vg-css": null, "vg-do": script })
     return clone(n, { "vg-css": null, ":ref": "$el => { ".concat(script, " }") });
 }

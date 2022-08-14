@@ -85,7 +85,7 @@ export function compileVgCss(n: VugNode): VugNode {
     const contents = n.getWord("vg-css") 
     if (!contents) return n
     const script = `
-        if ($el.$el) $el = $el.el;
+        if ($el.$el) $el = $el.$el;
         const d = $el.ownerDocument; 
         let st = null;
         if (!$el.vgcssKey) {
