@@ -94,26 +94,24 @@ const conditionalCssToVCss = (n: VugNode) => {
     if (!contents) return n
     return new VugNode(n.tag, [...words, new VugWord('v-css', contents, false)], n.children)
 }
-const compileVCss = (n: VugNode): VugNode => {
-    const contents = n.getWord("v-css") 
+const compileVgCss = (n: VugNode): VugNode => {
+    const contents = n.getWord("vg-css") 
     if (!contents) return n
-    // TODO support args here?
-    // TODO support multi words here?
     const script = `
         const d = $el.ownerDocument; 
         let st = null;
-        if (!$el.vcssKey) {
-            $el.vcssKey = 'vg_' + String((Math.random()+1).toString(36).slice(7));
+        if (!$el.vgcssKey) {
+            $el.vgcssKey = 'vg_' + String((Math.random()+1).toString(36).slice(7));
             st = d.head.appendChild(d.createElement('style'));
-            st.dataset[$el.vcssKey] = '';
-            $el.dataset.vcss = $el.vcssKey;
+            st.dataset[$el.vgcssKey] = '';
+            $el.dataset.vgcss = $el.vgcssKey;
         } else {
-            st = d.querySelector('*[data-' + $el.vcssKey + ']');
+            st = d.querySelector('*[data-' + $el.vgcssKey + ']');
         }
-        st.innerText = ${JSON.stringify(contents)}.replace(/&/g, '*[data-vcss=' + $el.vcssKey + ']');
+        st.innerText = ${JSON.stringify(contents)}.replace(/&/g, '*[data-vgcss=' + $el.vgcssKey + ']');
     `.replace(/\n/g, '').replace(/[ \t]+/g, ' ').replace(/"/g, "&quot;").replace(/'/g, "&#39;")
-    // return clone(n, { "v-css": null, "vg-do": script })
-    return clone(n, { "v-css": null, ":ref": `$el => { ${script} }` })
+    // return clone(n, { "vg-css": null, "vg-do": script })
+    return clone(n, { "vg-css": null, ":ref": `$el => { ${script} }` })
 }
 const vgCssComponent = (n: VugNode) => {
     /* TODO:
@@ -171,7 +169,7 @@ export function runAll(node: VugNode): VugNode {
     node = quickUnits(node)
     node = vgCssComponent(node)
     node = conditionalCssToVCss(node)
-    node = compileVCss(node)
+    node = compileVgCss(node)
     node = vgDo(node)
     node = vgLet( node)
     node = vgEachSimple(node)
