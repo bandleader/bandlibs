@@ -76,23 +76,18 @@ function wordTransformer(fn: (w: VugWord) => VugWord) {
 //     return { key: ret[0].text, args: ret.filter((x,i) => i && x.text) }
 // }
 // TODO all these can be combined into one pass which also parses the args and modifiers using parseArgsAndModifiers
-const conditionalCssToVCss = (n: VugNode) => {
-    let contents = ""
-    function splitTwo(text: string, sep: string) {
-        const pos = text.indexOf(sep)
-        if (pos < 0) return [text, '']
-        return [text.substr(0, pos), text.substr(pos + sep.length)]
-    }
-    const words = n.words.flatMap(w => {
-        let [key, slctr] = splitTwo(w.key,":")
-        if (['hover', 'active', 'focus'].includes(slctr)) slctr = "&:" + slctr // TODO add from https://tailwindcss.com/docs/hover-focus-and-other-states#pseudo-class-reference
-        if (!slctr || !slctr.includes("&")) return [w]
-        if (imbaDict[key]) key = imbaDict[key] // TODO macros, units, etc?
-        contents += `${slctr} { ${key}: ${w.value} } `
+const styleSheetCssAttrs = (n: VugNode) => {
+    const newCssTags: VugNode[] = []
+    const ourWords = n.words.flatMap(w => {
+        if (w.key[0] !== '*') return [w]
+        if (w.isExpr) throw "Stylesheet CSS attributes (*...) cannot be an expression"
+        let newTagKey = "css"
+        if (w.key.includes(":")) newTagKey += ":" + w.key.split(":").slice(1).join(":")
+        newCssTags.push(new VugNode(newTagKey, [new VugWord(w.key.slice(1).split(":")[0], w.value, false)]))
         return [] // skip the word, we've added it to contents
     })
-    if (!contents) return n
-    return new VugNode(n.tag, [...words, new VugWord('v-css', contents, false)], n.children)
+    if (!newCssTags.length) return n
+    return new VugNode(n.tag, ourWords, [...newCssTags, ...n.children])
 }
 const compileVgCss = (n: VugNode): VugNode => {
     // TODO later can put this directly in the <style> tag or a new one
@@ -146,6 +141,7 @@ function cssCustomTag(n: VugNode): VugNode {
 
 function processCssProp(key: string, value: string): null|Record<string,string> {
     // Supports shorthands and soon macros, units, etc., meant for running from elsewhere.
+    // Returns null if the key is not recognized.
     // TODO run macros, units, etc.
     // TODO make the regular step sequence use this
     if (cssProperties.includes(key)) return { [key]: value }
@@ -213,8 +209,8 @@ export function runAll(node: VugNode): VugNode {
     node = cssShorthand(node)
     node = cssRecognize(node)
     node = quickUnits(node)
+    node = styleSheetCssAttrs(node)
     node = cssCustomTag(node)
-    node = conditionalCssToVCss(node)
     node = compileVgCss(node)
     node = vgDo(node)
     node = vgLet( node)
