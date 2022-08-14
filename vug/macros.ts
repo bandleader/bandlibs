@@ -2,36 +2,6 @@
 - input:checkbox etc. But if we're going to parse that as an arg, maybe it conflicts with namespaces.
      - Can use input::checkbox, or a different char like input%checkbox, input+checkbox, input~checkbox, input^checkbox, input$checkbox
 - Same for flex:!|c.c etc (note period will need to be renamed to dash)
-- It should be safe to implement cleaner expression syntax for attribute binding:
-    foo=(1 + 2)
-    foo={ bar: true }
-    foo=`Hello ${world}`
-  For directives make sure not to emit :v-if.
-  To ensure consistency, so that quotes are never used for exprs, and so nameExpr always mean strings, we should probably enforce directives etc to use it:
-    v-if=(shown)
-    v-focus=(foo ? 'bar' : 'baz)
-    .foo=(shown)
-  BUT:
-    Is v-for OK? v-for=(x in foo.bar) / v-for=((x, i) in foo.bar)
-    It was very convenient to use v-if=shown and .foo=shown :( Isn't it clear enough?
-    Also I don't want to lose backward compatibility...
-  PERHAPS:
-    Allow the new syntax, and make it into an expr
-    Existing syntax should work too
-    Can warn if a directive/class uses quotes
-    Later can warn if it uses nameExpr, though I think I want that
-    Problem -- foo=(1 + 2) might easily be changed to foo=someVar and that has a different meaning
-  MAYBE:
-    Nothing wrong with :foo=bar, v-if=bar, .foo=bar. In all cases the left side makes clear it's an expr
-    We should give up on foo=(1 + 2) because indeed that doesn't translate well like we said above
-    It'll still be :foo=(1 + 2), we'll just enforce that it should be parens and not quotes
-    And of course {...}, `...` should work too
-
-    
-
-  Should we force v-if=(1 + 2)
-    v-if=foo // not clear it's expression
-- 
 */
 
 import { splitThree, VugNode, VugWord } from "./parsing"

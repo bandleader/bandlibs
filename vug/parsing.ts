@@ -24,7 +24,8 @@ export function compile(text: string){
     }
 }
 
-export function splitThree(what: string, sep = " ") {
+export function splitThree(what: string, sepChar = " ") {
+    // Splits on a char EXCEPT when that char occurs within quotes, parens, braces, curlies
     const ret: string[] = ['']
     const stack: string[] = []
     let escaping = false
@@ -44,7 +45,7 @@ export function splitThree(what: string, sep = " ") {
       } else if (starter >= 0) {
         stack.push(`'")}]\``[starter])
       } 
-      if (ch === sep && !stack.length) {
+      if (ch === sepChar && !stack.length) {
         ret.push('')
       } else {
         ret[ret.length - 1] += ch
@@ -66,7 +67,6 @@ function parseValue(value: string): [boolean, string] { // returns [isExpr, valu
         {obj: 'foo'}    (expr)
         345.2           (expr)
     TODO can remove parens
-    TODO parens/objs/template strings really require that the parser support not splitting on spaces within them
     */
    
     if (!value.length) return [false, '']
@@ -90,7 +90,7 @@ function parseLine(line: string) {
     if (line.startsWith("-- ")) line = " " + line // so that it gets detected, as we've trimmed
     let [_wordPart, innerHtml] = splitTwo(line, " -- ")
     if (!_wordPart) return htmlNode(innerHtml)
-    const [tag, ...words] = _wordPart.trim().match(/(?=\S)[^"\s]*(?:"[^\\"]*(?:\\[\s\S][^\\"]*)*"[^"\s]*)*/g) || [''] // Not 100% sufficient. From https://stackoverflow.com/questions/4031900/split-a-string-by-whitespace-keeping-quoted-segments-allowing-escaped-quotes
+    const [tag, ...words] = splitThree( _wordPart.trim(), " ")
     const words2 = words.map(w => {
         let [key, value] = splitTwo(w, "=")
         let [isExpr, parsedValue] = parseValue(value)
