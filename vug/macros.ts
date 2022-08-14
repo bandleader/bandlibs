@@ -51,10 +51,14 @@ const styleSheetCssAttrs = (n: VugNode) => {
     return new VugNode(n.tag, ourWords, [...newCssTags, ...n.children])
 }
 const compileVgCss = (n: VugNode): VugNode => {
-    // TODO later can put this directly in the <style> tag or a new one
-    // TODO we don't need the ad-hoc class if the selector doesn't contain &...
-    // TODO support multiple words
-    // TODO should we support not using braces, and taking an optional arg for the selector here? So far we're not really using this directly, rather CSS custom tags or stylesheet rules
+    /* Allows directive on any element: vg-css="& { background: green } &:hover { background: red }"
+    TODO:
+    - Later can put this directly in the <style> tag or a new one
+    - We don't need the ad-hoc class if the selector doesn't contain &...
+    - Right now this is only used through CSS custom tags which compiles to this, and *stylesheet attrs which compile to custom tags. But if we want to use this directly, we will probably want:
+        - Support multiple words
+        - Support not using braces, and taking an optional arg for the selector here? So far we're not really using this directly, rather CSS custom tags or stylesheet rules
+    */
     const contents = n.getWord("vg-css") 
     if (!contents) return n
     const script = `
@@ -83,10 +87,13 @@ function cssCustomTag(n: VugNode): VugNode {
       css selector="&:hover" bg=red
       css s="&:hover" bg=red // same
       css:hover bg=red // same
+    
+    TODO
+    - won't work for top-level CSS tags; we can make that work later once we have a way to put things in the <style> tag, see comment on vg-css. Or we can replace with a <noscript> tag with v-css...
+    - consolidate css tags that have the same selector and args
+    - I don't know how this is catching args, tagNameParser was supposed to take it out and put it under _mainArg
+    - "opacity=0.5" errors with "Props of a CSS tag can't be expressions, since they're inserted as a stylesheet" since numbers are parsed as expressions
     */
-    // TODO won't work for top-level CSS tags; we can make that work later once we have a way to put things in the <style> tag, see comment on vg-css. Or we can replace with a <noscript> tag with v-css...
-    // TODO consolidate css tags that have the same selector and args
-    // TODO I don't know how this is catching args, tagNameParser was supposed to take it out and put it under _mainArg
     function cssStringForCssCustomTag(cssTag: VugNode): string {
         const selector = cssTag.getWordErrIfCalc("selector") || cssTag.getWordErrIfCalc("s") || '&'        
         let rule = cssTag.children.map(x => x.getWord("_contents")).join(" ")
