@@ -48,7 +48,8 @@ export function emitVueTemplate(node: VugNode, whitespace = false) {
           if (x.value === undefined) {
             out.push(" ", x.key)
           } else {
-            out.push(" ", x.isExpr ? ":" : "", x.key)
+            const needsColon = x.isExpr && !x.key.startsWith("v-") && !x.key.startsWith("x-")
+            out.push(" ", needsColon ? ":" : "", x.key)
             out.push('="', htmlAttrEnc(x.value), '"')
           }
         }

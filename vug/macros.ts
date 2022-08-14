@@ -2,7 +2,6 @@
 - input:checkbox etc. But if we're going to parse that as an arg, maybe it conflicts with namespaces.
      - Can use input::checkbox, or a different char like input%checkbox, input+checkbox, input~checkbox, input^checkbox, input$checkbox
 - Same for flex:!|c.c etc (note period will need to be renamed to dash)
-- .foo=bar currently errors in emitter because it's expecting an expression. But in v2 expr has different meaning, it means explicitly :'d.
 - It should be safe to implement cleaner expression syntax for attribute binding:
     foo=(1 + 2)
     foo={ bar: true }
