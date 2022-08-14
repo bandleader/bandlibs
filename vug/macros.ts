@@ -32,20 +32,6 @@
 
   Should we force v-if=(1 + 2)
     v-if=foo // not clear it's expression
-
-// - First while we have the order, do the > operator. Wherever you find it, split off words into a new child node, the first word is the tag name, and then put all our children into the child node.
-// - Handle Vue syntax of calculated words for now -- :foo
-//- Parse .classes and #ids out of the tag name
-//    - Later we can have a single argument using div:arg, might be useful for flexes. Can also do tag@arg, etc. Might be useful for position.
-// - Recognize CSS shorthand, convert to real property names, beginning with "style_"
-// - Recognize CSS properties, add "style_"
-// - Additional macros: mx/my/px/py/sz/circ
-// - Flex 'fx' macro: fx=<optional ! to reverse direction><optional pipe or hyphen to set direction><optional justify-content><optional period followed by align-items><optional period followed by align-content>
-// - Custom tag types: d/s/f/ib
-// - For compatibility reasons, recognize fr/fc for column/row flex
-// - Custom values for 'display'
-// - Custom values for numeric units ending in 'q'
-// Recognize ".foo.bar" and convert to separate words
 - 
 */
 
