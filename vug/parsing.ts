@@ -67,7 +67,7 @@ function parseValue(value: string): [boolean, string] { // returns [isExpr, valu
         {obj: 'foo'}    (expr)
         345.2           (expr)
     */
-    if (!value.length) return [false, '']
+    if (!value.length) return [false, ''] // If there is no value, it's not an expr.
     const first = value[0], last = value[value.length - 1], same = first === last && value.length > 1
     if (same && (first === '"' || first === "'")) return [false, value.slice(1, value.length - 1)] // Quoted values
     const opener = "({`".indexOf(first), closer = ")}`".indexOf(last)
