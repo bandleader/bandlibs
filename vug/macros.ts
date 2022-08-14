@@ -1,4 +1,4 @@
-/*
+/* TODO
 - input:checkbox etc. But if we're going to parse that as an arg, maybe it conflicts with namespaces.
      - Can use input::checkbox, or a different char like input%checkbox, input+checkbox, input~checkbox, input^checkbox, input$checkbox
 - Same for flex:!|c.c etc (note period will need to be renamed to dash)
@@ -30,6 +30,10 @@ function wordTransformer(fn: (w: VugWord) => VugWord) {
 //     }
 //     return { key: ret[0].text, args: ret.filter((x,i) => i && x.text) }
 // }
+
+
+
+
 // TODO all these can be combined into one pass which also parses the args and modifiers using parseArgsAndModifiers
 const styleSheetCssAttrs = (n: VugNode) => {
     /*  Handles css attributes that are to be converted into stylesheet rules (i.e. `css` custom tag, handled later in the pipeline).
@@ -50,6 +54,7 @@ const styleSheetCssAttrs = (n: VugNode) => {
     if (!newCssTags.length) return n
     return new VugNode(n.tag, ourWords, [...newCssTags, ...n.children])
 }
+
 const compileVgCss = (n: VugNode): VugNode => {
     /* Allows directive on any element: vg-css="& { background: green } &:hover { background: red }"
     TODO:
@@ -181,6 +186,7 @@ const vgLet = wordTransformer(w => w.key.startsWith("vg-let:") ? new VugWord("v-
 const vgEachSimple = wordTransformer(w => w.key === "vg-each" ? new VugWord("vg-each:it", w.value, false) : w)
 const vgEach = wordTransformer(w => w.key.startsWith("vg-each:") ? new VugWord("v-for", `(${w.key.slice(8)},${w.key.slice(8)}_i) in ${w.value}`, false) : w)
 const allowReferencesToGlobals = wordTransformer(w => w.value.includes("$win") ? new VugWord(w.key, w.value.replace(/\$win/g, "(Array.constructor('return window')())"), w.isExpr) : w)
+
 export function runAll(node: VugNode): VugNode {
     node = directChild(node)
     node = tagNameParser(node)
