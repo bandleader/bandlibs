@@ -75,10 +75,17 @@ export function compileVgCss(n: VugNode): VugNode {
     - Right now this is only used through CSS custom tags which compiles to this, and *stylesheet attrs which compile to custom tags. But if we want to use this directly, we will probably want:
         - Support multiple words
         - Support not using braces, and taking an optional arg for the selector here? So far we're not really using this directly, rather CSS custom tags or stylesheet rules
+    - The encoding should be done by the emitter, not here
+    - Replacing on every render might be wasteful; should we check if it was modified before replacing innerText? Not sure what is better
+    
+    NOTE
+    - We're not using vg-do because it only runs once, whereas here we want HMR. However vg-do can maybe have a .everyrender modifier
+    - The $el.el line is because the ref can resolve to a component. (Might want to handle this in vg-do)
     */
     const contents = n.getWord("vg-css") 
     if (!contents) return n
     const script = `
+        if ($el.$el) $el = $el.el;
         const d = $el.ownerDocument; 
         let st = null;
         if (!$el.vgcssKey) {

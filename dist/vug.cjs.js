@@ -220,11 +220,17 @@ function compileVgCss(n) {
     - Right now this is only used through CSS custom tags which compiles to this, and *stylesheet attrs which compile to custom tags. But if we want to use this directly, we will probably want:
         - Support multiple words
         - Support not using braces, and taking an optional arg for the selector here? So far we're not really using this directly, rather CSS custom tags or stylesheet rules
+    - The encoding should be done by the emitter, not here
+    - Replacing on every render might be wasteful; should we check if it was modified before replacing innerText? Not sure what is better
+    
+    NOTE
+    - We're not using vg-do because it only runs once, whereas here we want HMR. However vg-do can maybe have a .everyrender modifier
+    - The $el.el line is because the ref can resolve to a component. (Might want to handle this in vg-do)
     */
     var contents = n.getWord("vg-css");
     if (!contents)
         return n;
-    var script = "\n        const d = $el.ownerDocument; \n        let st = null;\n        if (!$el.vgcssKey) {\n            $el.vgcssKey = 'vg_' + String((Math.random()+1).toString(36).slice(7));\n            st = d.head.appendChild(d.createElement('style'));\n            st.dataset[$el.vgcssKey] = '';\n            $el.dataset.vgcss = $el.vgcssKey;\n        } else {\n            st = d.querySelector('*[data-' + $el.vgcssKey + ']');\n        }\n        st.innerText = ".concat(JSON.stringify(contents), ".replace(/&/g, '*[data-vgcss=' + $el.vgcssKey + ']');\n    ").replace(/\n/g, '').replace(/[ \t]+/g, ' ').replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    var script = "\n        if ($el.$el) $el = $el.el;\n        const d = $el.ownerDocument; \n        let st = null;\n        if (!$el.vgcssKey) {\n            $el.vgcssKey = 'vg_' + String((Math.random()+1).toString(36).slice(7));\n            st = d.head.appendChild(d.createElement('style'));\n            st.dataset[$el.vgcssKey] = '';\n            $el.dataset.vgcss = $el.vgcssKey;\n        } else {\n            st = d.querySelector('*[data-' + $el.vgcssKey + ']');\n        }\n        st.innerText = ".concat(JSON.stringify(contents), ".replace(/&/g, '*[data-vgcss=' + $el.vgcssKey + ']');\n    ").replace(/\n/g, '').replace(/[ \t]+/g, ' ').replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     // return clone(n, { "vg-css": null, "vg-do": script })
     return clone(n, { "vg-css": null, ":ref": "$el => { ".concat(script, " }") });
 }
