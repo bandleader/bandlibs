@@ -10,10 +10,6 @@
     and can't contain dots because that ends it.
     although maybe we can do `f:c-c[this can contain more colons and dots].text-center[this contains dots].foo` using splitThree. However we want dot modifiers to have colons without that...
     maybe args can just be `f[args here].foo` and then it can be whatever we want. Nah
-- And then rationalize flex
-    No al, no fx, just mainarg. Commas instead of periods? f:|c,c 
-    Or just fx? `f fx=|c.c` is pretty short, 9 chars `f:|c.c` is 6, do we want to save 3 chars? (Maybe YES)
-
 */
 
 import { VugNode, VugWord } from "./parsing"
