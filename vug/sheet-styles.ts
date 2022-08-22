@@ -118,8 +118,8 @@ function parseStyleVariants(key: string, start = ".foo", attrs = "%%%") {
         else if (x[0] === '.')
             sel = `${sel}${x}`
         else if (x[0] === '!') { // negation -- experimental and hacky
-            const plchldr = 'HREKJSBLLI'
-            const done = parseStyleVariants("$" + x.slice(1), plchldr, '%%%').split('{')[0].trim()
+            const plchldr = '.dummySelectorHREKJSBLLI'
+            const done = parseStyleVariants("thisPartIsIgnored:" + x.slice(1), plchldr, '%%%').split('{')[0].trim()
             const whatAdded = done.slice(done.indexOf(plchldr) + plchldr.length)
             sel = `${sel}:not(${whatAdded})`
         }
