@@ -14,11 +14,11 @@ const output = computed(() => Vug.load(input.value, {_tempLangVersion: 2}).toVue
 <template>
     <div class="row">
         <div class="col-6">
-            <div style="#AAA">Vug</div>
+            <div class="subtitle">Vug</div>
             <div class="code" style="color: #FFF" v-text="input" />
         </div>
         <div class="col-6">
-            <div style="#AAA">HTML</div>
+            <div class="subtitle">HTML</div>
             <div class="code" style="color: rgb(200 200 255)" v-text="output" />
         </div>
     </div>
@@ -26,4 +26,5 @@ const output = computed(() => Vug.load(input.value, {_tempLangVersion: 2}).toVue
 
 <style scoped>
     .code { width: 100%; padding: 0.5em; background: #333; font-family: 'Courier New', Courier, monospace; font-size: 0.8em; white-space: pre-wrap; }
+    .subtitle { float: right; background: #AAA; border-radius: 0.2em; opacity: 0.7; padding: 0.07rem 0.15rem; font-size: 0.7em; }
 </style>
