@@ -1,7 +1,31 @@
 /* TODO
 - input:checkbox etc. But if we're going to parse that as an arg, maybe it conflicts with namespaces.
      - Can use input::checkbox, or a different char like input%checkbox, input+checkbox, input~checkbox, input^checkbox, input$checkbox
-- Same for flex:!|c.c etc (note period will need to be renamed to dash)
+- Same for flex:!|c.c etc (note period will need to be renamed to dash [but that conflicts with row])
+- d .foo.bar (split. Mostly for when it's conditional)
+- Debug things that aren't working properly:
+    *bg:!hover is not working, does :not()
+    d .bg-dark.text-light=true   -> <div :class='{"bg-dark.text-light": true}'>
+    [done?] fr:c.c (the mainarg is only processed on f, not fr/fc)
+    f:c.c.class1.class2 (class1 is taken as align-content, and class2 is discarded) (either use hyphens [but that conflicts with row], or go back to "al" or "fx" props)
+    [done? was because f overwrote it] f fx=c.c (it works on fr, fc, even div, but not f!)
+    f -> <div style="display: flex" fx=""></div>
+    f fx:c.c <div style="display: flex; display: flex; justify-content: center; align-items: center"></div>
+    f fx=c.c -- fx no effect because blanked
+    f:c.c display:flex is twice
+    clone to undefined to not touch an attr does not seem to be working
+    in ONE line detect all flex tags, transfer the arg to fx but preserve fx otherwise, and if R or C, add to fx I guess, or just a flex-direction property
+    but also fix clone, maybe first
+- Just rationalize args. 
+    They're a good idea, 
+    but they have to be right after tagname before any dot-modifiers/classes (because dot modifiers can contain colons), 
+    and can't contain dots because that ends it.
+    although maybe we can do `f:c-c[this can contain more colons and dots].text-center[this contains dots].foo` using splitThree. However we want dot modifiers to have colons without that...
+    maybe args can just be `f[args here].foo` and then it can be whatever we want. Nah
+- And then rationalize flex
+    No al, no fx, just mainarg. Commas instead of periods? f:|c,c 
+    Or just fx? `f fx=|c.c` is pretty short, 9 chars `f:|c.c` is 6, do we want to save 3 chars? (Maybe YES)
+
 */
 
 import { VugNode, VugWord } from "./parsing"

@@ -26,6 +26,9 @@ export function compile(text: string){
 
 export function splitThree(what: string, sepChar = " ") {
     // Splits on a char EXCEPT when that char occurs within quotes, parens, braces, curlies
+    // MAYBE allow sepChar to be >1 char long?
+    // MAYBE allow for multiple possibilities of sepChar, and tack it on? Can use this for parsing classes&ids&args... nah won't help, we don't want quotes in there anyway
+    // MAYBE customize the list of things that can quote? and the escape char?
     const ret: string[] = ['']
     const stack: string[] = []
     let escaping = false
