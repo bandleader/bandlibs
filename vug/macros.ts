@@ -1,6 +1,4 @@
 /* TODO
-- input:checkbox etc. But if we're going to parse that as an arg, maybe it conflicts with namespaces.
-     - Can use input::checkbox, or a different char like input%checkbox, input+checkbox, input~checkbox, input^checkbox, input$checkbox
 - Debug things that aren't working properly:
     *bg:!hover is not working, does :not()
     f:c.c.class1.class2 (class1 is taken as align-content, and class2 is discarded) (either use hyphens [but that conflicts with row], or go back to "al" or "fx" props)
@@ -67,6 +65,7 @@ export function runAll(node: VugNode): VugNode {
     node = Styling.flexMacroFx(node)
     node = Styling.mainTransform(node)
     node = Styling.quickUnits(node)
+    node = customUsesOfArg(node)
     node = SheetStyles.sheetStyles(node)
     node = SheetStyles.cssCustomTag(node)
     node = SheetStyles.compileVgCss(node)
@@ -78,6 +77,12 @@ export function runAll(node: VugNode): VugNode {
     return new VugNode(node.tag, node.words, node.children.map(c => runAll(c)))
 }
 
+function customUsesOfArg(n: VugNode): VugNode {
+    // For now just convert it into 'type'. For inputs, buttons, etc
+    // Run this AFTER anything that uses it in a different way, like 'flex'
+    if (n.getWord("_mainArg")) return clone(n, { _mainArg: null, type: n.getWordErrIfCalc("_mainArg") })
+    return n
+}
 
 function customTagTypes(n: VugNode): VugNode {
     if (n.tag === 'd') return clone(n, { tag: "div" })
