@@ -8,6 +8,6 @@ import VugDocs from './components/VugDocs.vue';
 </template>
 
 <style>
-  a.nonLink { color: inherit; text-decoration: none;}
+  a.nonLink { color: inherit; text-decoration: none; }
   .hoverable:hover { background: #EEE; }
 </style>
