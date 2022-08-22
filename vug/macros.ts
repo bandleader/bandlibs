@@ -2,10 +2,8 @@
 - input:checkbox etc. But if we're going to parse that as an arg, maybe it conflicts with namespaces.
      - Can use input::checkbox, or a different char like input%checkbox, input+checkbox, input~checkbox, input^checkbox, input$checkbox
 - Same for flex:!|c.c etc (note period will need to be renamed to dash [but that conflicts with row])
-- d .foo.bar (split. Mostly for when it's conditional)
 - Debug things that aren't working properly:
     *bg:!hover is not working, does :not()
-    d .bg-dark.text-light=true   -> <div :class='{"bg-dark.text-light": true}'>
     [done?] fr:c.c (the mainarg is only processed on f, not fr/fc)
     f:c.c.class1.class2 (class1 is taken as align-content, and class2 is discarded) (either use hyphens [but that conflicts with row], or go back to "al" or "fx" props)
     [done? was because f overwrote it] f fx=c.c (it works on fr, fc, even div, but not f!)
@@ -71,6 +69,7 @@ const allowReferencesToGlobals = wordTransformer(w => w.value.includes("$win") ?
 export function runAll(node: VugNode): VugNode {
     node = directChild(node)
     node = tagNameParser(node)
+    node = splitDoubleClasses(node)
     node = customTagTypes(node)
     node = Styling.basicCssMacros(node)
     node = Styling.flexMacroFx(node)
@@ -96,6 +95,14 @@ function customTagTypes(n: VugNode): VugNode {
     if (v1compat && n.tag === 'fc') return clone(n, { tag: "div", style_display: "flex", 'style_flex-direction': 'column' })
     if (n.tag === 'ib'|| n.tag === 'inline-block') return clone(n, { tag: "div", style_display: "inline-block" })
     return n
+}
+
+function splitDoubleClasses(n: VugNode) { // TODO optimize
+    return new VugNode(n.tag, n.words.flatMap(w => {
+        if (w.key[0] !== '.' || !w.key.slice(1).includes('.')) return [w]
+        const classes = w.key.slice(1).split(".")
+        return classes.map(x => new VugWord("." + x, w.value, w.isExpr))
+    }), n.children)
 }
 
 function tagNameParser(n: VugNode): VugNode {
