@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import * as Vug from '../../../vug'
-import VugDocsExample from './VugDocsExample.vue';
+import VugDocsExample from './VugDocsExample.vue'
+
+const commentExampleCode = `h3 -- Welcome to Vug! // This is a comment\n// This is also a comment`
 
 /* 
 TODO:
@@ -15,7 +17,6 @@ To add to docs:
   - Flex macro
 - CSS units
 - Custom tag types
-- Comments
 - HTML on right side
 - HTML on left side
 - Direct children
@@ -49,6 +50,7 @@ section.py-4 bg=#AAA
     --   button.btn.btn-primary -- ♥ Like
 
 .container.py-4
+  css:[& aside] font-style=italic c=#777 d=inline
   h2 -- Vug documentation
   p -- Vug is a concise language for expressing DOM elements, inspired by <a href="https://pugjs.org">Pug</a>, <a href="https://imba.io/docs/tags">Imba Elements</a>, and <a href="https://tailwindcss.com">Tailwind CSS</a>.
   
@@ -58,6 +60,12 @@ section.py-4 bg=#AAA
   VugDocsExample.mb-4 > pre
     -- h3 -- Welcome to Vug!
     -- p -- Let's describe Vug in a paragraph.
+  
+  p -- You can add comments after a <code>//&nbsp;</code>, like in Javascript:
+    aside -- (make sure there's a space after the <code>//</code> -- this helps to disambiguate from things like <code>https://example.com</code>)
+  VugDocsExample.mb-4 code=(commentExampleCode)
+
+
 
   p -- You can create nested structures of elements simply by indenting them appropriately:
   VugDocsExample.mb-4 > pre
@@ -88,7 +96,7 @@ section.py-4 bg=#AAA
   p -- You can set attributes on elements just like in HTML:
   VugDocsExample.mb-4 > pre -- input type="text" value="Hello there"
   p -- However, if the attribute value does not contain any spaces, you can skip the quotes
-    i c=#777 -- (HTML also supports this, but in Vug, it fits in well with the language and is the idiomatic style):
+    aside -- (HTML also supports this, but in Vug, it fits in well with the language and is the idiomatic style):
   VugDocsExample.mb-4 > pre -- input type=text value="Multiple words still need quotes"
   p -- Like in HTML, you can specify an attribute without a value, which is equivalent to setting it to <code>&quot;&quot;</code>:
   VugDocsExample.mb-4 > pre -- input type=checkbox checked
