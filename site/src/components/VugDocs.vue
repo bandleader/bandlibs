@@ -2,6 +2,34 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import * as Vug from '../../../vug'
 import VugDocsExample from './VugDocsExample.vue';
+/* 
+TODO:
+- Syntax-highlight the HTML
+- Syntax-highlight the left side
+- Make the left side editable or even Monaco
+
+To add to docs:
+- CSS shorthand
+- CSS macros
+  - Flex macro
+- CSS units
+- Custom tag types
+- Comments
+- HTML on right side
+- HTML on left side
+- Direct children
+- Binding to expression (incl styles)
+  - Conditional classes
+  - Objects/templates/numbers
+- First-class stylesheets
+  - (main point being co-location)
+  - (and to refer to the current element by default without needing to dream up class names)
+  - (but can also refer to on hover etc)
+  - (or children)
+  - Or express on the element itself using *
+- Macros: vg-let, vg-do, vg-each, $win
+
+ */
 </script>
 
 <template lang="vug">
@@ -55,7 +83,13 @@ import VugDocsExample from './VugDocsExample.vue';
   p -- However, if the attribute value does not contain any spaces, you can skip the quotes
     i c=#777 -- (HTML also supports this, but in Vug, it fits in well with the language and is the idiomatic style):
   VugDocsExample.mb-4 > pre -- input type=text value="Multiple words still need quotes"
-
+  p -- Like in HTML, you can specify an attribute without a value, which is equivalent to setting it to <code>&quot;&quot;</code>:
+  VugDocsExample.mb-4 > pre -- input type=checkbox checked
+  p -- You can also set CSS attributes directly on the element. In HTML, you are probably used to doing this in a <code>style</code> attribute:
+  VugDocsExample.mb-4 > pre -- div style="font-size: 1.5em; font-weight: bold;"
+  p -- But in Vug, we recognize all CSS property names, so you can set them directly on the element:
+  VugDocsExample.mb-4 > pre -- div font-size=1.5em font-weight=bold
+  // TODO link to shorthand etc
 
 
 </template>
