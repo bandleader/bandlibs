@@ -65,7 +65,7 @@ export function flexMacroFx(n: VugNode): VugNode {
     if (value[0] === "!") { reverse = true; value = value.slice(1) }    
     let direction = column ? 'column' : (reverse || row) ? 'row' : '' // If reverse was specified, we have to specify row (which is the default)
     if (reverse) direction += "-reverse"
-    const obj: any = { fx: null, display: 'flex' }
+    const obj: any = { fx: null, style_display: 'flex' }
     if (direction) obj['style_flex-direction'] = direction
     
     // Alignment etc

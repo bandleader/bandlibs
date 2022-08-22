@@ -4,7 +4,6 @@
 - Debug things that aren't working properly:
     *bg:!hover is not working, does :not()
     f:c.c.class1.class2 (class1 is taken as align-content, and class2 is discarded) (either use hyphens [but that conflicts with row], or go back to "al" or "fx" props)
-    f:c.c display:flex is twice
 - Just rationalize args. 
     They're a good idea, 
     but they have to be right after tagname before any dot-modifiers/classes (because dot modifiers can contain colons), 
