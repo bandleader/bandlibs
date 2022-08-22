@@ -1,19 +1,10 @@
 /* TODO
 - input:checkbox etc. But if we're going to parse that as an arg, maybe it conflicts with namespaces.
      - Can use input::checkbox, or a different char like input%checkbox, input+checkbox, input~checkbox, input^checkbox, input$checkbox
-- Same for flex:!|c.c etc (note period will need to be renamed to dash [but that conflicts with row])
 - Debug things that aren't working properly:
     *bg:!hover is not working, does :not()
-    [done?] fr:c.c (the mainarg is only processed on f, not fr/fc)
     f:c.c.class1.class2 (class1 is taken as align-content, and class2 is discarded) (either use hyphens [but that conflicts with row], or go back to "al" or "fx" props)
-    [done? was because f overwrote it] f fx=c.c (it works on fr, fc, even div, but not f!)
-    f -> <div style="display: flex" fx=""></div>
-    f fx:c.c <div style="display: flex; display: flex; justify-content: center; align-items: center"></div>
-    f fx=c.c -- fx no effect because blanked
     f:c.c display:flex is twice
-    clone to undefined to not touch an attr does not seem to be working
-    in ONE line detect all flex tags, transfer the arg to fx but preserve fx otherwise, and if R or C, add to fx I guess, or just a flex-direction property
-    but also fix clone, maybe first
 - Just rationalize args. 
     They're a good idea, 
     but they have to be right after tagname before any dot-modifiers/classes (because dot modifiers can contain colons), 
@@ -33,9 +24,15 @@ import * as Styling from "./styling"
 export let v1compat = true
 
 export function clone(node: VugNode, changes: Record<string, string>) {
-    // TODO: throw if overwriting an isExpr word, I think
-    const ks = Object.keys(changes).filter(x => x !== "tag")
-    return new VugNode(changes.tag || node.tag, [...node.words.filter(w => changes[w.key] === undefined /*whereas null will blank it*/), ...ks.filter(k => changes[k] !== null).map(k => new VugWord(k, changes[k], false))], node.children)
+    const ret = new VugNode(changes.tag || node.tag, node.words, node.children)
+    for (const [k,v] of Object.entries(changes)) {
+        if (k === 'tag') continue;
+        else if (v === undefined) continue;
+        if (ret.words.find(x => x.key === k && x.isExpr)) throw `Clone can't overwrite attribute '${k}' that is bound to an expression`
+        ret.words = ret.words.filter(x => x.key !== k)
+        if (v !== null) ret.words.push(new VugWord(k, v, false))
+    }
+    return ret
 }
 export function wordTransformer(fn: (w: VugWord) => VugWord) {
     // TODO-OPTIMIZE Can check whether any of the nodes were replaced and if not return the original node... or even only copy the array once something was switched.
@@ -90,9 +87,11 @@ export function runAll(node: VugNode): VugNode {
 function customTagTypes(n: VugNode): VugNode {
     if (n.tag === 'd') return clone(n, { tag: "div" })
     if (n.tag === 's') return clone(n, { tag: "span" })
-    if (n.tag === 'f' || n.tag === 'flex') return clone(n, { tag: "div", style_display: "flex", fx: n.getWord("_mainArg") || "", _mainArg: null })
-    if (v1compat && n.tag === 'fr') return clone(n, { tag: "div", style_display: "flex", 'style_flex-direction': 'row' })
-    if (v1compat && n.tag === 'fc') return clone(n, { tag: "div", style_display: "flex", 'style_flex-direction': 'column' })
+    if (v1compat && n.tag === 'fr') n = clone(n, { tag: "f", 'style_flex-direction': 'row' })
+    if (v1compat && n.tag === 'fc') n = clone(n, { tag: "f", 'style_flex-direction': 'column' })
+    if (n.tag === 'f') n = clone(n, { tag: "flex" })
+    if (v1compat && n.tag === "flex" && n.getWord("al")) n = clone(n, { fx: n.getWordErrIfCalc("al"), al: null }) 
+    if (n.tag === 'flex') return clone(n, { tag: "div", style_display: "flex", fx: n.getWord("_mainArg") || undefined, _mainArg: null })
     if (n.tag === 'ib'|| n.tag === 'inline-block') return clone(n, { tag: "div", style_display: "inline-block" })
     return n
 }
