@@ -57,14 +57,15 @@ export function emitVueTemplate(node: VugNode, whitespace = false) {
       out.push(">")
     }
     if (node.children.length) {
-        if (whitespace) out.push("\n")
+        const needsIndent = whitespace && (node.children.length > 1 || (node.children[0] && (node.children[0].tag !== "_html" || (node.children[0].getWord("_contents") || '').includes('\n'))))
+        if (needsIndent) out.push("\n")
         for (const c of node.children) {
-            if (whitespace && c !== node.children[0]) out.push("\n")
+            if (needsIndent && c !== node.children[0]) out.push("\n")
             let txt = emitVueTemplate(c, whitespace)
-            if (whitespace) txt = txt.split("\n").map(l => `  ${l}`).join('\n') // Indent
+            if (needsIndent) txt = txt.split("\n").map(l => `  ${l}`).join('\n') // Indent
             out.push(txt)
         }
-        if (whitespace) out.push("\n")
+        if (needsIndent) out.push("\n")
     }
     // Close tags except for 'void tags'. That includes '_html' because that's my element for raw HTML
     if (!["_html", "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"].includes(node.tag.toLowerCase())) out.push(`</${node.tag}>`)
