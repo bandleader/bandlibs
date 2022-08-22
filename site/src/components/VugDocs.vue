@@ -7,7 +7,7 @@ import VugDocsExample from './VugDocsExample.vue';
 TODO:
 - Syntax-highlight the HTML
 - Syntax-highlight the left side
-- Make the left side editable or even Monaco
+- Make the left side Monaco
 
 To add to docs:
 - CSS shorthand
