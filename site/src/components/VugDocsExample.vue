@@ -8,6 +8,7 @@ const input = computed(() => {
     const minIndent = Math.min(...lines.filter(x => x.trim().length).map(x => x.length - x.trimStart().length))
     return lines.map(x => x.slice(minIndent)).join("\n")
 })
+const render = ref(false)
 const output = computed(() => Vug.load(input.value, {_tempLangVersion: 2}).toVueTemplate(true))
 </script>
 
@@ -18,8 +19,11 @@ const output = computed(() => Vug.load(input.value, {_tempLangVersion: 2}).toVue
             <div class="code" style="color: #FFF" v-text="input" />
         </div>
         <div class="col-6">
-            <div class="subtitle">HTML</div>
-            <div class="code" style="color: rgb(200 200 255)" v-text="output" />
+            <div class="subtitle" @click="render = !render" v-text="render ? 'Rendered' : 'HTML'" />
+            <div v-if="render" style="padding: 0.5em; border: 1px solid #AAA" v-html="output" />
+            <template v-else>
+                <div class="code" style="color: rgb(200 200 255)" v-text="output" />
+            </template>
         </div>
     </div>
 </template>
