@@ -3,14 +3,6 @@ import { ref, computed, onMounted, watch } from 'vue'
 import * as Vug from '../../../vug'
 import VugDocsExample from './VugDocsExample.vue';
 
-const tryItInput = ref("")
-const tryItOutput = computed(() => {
-  try {
-    return Vug.load(tryItInput.value, {_tempLangVersion: 2}).toVueTemplate(true)
-  } catch (e) {
-    return `Error: ${e}`
-  }
-})
 /* 
 TODO:
 - Syntax-highlight the HTML
@@ -50,13 +42,12 @@ section.bg-dark.text-secondary.px-4.py-5.text-center bg=#222!important > .py-5
     .d-grid.gap-2.d-sm-flex.justify-content-sm-center
       button.btn.btn-outline-info.btn-lg.px-4.me-sm-3.fw-bold type=button -- Get started
       button.btn.btn-outline-light.btn-lg.px-4 type=button -- Docs
-section.text-center.py-4 bg=#AAA
-  h2 -- Try it now!
-  .row.container
-    .col-6
-      textarea.p-1 c=#FFD w=100% h=10em bg=#222 font-family=monospace v-model=tryItInput
-    .col-6
-      pre.text-start.p-1 bg=#FFF v-text=tryItOutput
+section.py-4 bg=#AAA
+  h2.text-center -- Try it now!
+  .container > VugDocsExample > pre
+    -- .text-center.p-2 bg=green c=#FFF -- Hello from Vug!
+    --   button.btn.btn-primary -- ♥ Like
+
 .container.py-4
   h2 -- Vug documentation
   p -- Vug is a concise language for expressing DOM elements, inspired by <a href="https://pugjs.org">Pug</a>, <a href="https://imba.io/docs/tags">Imba Elements</a>, and <a href="https://tailwindcss.com">Tailwind CSS</a>.

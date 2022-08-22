@@ -2,21 +2,24 @@
 import { ref, computed, onMounted, watch, getCurrentInstance } from 'vue'
 import * as Vug from '../../../vug'
 const props = defineProps<{ code?: string }>()
-const input = computed(() => {
+const initialInput = (function() {
     const get = props.code || String(getCurrentInstance().slots.default()[0].children) 
     const lines = get.split('\n')
     const minIndent = Math.min(...lines.filter(x => x.trim().length).map(x => x.length - x.trimStart().length))
     return lines.map(x => x.slice(minIndent)).join("\n")
-})
+})()
+const input = ref(initialInput)
 const render = ref(false)
 const output = computed(() => Vug.load(input.value, {_tempLangVersion: 2}).toVueTemplate(true))
+const inputDiv = ref<HTMLElement>()
+setInterval(() => { if (inputDiv.value) input.value = inputDiv.value.innerText }, 500) // TODO optimize
 </script>
 
 <template>
     <div class="row">
         <div class="col-6">
             <div class="subtitle">Vug</div>
-            <div class="code" style="color: #FFF" v-text="input" />
+            <div contenteditable class="code" style="color: #FFF" v-text="initialInput" ref="inputDiv" />
         </div>
         <div class="col-6">
             <div class="subtitle" @click="render = !render" v-text="render ? 'Rendered' : 'HTML'" />
