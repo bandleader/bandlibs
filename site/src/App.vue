@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import MainPlayground from './components/MainPlayground.vue'
+import VugDocs from './components/VugDocs.vue';
 </script>
 
 <template>
-  <MainPlayground />
+  <VugDocs />
 </template>
 
 <style>
