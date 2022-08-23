@@ -16168,7 +16168,7 @@ function flexMacroFx(n) {
     var direction = column ? 'column' : (reverse || row) ? 'row' : ''; // If reverse was specified, we have to specify row (which is the default)
     if (reverse)
         direction += "-reverse";
-    var obj = { fx: null, display: 'flex' };
+    var obj = { fx: null, style_display: 'flex' };
     if (direction)
         obj['style_flex-direction'] = direction;
     // Alignment etc
@@ -16308,8 +16308,8 @@ function parseStyleVariants(key, start, attrs) {
         else if (x[0] === '.')
             sel = "".concat(sel).concat(x);
         else if (x[0] === '!') { // negation -- experimental and hacky
-            var plchldr = 'HREKJSBLLI';
-            var done = parseStyleVariants("$" + x.slice(1), plchldr, '%%%').split('{')[0].trim();
+            var plchldr = '.dummySelectorHREKJSBLLI';
+            var done = parseStyleVariants("thisPartIsIgnored:" + x.slice(1), plchldr, '%%%').split('{')[0].trim();
             var whatAdded = done.slice(done.indexOf(plchldr) + plchldr.length);
             sel = "".concat(sel, ":not(").concat(whatAdded, ")");
         }
@@ -16338,14 +16338,33 @@ function parseStyleVariants(key, start, attrs) {
 }
 
 /* TODO
-- input:checkbox etc. But if we're going to parse that as an arg, maybe it conflicts with namespaces.
-     - Can use input::checkbox, or a different char like input%checkbox, input+checkbox, input~checkbox, input^checkbox, input$checkbox
-- Same for flex:!|c.c etc (note period will need to be renamed to dash)
+- Debug things that aren't working properly:
+    f:c.c.class1.class2 (class1 is taken as align-content, and class2 is discarded) (either use hyphens [but that conflicts with row], or go back to "al" or "fx" props)
+- Just rationalize args.
+    They're a good idea,
+    but they have to be right after tagname before any dot-modifiers/classes (because dot modifiers can contain colons),
+    and can't contain dots because that ends it.
+    although maybe we can do `f:c-c[this can contain more colons and dots].text-center[this contains dots].foo` using splitThree. However we want dot modifiers to have colons without that...
+    maybe args can just be `f[args here].foo` and then it can be whatever we want. Nah
 */
 function clone(node, changes) {
-    // TODO: throw if overwriting an isExpr word, I think
-    var ks = Object.keys(changes).filter(function (x) { return x !== "tag"; });
-    return new VugNode(changes.tag || node.tag, __spreadArray(__spreadArray([], node.words.filter(function (w) { return changes[w.key] === undefined; } /*whereas null will blank it*/), true), ks.filter(function (k) { return changes[k] !== null; }).map(function (k) { return new VugWord(k, changes[k], false); }), true), node.children);
+    var ret = new VugNode(changes.tag || node.tag, node.words, node.children);
+    var _loop_1 = function (k, v) {
+        if (k === 'tag')
+            return "continue";
+        else if (v === undefined)
+            return "continue";
+        if (ret.words.find(function (x) { return x.key === k && x.isExpr; }))
+            throw "Clone can't overwrite attribute '".concat(k, "' that is bound to an expression");
+        ret.words = ret.words.filter(function (x) { return x.key !== k; });
+        if (v !== null)
+            ret.words.push(new VugWord(k, v, false));
+    };
+    for (var _i = 0, _a = Object.entries(changes); _i < _a.length; _i++) {
+        var _b = _a[_i], k = _b[0], v = _b[1];
+        _loop_1(k, v);
+    }
+    return ret;
 }
 function wordTransformer(fn) {
     // TODO-OPTIMIZE Can check whether any of the nodes were replaced and if not return the original node... or even only copy the array once something was switched.
@@ -16377,11 +16396,13 @@ var allowReferencesToGlobals = wordTransformer(function (w) { return w.value.inc
 function runAll(node) {
     node = directChild(node);
     node = tagNameParser(node);
+    node = splitDoubleClasses(node);
     node = customTagTypes(node);
     node = basicCssMacros(node);
     node = flexMacroFx(node);
     node = mainTransform(node);
     node = quickUnits(node);
+    node = customUsesOfArg(node);
     node = sheetStyles(node);
     node = cssCustomTag(node);
     node = compileVgCss(node);
@@ -16392,20 +16413,39 @@ function runAll(node) {
     node = allowReferencesToGlobals(node);
     return new VugNode(node.tag, node.words, node.children.map(function (c) { return runAll(c); }));
 }
+function customUsesOfArg(n) {
+    // For now just convert it into 'type'. For inputs, buttons, etc
+    // Run this AFTER anything that uses it in a different way, like 'flex'
+    if (n.getWord("_mainArg"))
+        return clone(n, { _mainArg: null, type: n.getWordErrIfCalc("_mainArg") });
+    return n;
+}
 function customTagTypes(n) {
     if (n.tag === 'd')
         return clone(n, { tag: "div" });
     if (n.tag === 's')
         return clone(n, { tag: "span" });
-    if (n.tag === 'f' || n.tag === 'flex')
-        return clone(n, { tag: "div", style_display: "flex", fx: n.getWord("_mainArg") || "", _mainArg: null });
     if (n.tag === 'fr')
-        return clone(n, { tag: "div", style_display: "flex", 'style_flex-direction': 'row' });
+        n = clone(n, { tag: "f", 'style_flex-direction': 'row' });
     if (n.tag === 'fc')
-        return clone(n, { tag: "div", style_display: "flex", 'style_flex-direction': 'column' });
+        n = clone(n, { tag: "f", 'style_flex-direction': 'column' });
+    if (n.tag === 'f')
+        n = clone(n, { tag: "flex" });
+    if (n.tag === "flex" && n.getWord("al"))
+        n = clone(n, { fx: n.getWordErrIfCalc("al"), al: null });
+    if (n.tag === 'flex')
+        return clone(n, { tag: "div", style_display: "flex", fx: n.getWord("_mainArg") || undefined, _mainArg: null });
     if (n.tag === 'ib' || n.tag === 'inline-block')
         return clone(n, { tag: "div", style_display: "inline-block" });
     return n;
+}
+function splitDoubleClasses(n) {
+    return new VugNode(n.tag, n.words.flatMap(function (w) {
+        if (w.key[0] !== '.' || !w.key.slice(1).includes('.'))
+            return [w];
+        var classes = w.key.slice(1).split(".");
+        return classes.map(function (x) { return new VugWord("." + x, w.value, w.isExpr); });
+    }), n.children);
 }
 function tagNameParser(n) {
     var _a;
@@ -16554,18 +16594,19 @@ function emitVueTemplate(node, whitespace) {
         out.push(">");
     }
     if (node.children.length) {
-        if (whitespace)
+        var needsIndent = whitespace && (node.children.length > 1 || (node.children[0] && (node.children[0].tag !== "_html" || (node.children[0].getWord("_contents") || '').includes('\n'))));
+        if (needsIndent)
             out.push("\n");
         for (var _i = 0, _d = node.children; _i < _d.length; _i++) {
             var c = _d[_i];
-            if (whitespace && c !== node.children[0])
+            if (needsIndent && c !== node.children[0])
                 out.push("\n");
             var txt = emitVueTemplate(c, whitespace);
-            if (whitespace)
+            if (needsIndent)
                 txt = txt.split("\n").map(function (l) { return "  ".concat(l); }).join('\n'); // Indent
             out.push(txt);
         }
-        if (whitespace)
+        if (needsIndent)
             out.push("\n");
     }
     // Close tags except for 'void tags'. That includes '_html' because that's my element for raw HTML
@@ -16612,6 +16653,9 @@ function compile$1(text) {
 function splitThree(what, sepChar) {
     if (sepChar === void 0) { sepChar = " "; }
     // Splits on a char EXCEPT when that char occurs within quotes, parens, braces, curlies
+    // MAYBE allow sepChar to be >1 char long?
+    // MAYBE allow for multiple possibilities of sepChar, and tack it on? Can use this for parsing classes&ids&args... nah won't help, we don't want quotes in there anyway
+    // MAYBE customize the list of things that can quote? and the escape char?
     var ret = [''];
     var stack = [];
     var escaping = false;
