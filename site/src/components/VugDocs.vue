@@ -103,7 +103,7 @@ section.py-4 bg=#AAA
   VugDocsExample.mb-4 > pre -- div style="font-size: 1.5em; font-weight: bold;"
   p -- But in Vug, we recognize all CSS property names, so you can set them directly on the element:
   VugDocsExample.mb-4 > pre -- div font-size=1.5em font-weight=bold
-  // TODO link to shorthand etc
+  // TODO link to shorthand etc, and to binding
 
   h3 -- CSS Shorthand
   // TODO
@@ -141,8 +141,10 @@ section.py-4 bg=#AAA
     aside -- (accomplished using Vue's <a href="#">Function Refs</a> feature)
   VugDocsExample.mb-4 > pre 
     -- input vg-do=$el.focus() 
+    -- div vg-do=customAnimationRoutine($el) 
   p -- It is sometimes helpful to access global functions in these handlers (i.e. to break out of Vue's sandbox). Vug provides <code>${{''}}win</code> for this:
     aside -- (accomplished using <code>Array.constructor('return window')()</code>)
+    aside -- (you can do this in any Vug attribute, like in <code>@click</code> handlers)
   VugDocsExample.mb-4 > pre 
     -- input vg-do="${{''}}win.setTimeout(() => $el.focus(), 5000)"
 
