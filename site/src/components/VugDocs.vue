@@ -29,7 +29,6 @@ To add to docs:
   - (but can also refer to on hover etc)
   - (or children)
   - Or express on the element itself using *
-- Macros: vg-let, vg-do, vg-each, $win
 
  */
 </script>
@@ -105,6 +104,48 @@ section.py-4 bg=#AAA
   p -- But in Vug, we recognize all CSS property names, so you can set them directly on the element:
   VugDocsExample.mb-4 > pre -- div font-size=1.5em font-weight=bold
   // TODO link to shorthand etc
+
+  h3 -- CSS Shorthand
+  // TODO
+
+  h3 -- CSS Macros
+
+  h3 -- Custom Tag Types
+  p -- Including flex macros or arg
+
+  h3 -- (Vue only) Stylesheets
+  p -- Including on the element itself
+
+  h3 -- (Vue only) Binding to Expressions
+
+  h3 -- (Vue only) Special Directives
+  
+  h5 > code -- vg-each
+  p -- Vug provides a more concise syntax for loops (compiles down to a regular <code>v-for</code>). You can access the element via the variable <code>it</code>, and the index (or key of an object) via <code>it_i</code>.
+  VugDocsExample.mb-4 > pre -- div vg-each=items -- [[[[it.prop]]]]
+  p -- If desired, you can customize the name of the iteration variables using an argument: 
+  VugDocsExample.mb-4 > pre -- div vg-each:foo=items -- [[[[foo.prop]]]]
+
+  h5 > code -- vg-let
+  p -- Sets a new variable in the current scope. This is useful where you want to refer to it more than once (to be more DRY, or to save computing it twice).
+    aside -- (This is accomplished by compiling to a <code>v-for</code> loop over a single-element array.)
+  VugDocsExample.mb-4 > pre 
+    -- div vg-each=customers
+    --   .card vg-let:fullName=`${it.firstName} ${it.lastName}`
+    --     .card-heading -- [[[[fullName]]]]
+    --     // More elements here...
+    --     .card-body > a -- Send a message to [[[[fullName]]]]
+
+  h5 > code -- vg-do
+  p -- Lets you run code on the element as soon as it is inserted. The element is available as <code>$el</code>.
+    aside -- (accomplished using Vue's <a href="#">Function Refs</a> feature)
+  VugDocsExample.mb-4 > pre 
+    -- input vg-do=$el.focus() 
+  p -- It is sometimes helpful to access global functions in these handlers (i.e. to break out of Vue's sandbox). Vug provides <code>${{''}}win</code> for this:
+    aside -- (accomplished using <code>Array.constructor('return window')()</code>)
+  VugDocsExample.mb-4 > pre 
+    -- input vg-do="${{''}}win.setTimeout(() => $el.focus(), 5000)"
+
 
 
 </template>

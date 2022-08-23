@@ -3,7 +3,8 @@ import { ref, computed, onMounted, watch, getCurrentInstance } from 'vue'
 import * as Vug from '../../../vug'
 const props = defineProps<{ code?: string }>()
 const initialInput = (function() {
-    const get = props.code || String(getCurrentInstance().slots.default()[0].children) 
+    let get = props.code || String(getCurrentInstance().slots.default()[0].children) 
+    get = get.replace(/\[\[/g,'{').replace(/\]\]/g,'}')
     const lines = get.split('\n')
     const minIndent = Math.min(...lines.filter(x => x.trim().length).map(x => x.length - x.trimStart().length))
     return lines.map(x => x.slice(minIndent)).join("\n")
