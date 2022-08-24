@@ -119,6 +119,35 @@ section.py-4 bg=#AAA
   p -- Including flex macros or arg
 
   h3
+    -- Markdown
+    s.badge.rounded-pill.bg-danger fs=0.4em -- EXPERIMENTAL
+  
+  p -- Being that Vug is all about conciseness, it seems natural to support Markdown directly in Vue templates. This is useful for text-heavy pages.
+  VugDocsExample.mb-4 > pre
+    -- f:c.c bg=#222 p=5em
+    --   .card > .card-body
+    --     # Heading 1
+    --     ## Heading 2
+    --     ### Heading 3
+    --     #### Heading 4
+    --     ##### Heading 5
+    --     ###### Heading 6
+    --     
+    --     | Regular paragraphs of text must start with the pipe (|) character.
+    --     | Otherwise, they would be confused with regular elements.
+    --     | Each line is a new paragraph.
+
+    -- d.alert.alert-info.p-4 
+    --   | You can mix regular elements and `Markdown`.
+    --   ### No problem at all.
+    -- - You can of course use [Markdown Syntax](https://www.markdownguide.org/basic-syntax/) inside these lines. **Bold**, _italics_, [links](#), etc.
+    -- - Unordered lists work too.
+    --   1. As well as ordered ones.
+    --   1. Indentation works the usual way.
+    --   1. Everything should work.
+    --   // - Starting a line with <code>#</code>, <code>##</code>, ... <code>######</code> will turn that line into a heading.
+
+  h3
     -- Stylesheets
     s.badge.rounded-pill.bg-warning fs=0.4em -- Vue only
   p -- Including on the element itself
@@ -148,8 +177,8 @@ section.py-4 bg=#AAA
     --     .card-body > a -- Send a message to [[[[fullName]]]]
 
   h5 > code -- vg-do
-  p -- Lets you run code on the element as soon as it is inserted. The element is available as <code>$el</code>.
-    aside -- (accomplished using Vue's <a href="#">Function Refs</a> feature)
+  p -- Runs code on the element once, as soon as it is inserted. The element is available as <code>$el</code>.
+    aside -- (accomplished using Vue's <a href="https://vuejs.org/guide/essentials/template-refs.html#function-refs">Function Refs</a> feature)
   VugDocsExample.mb-4 > pre 
     -- input vg-do=$el.focus() 
     -- div vg-do=customAnimationRoutine($el) 
