@@ -85,7 +85,7 @@ function splitTwo(text: string, sep: string) {
     if (pos < 0) return [text, '']
     return [text.substr(0, pos), text.substr(pos + sep.length)]
 }
-const htmlNode = (html: string) => new VugNode("_html", [new VugWord("_contents", html, false)])
+const htmlNode = (html: string, raw = false) => new VugNode("_html", [new VugWord("_contents", raw ? html : MarkdownSupport.convertSingleLineOfText(html), false)])
 function parseLine(line: string) {
     line = splitTwo(line, "// ")[0] // ignore comments
     if (line.startsWith("<")) line = "-- " + line // allow HTML tags
@@ -93,6 +93,7 @@ function parseLine(line: string) {
     if (line.startsWith("-- ")) line = " " + line // so that it gets detected, as we've trimmed
     let [_wordPart, innerHtml] = splitTwo(line, " -- ")
     if (!_wordPart) return htmlNode(innerHtml)
+    if (_wordPart === 'raw') return htmlNode(innerHtml, true)
     const [tag, ...words] = splitThree( _wordPart.trim(), " ")
     if (MarkdownSupport.aggressiveMarkdownParagraphDetection(tag, words)) return parseLine("| " + line)
     const words2 = words.map(w => {
