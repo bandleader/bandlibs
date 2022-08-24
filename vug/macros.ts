@@ -125,7 +125,7 @@ function routing(n: VugNode): VugNode {
         // Update our component when the route changes, as well as once now
         if (!$el || $el.ranonce) return;
         $el.ranonce = true;
-        console.log('running on', $el); // debug
+        win.console.log('running on', $el); // debug
         const onUpd = () => $el.__vueParentComponent?.update();
         win.addEventListener('popstate', onUpd);
         win.setTimeout(onUpd, 10);
