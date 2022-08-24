@@ -2,7 +2,7 @@ import { clone } from "./macros"
 import { VugNode } from "./parsing"
 
 export function lineTransformBasedOnPrefixes(line: string) {
-    const convLine = (txt: string): string => globalThis.convertMarkdownLine ? globalThis.convertMarkdownLine(txt) : txt
+    const convLine = convertSingleLineOfText
     const re = (regexp: RegExp, transform: (x: RegExpMatchArray)=>string) => (input: string) => { const result = input.match(regexp); if (!result) return null; return transform(result) }
     const funcs: ((input: string) => string|null)[] = [
         re(/^(#+) (.*)/, x => `h${x[1].length} -- ${convLine(x[2])}`),
@@ -16,6 +16,13 @@ export function lineTransformBasedOnPrefixes(line: string) {
     const tryThem = funcs.find(f => f(line) !== null)
     if (tryThem) return tryThem(line)
     return line
+}
+
+export function convertSingleLineOfText(txt: string) {
+    if (!globalThis.convertMarkdown) return txt
+    let ret = (globalThis.convertMarkdown(txt) as string).replace(/\n/g, ' ').trim()
+    if (ret.startsWith("<p>")) ret = ret.slice(3, ret.length - 4)
+    return ret
 }
 
 export function fixMarkdownMacro(n: VugNode) {

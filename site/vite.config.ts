@@ -5,7 +5,7 @@ import * as Vug from '../vug'
 
 // Enable Markdown in Vug
 import { marked } from 'marked'
-globalThis.convertMarkdownLine = (text: string) => { const ret: string = marked.parse(text); return ret.slice(3, ret.length - 5) }
+globalThis.convertMarkdown = (text: string) => marked.parse(text)
 
 // https://vitejs.dev/config/
 export default defineConfig({
