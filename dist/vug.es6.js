@@ -226,7 +226,7 @@ function compileVgCss(n) {
     var contents = n.getWord("vg-css");
     if (!contents)
         return n;
-    var script = "\n        if ($el.$el) $el = $el.$el;\n        const d = $el.ownerDocument; \n        let st = null;\n        if (!$el.vgcssKey) {\n            $el.vgcssKey = 'vg_' + String((Math.random()+1).toString(36).slice(7));\n            st = d.head.appendChild(d.createElement('style'));\n            st.dataset[$el.vgcssKey] = '';\n            $el.dataset.vgcss = $el.vgcssKey;\n        } else {\n            st = d.querySelector('*[data-' + $el.vgcssKey + ']');\n        }\n        st.innerText = ".concat(JSON.stringify(contents), ".replace(/&/g, '*[data-vgcss=' + $el.vgcssKey + ']');\n    ").replace(/\n/g, '').replace(/[ \t]+/g, ' ').replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    var script = "\n        if (!$el) return;\n        if ($el.$el) $el = $el.$el;\n        const d = $el.ownerDocument; \n        let st = null;\n        if (!$el.vgcssKey) {\n            $el.vgcssKey = 'vg_' + String((Math.random()+1).toString(36).slice(7));\n            st = d.head.appendChild(d.createElement('style'));\n            st.dataset[$el.vgcssKey] = '';\n            $el.dataset.vgcss = $el.vgcssKey;\n        } else {\n            st = d.querySelector('*[data-' + $el.vgcssKey + ']');\n        }\n        st.innerText = ".concat(JSON.stringify(contents), ".replace(/&/g, '*[data-vgcss=' + $el.vgcssKey + ']');\n    ").replace(/\n/g, '').replace(/[ \t]+/g, ' ').replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     // return clone(n, { "vg-css": null, "vg-do": script })
     return clone(n, { "vg-css": null, ":ref": "$el => { ".concat(script, " }") });
 }
@@ -339,7 +339,7 @@ function clone(node, changes) {
             return "continue";
         else if (v === undefined)
             return "continue";
-        if (ret.words.find(function (x) { return x.key === k && x.isExpr; }))
+        if (ret.words.find(function (x) { return x.key === k && x.isExpr && v !== null; }))
             throw "Clone can't overwrite attribute '".concat(k, "' that is bound to an expression");
         ret.words = ret.words.filter(function (x) { return x.key !== k; });
         if (v !== null)
@@ -384,6 +384,7 @@ function runAll(node) {
     node = tagNameParser(node);
     node = splitDoubleClasses(node);
     node = customTagTypes(node);
+    node = routing(node);
     node = basicCssMacros(node);
     node = flexMacroFx(node);
     node = mainTransform(node);
@@ -424,6 +425,24 @@ function customTagTypes(n) {
     if (n.tag === 'ib' || n.tag === 'inline-block')
         return clone(n, { tag: "div", style_display: "inline-block" });
     return n;
+}
+function routing(n) {
+    if (n.tag === "a" && n.getWord('to-route')) {
+        var word = n.words.find(function (x) { return x.key === 'to-route'; });
+        var ret = clone(n, { 'to-route': null, onclick: "router.push(this.href); return false" });
+        ret.words.push(new VugWord('href', word.value, word.isExpr)); // to allow calculated
+        return ret;
+    }
+    if (n.tag !== "route")
+        return n;
+    var path = n.getWordErrIfCalc("path");
+    var innerVFor = "{$route, $router} in (Array.constructor('return window')().router?.match?.(".concat(JSON.stringify(path).replace(/"/g, "&quot;"), ") || [])");
+    var vIfTrue = function () { return new VugWord("v-if", "true", false); }; // for 'template' tags. Otherwise Vue renders them as the HTML tag 'template' which is invisible. I want a fragment. Note that even with this done, I couldn't make 'inner' a child of scriptAdder. It wouldn't render.
+    var inner = new VugNode("template", [new VugWord("v-for", innerVFor, true)], n.children);
+    var script = "$el => {\n        const win = Array.constructor('return window')();\n        // win.console.log('Running!');\n        if (!win.router) {\n            win.router = {\n                basePath: '/bandlibs',\n                get pathname() { return win.location.pathname.replace(win.router.basePath, '') || '/' },\n                push(url) { win.history.pushState('', '', url); win.dispatchEvent(new win.Event('popstate')) },\n                match: path => win.router.pathname === path ? [{ $router: win.router, $route: { path: win.router.pathname, params: {} } }] : [],\n            };\n            // win.console.log(\"Router initialized!\");\n        };\n        // Update our component when the route changes, as well as once now\n        if (!$el || $el.ranonce) return;\n        $el.ranonce = true;\n        const onUpd = () => $el.__vueParentComponent.update();\n        win.addEventListener('popstate', onUpd);\n        win.setTimeout(onUpd, 10);\n      }\n    ".split("\n").map(function (x) { return x.split(" //")[0].trim(); }).join(" "); // So make sure you have semicolons on each line
+    var scriptAdder = new VugNode("template", [new VugWord("ref", script, true)]);
+    var container = new VugNode("template", [vIfTrue()], [scriptAdder, inner]);
+    return container;
 }
 function splitDoubleClasses(n) {
     return new VugNode(n.tag, n.words.flatMap(function (w) {

@@ -62,6 +62,7 @@ export function runAll(node: VugNode): VugNode {
     node = tagNameParser(node)
     node = splitDoubleClasses(node)
     node = customTagTypes(node)
+    node = routing(node)
     node = Styling.basicCssMacros(node)
     node = Styling.flexMacroFx(node)
     node = Styling.mainTransform(node)
@@ -95,6 +96,43 @@ function customTagTypes(n: VugNode): VugNode {
     if (n.tag === 'flex') return clone(n, { tag: "div", style_display: "flex", fx: n.getWord("_mainArg") || undefined, _mainArg: null })
     if (n.tag === 'ib'|| n.tag === 'inline-block') return clone(n, { tag: "div", style_display: "inline-block" })
     return n
+}
+
+function routing(n: VugNode): VugNode {
+    if (n.tag === "a" && n.getWord('to-route')) {
+        const word = n.words.find(x => x.key === 'to-route')
+        const ret = clone(n, { 'to-route': null, onclick: "router.push(this.href); return false" })
+        ret.words.push(new VugWord('href', word.value, word.isExpr)) // to allow calculated
+        return ret
+    }
+    if (n.tag !== "route") return n
+    const path = n.getWordErrIfCalc("path")
+    const innerVFor = `{$route, $router} in (Array.constructor('return window')().router?.match?.(${JSON.stringify(path).replace(/"/g, "&quot;")}) || [])`
+    const vIfTrue = () => new VugWord("v-if", "true", false) // for 'template' tags. Otherwise Vue renders them as the HTML tag 'template' which is invisible. I want a fragment. Note that even with this done, I couldn't make 'inner' a child of scriptAdder. It wouldn't render.
+    const inner = new VugNode("template", [new VugWord("v-for", innerVFor, true)], n.children)
+    const script = `$el => {
+        const win = Array.constructor('return window')();
+        // win.console.log('Running!');
+        if (!win.router) {
+            win.router = {
+                basePath: '/bandlibs',
+                get pathname() { return win.location.pathname.replace(win.router.basePath, '') || '/' },
+                push(url) { win.history.pushState('', '', url); win.dispatchEvent(new win.Event('popstate')) },
+                match: path => win.router.pathname === path ? [{ $router: win.router, $route: { path: win.router.pathname, params: {} } }] : [],
+            };
+            // win.console.log("Router initialized!");
+        };
+        // Update our component when the route changes, as well as once now
+        if (!$el || $el.ranonce) return;
+        $el.ranonce = true;
+        const onUpd = () => $el.__vueParentComponent.update();
+        win.addEventListener('popstate', onUpd);
+        win.setTimeout(onUpd, 10);
+      }
+    `.split("\n").map(x => x.split(" //")[0].trim()).join(" ") // So make sure you have semicolons on each line
+    const scriptAdder = new VugNode("template", [new VugWord("ref", script, true)])
+    const container = new VugNode("template", [vIfTrue()], [scriptAdder, inner])
+    return container
 }
 
 function splitDoubleClasses(n: VugNode) { // TODO optimize
