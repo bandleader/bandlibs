@@ -15,17 +15,17 @@ TODO:
 - Make the left side Monaco
 
 To add to docs:
-- CSS shorthand
-- CSS macros
+// - CSS shorthand
+// - CSS macros
   - Flex macro
 - CSS units
-- Custom tag types
+// - Custom tag types
 - HTML on right side
 - HTML on left side
-- Direct children
-- Binding to expression (incl styles)
-  - Conditional classes
-  - Objects/templates/numbers
+// - Direct children
+// - Binding to expression (incl styles)
+  // - Conditional classes
+  // - Objects/templates/numbers
 - First-class stylesheets
   - (main point being co-location)
   - (and to refer to the current element by default without needing to dream up class names)
@@ -81,6 +81,11 @@ section.py-4 bg=#AAA
     raw --   -- Here's some plain text inside the paragraph,
     raw --   -- and another line of plain text.
 
+  In the case where an element has only one child, you can express it on one line using `>` (syntax similar to the CSS direct-child operator):
+  VugDocsExample.mb-4 > pre
+    raw -- .card > .card-body -- Contents
+    raw -- ul > li > span -- List with a single list item containing a span
+
   ### Classes and IDs
   
   You can add CSS classes to to the tag name using the `.` character, just like in CSS itself:
@@ -108,15 +113,37 @@ section.py-4 bg=#AAA
   VugDocsExample.mb-4 > pre -- div style="font-size: 1.5em; font-weight: bold;"
   But in Vug, we recognize all CSS property names, so you can set them directly on the element:
   VugDocsExample.mb-4 > pre -- div font-size=1.5em font-weight=bold
-  // TODO link to shorthand etc, and to binding
+  p -- You can also bind an attribute to a dynamically computed value. See [Binding to Expressions](#binding-to-expressions).
+  p -- See also: [CSS Shorthand](#css-shorthand), [CSS Macros](#css-macros)
 
   ### CSS Shorthand
-  // TODO
+  Vug provides the shorthand versions of many CSS properties, same as [Imba](https://imba.io/docs/css/properties):
+  .row vg-let:all=Object.entries({ ac: "align-content", ai: "align-items", as: "align-self", b: "bottom", bc: "border-color", bcb: "border-bottom-color", bcl: "border-left-color", bcr: "border-right-color", bct: "border-top-color", bd: "border", bdb: "border-bottom", bdl: "border-left", bdr: "border-right", bdt: "border-top", bg: "background", bga: "background-attachment", bgc: "background-color", bgclip: "background-clip", bcgi: "background-image", bgo: "background-origin", bgp: "background-position", bgr: "background-repeat", bgs: "background-size", bs: "border-style", bsb: "border-bottom-style", bsl: "border-left-style", bsr: "border-right-style", bst: "border-top-style", bw: "border-width", bwb: "border-bottom-width", bwl: "border-left-width", bwr: "border-right-width", bwt: "border-top-width", c: "color", cg: "column-gap", d: "display", e: "ease", ec: "ease-colors", eo: "ease-opacity", et: "ease-transform", ff: "font-family", fl: "flex", flb: "flex-basis", fld: "flex-direction", flf: "flex-flow", flg: "flex-grow", fls: "flex-shrink", flw: "flex-wrap", fs: "font-size", fw: "font-weight", g: "gap", ga: "grid-area", gac: "grid-auto-columns", gaf: "grid-auto-flow", gar: "grid-auto-rows", gc: "grid-column", gce: "grid-column-end", gcg: "grid-column-gap", gcs: "grid-column-start", gr: "grid-row", gre: "grid-row-end", grg: "grid-row-gap", grs: "grid-row-start", gt: "grid-template", gta: "grid-template-areas", gtc: "grid-template-columns", gtr: "grid-template-rows", h: "height", jac: "place-content", jai: "place-items", jas: "place-self", jc: "justify-content", ji: "justify-items", js: "justify-self", l: "left", lh: "line-height", ls: "letter-spacing", m: "margin", mb: "margin-bottom", ml: "margin-left", mr: "margin-right", mt: "margin-top", o: "opacity", of: "overflow", ofa: "overflow-anchor", ofx: "overflow-x", ofy: "overflow-y", origin: "transform-origin", p: "padding", pb: "padding-bottom", pe: "pointer-events", pl: "padding-left", pos: "position", pr: "padding-right", pt: "padding-top", r: "right", rd: "border-radius", rdbl: "border-bottom-left-radius", rdbr: "border-bottom-right-radius", rdtl: "border-top-left-radius", rdtr: "border-top-right-radius", rg: "row-gap", shadow: "box-shadow", t: "top", ta: "text-align", td: "text-decoration", tdc: "text-decoration-color", tdl: "text-decoration-line", tds: "text-decoration-style", tdsi: "text-decoration-skip-ink", tdt: "text-decoration-thickness", te: "text-emphasis", tec: "text-emphasis-color", tep: "text-emphasis-position", tes: "text-emphasis-style", ts: "text-shadow", tt: "text-transform", tween: "transition", us: "user-select", va: "vertical-align", w: "width", ws: "white-space", zi: "z-index" })
+    template vg-let:colLength="Math.trunc(all.length+1) / 3"
+      .col-md-3 vg-each:col=[0, 1, 2].map(i => all.slice(i * colLength, i * colLength + colLength))
+        ul > li v-for="[k,v] in col" -- `{{k}}` => `{{v}}`
 
   ### CSS Macros
+  Besides for the regular CSS properties, Vug also supports these custom properties (macros) that compile into other properties:
+  - `mx`: horizontal margin; compiles to `margin-left` and `margin-right`.
+  - `my`: vertical margin; compiles to `margin-top` and `margin-bottom`.
+  - `px`: horizontal padding; compiles to `padding-left` and `padding-right`.
+  - `py`: vertical padding; compiles to `padding-top` and `padding-bottom`.
+  - `sz`: size; compiles to `width` and `height`.
+  - `circ` (without value): compiles to `border-radius=100%`.
 
   ### Custom Tag Types
-  Including flex macros or arg
+  // TODO flex arg (or as macro)
+  - `d`: short for `div`
+  - `s`: short for `span`
+  - `ib`, `inline-block`: short for `<div style="display: inline-block" />`
+  - `f`, `flex`: short for `<div style="display: flex" />`
+  VugDocsExample.mb-4 > pre
+    raw -- d -- This is a div
+    raw -- s.badge.bg-primary -- This is a span
+    raw -- ib bg=yellow -- This is an inline-block
+    raw -- f -- This is a flexbox
+    raw -- f:c.c h=5em bg=lightgreen -- Centered flexbox
 
   ### Markdown
     s.badge.rounded-pill.bg-danger fs=0.4em -- EXPERIMENTAL
@@ -154,6 +181,31 @@ section.py-4 bg=#AAA
 
   ### Binding to Expressions
     s.badge.rounded-pill.bg-warning fs=0.4em -- Vue only
+  To bind an attribute to a dynamically computed expression, wrap the expression in parentheses:
+  VugDocsExample.mb-4 > pre > raw -- input value=(someObj.someProp)
+  These can contain spaces:
+  VugDocsExample.mb-4 > pre > raw -- input value=(someObj.someProp + someVariable)
+  You can also bind to a template string:
+  VugDocsExample.mb-4 > pre // TODO this should work even if in one line! Problem is it runs before the directChild macro 
+    raw -- input value=`${firstName} ${lastName}`
+  Or an object literal:
+  VugDocsExample.mb-4 > pre > raw -- PersonCard person={name: "Fred", age: 40}
+  Or a number literal: (i.e. it will be bound as a number rather than a string)
+  VugDocsExample.mb-4 > pre > raw -- CustomTable lines=12
+  But note that in all other cases (i.e without parens or the options above), the value will be interpreted as a string:
+  VugDocsExample.mb-4 > pre
+    raw -- /{{''}}/ This will be bound to the string 'numLines', not a variable
+    raw -- CustomTable lines=numLines 
+  
+  ##### Style Binding
+  The same thing can be done for inline styles:
+  VugDocsExample.mb-4 > pre > raw -- div bg=(important ? 'red' : 'white')
+
+  ##### Conditional Classes
+  Classes can be applied conditionally. No need for parens here as it's necessarily an expression, but you can use it if there are spaces:
+  VugDocsExample.mb-4 > pre > raw -- a.link .active=isActive
+  VugDocsExample.mb-4 > pre > raw -- a.link .active=(curTab === 2)
+
 
   ### Special Directives
     s.badge.rounded-pill.bg-warning fs=0.4em -- Vue only
