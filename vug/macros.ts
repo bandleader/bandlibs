@@ -122,9 +122,16 @@ function routing(n: VugNode): VugNode {
             };
             // win.console.log("Router initialized!");
         };
-        
+        // Update our component when the route changes, as well as once now
+        // This doesn't work in production. We'll go another way instead
+        // if (!$el || $el.ranonce) return;
+        // $el.ranonce = true;
+        // win.console.log('running on', $el, this); // debug
+        // const onUpd = () => $el.__vueParentComponent?.update();
+        // win.addEventListener('popstate', onUpd);
+        // win.setTimeout(onUpd, 10);
       }
-    `.split("\n").map(x => x.split(" //")[0].trim()).join(" ") // So make sure you have semicolons on each line
+    `.split("\n").map(x => x.split(" //")[0].trim()).join(" ").trim() // So make sure you have semicolons on each line
     const scriptAdder = new VugNode("div", [new VugWord("ref", script, true)])
     const container = new VugNode("template", [vIfTrue()], [scriptAdder, inner])
     return container

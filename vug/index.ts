@@ -50,6 +50,8 @@ export function ViteTransformPlugin(opts: VugOptions = {}) {
     enforce: "pre" as const,
     transform(code: string, id: string) {
       if (!id.endsWith(".vue")) return;
+      const origCode = code
+
       const findTemplateTag = /<template lang=['"]?vug['" >]/g.exec(code)
       if (!findTemplateTag) return;
       const startOfTemplateTag = findTemplateTag.index
@@ -57,7 +59,25 @@ export function ViteTransformPlugin(opts: VugOptions = {}) {
       const endOfCode = code.lastIndexOf("</template>")
       const vugCode = code.substring(startOfCode, endOfCode)
       const output = (opts._tempLangVersion||1.2) >= 2 ? V2.compile(vugCode).toVueTemplate() : V1.v1Load(vugCode).toVueTemplate()
-      return code.substring(0, startOfTemplateTag) + "<template>" + output + code.substring(endOfCode) // We have to replace the template tag so the SFC compiler doesn't error because it doesn't know how to process Vue
+      code = code.substring(0, startOfTemplateTag) + "<template>" + output + code.substring(endOfCode) // We have to replace the template tag so the SFC compiler doesn't error because it doesn't know how to process Vue
+
+      // Inject some code (experimental)
+      if (origCode.includes('route path=')) {
+        const decls = "import * as VugVue from 'vue'"
+        const statements = `
+          console.log('hi!')
+          const inst = VugVue.getCurrentInstance()
+          window.addEventListener('popstate', () => inst.update())
+          setTimeout(() => inst.update(), 10)
+        `
+        const scriptTag = code.match(/<script[^>]+>/)
+        const scriptEndTag = code.match(/<\/script>/)
+        if (!scriptTag || !scriptEndTag) throw "Can't inject script; tag not found" // TODO add one?
+        code = code.replace(scriptTag[0], scriptTag[0] + '\n' + decls + '\n')
+        code = code.replace(scriptEndTag[0], '\n' + statements + '\n' + scriptEndTag)
+      }
+
+      return code
     }
   }
 }
