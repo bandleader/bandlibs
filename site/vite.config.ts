@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import * as Vug from '../dist/vug.cjs'
+// import * as Vug from '../dist/vug.cjs'
+import * as Vug from '../vug'
 
 // Enable Markdown in Vug
 import { marked } from 'marked'
