@@ -19,6 +19,10 @@ export function lineTransformBasedOnPrefixes(line: string) {
 }
 
 export function fixMarkdownMacro(n: VugNode) {
+    // Handles list items and blockquotes, which need to be grouped together with siblings of the same type, into a container of the appropriate type
+    // (markdownlistitem-ul)+       --->        ul > li
+    // (markdownlistitem-ol)+       --->        ol > li
+    // (blockquote.blockquote)+     --->        blockquote.blockquote > p
     let foundAny = false, children: VugNode[] = [], lastTag = ""
     for (const c of n.children) {
         if (c.tag.startsWith("markdownlistitem-")) {
