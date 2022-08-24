@@ -89,7 +89,7 @@ const htmlNode = (html: string) => new VugNode("_html", [new VugWord("_contents"
 function parseLine(line: string) {
     line = splitTwo(line, "// ")[0] // ignore comments
     if (line.startsWith("<")) line = "-- " + line // allow HTML tags
-    line = MarkdownSupport.lineTransform(line)
+    line = MarkdownSupport.lineTransformBasedOnPrefixes(line)
     if (line.startsWith("-- ")) line = " " + line // so that it gets detected, as we've trimmed
     let [_wordPart, innerHtml] = splitTwo(line, " -- ")
     if (!_wordPart) return htmlNode(innerHtml)

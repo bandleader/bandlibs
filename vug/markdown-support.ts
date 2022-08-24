@@ -1,7 +1,7 @@
 import { clone } from "./macros"
 import { VugNode } from "./parsing"
 
-export function lineTransform(line: string) {
+export function lineTransformBasedOnPrefixes(line: string) {
     const convLine = (txt: string): string => globalThis.convertMarkdownLine ? globalThis.convertMarkdownLine(txt) : txt
     const re = (regexp: RegExp, transform: (x: RegExpMatchArray)=>string) => (input: string) => { const result = input.match(regexp); if (!result) return null; return transform(result) }
     const funcs: ((input: string) => string|null)[] = [
