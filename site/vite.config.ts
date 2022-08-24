@@ -10,5 +10,5 @@ globalThis.convertMarkdownLine = (text: string) => { const ret: string = marked.
 // https://vitejs.dev/config/
 export default defineConfig({
   base: "/bandlibs",
-  plugins: [Vug.ViteTransformPlugin({_tempLangVersion: 2}), vue({isProduction: false})],
+  plugins: [Vug.ViteTransformPlugin({_tempLangVersion: 2}), vue()],
 })
