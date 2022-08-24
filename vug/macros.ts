@@ -110,7 +110,7 @@ function routing(n: VugNode): VugNode {
     const innerVFor = `{$route, $router} in (Array.constructor('return window')().router?.match?.(${JSON.stringify(path).replace(/"/g, "&quot;")}) || [])`
     const vIfTrue = () => new VugWord("v-if", "true", false) // for 'template' tags. Otherwise Vue renders them as the HTML tag 'template' which is invisible. I want a fragment. Note that even with this done, I couldn't make 'inner' a child of scriptAdder. It wouldn't render.
     const inner = new VugNode("template", [new VugWord("v-for", innerVFor, true)], n.children)
-    const script = `$el => {
+    const script = `function($el) {
         const win = Array.constructor('return window')();
         // win.console.log('Running!');
         if (!win.router) {
@@ -125,7 +125,7 @@ function routing(n: VugNode): VugNode {
         // Update our component when the route changes, as well as once now
         if (!$el || $el.ranonce) return;
         $el.ranonce = true;
-        win.console.log('running on', $el); // debug
+        win.console.log('running on', $el, this); // debug
         const onUpd = () => $el.__vueParentComponent?.update();
         win.addEventListener('popstate', onUpd);
         win.setTimeout(onUpd, 10);
