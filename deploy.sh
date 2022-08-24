@@ -6,6 +6,7 @@
 set -e
 
 # build
+cd site
 npm run build
 
 # navigate into the build output directory
