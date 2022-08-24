@@ -35,6 +35,7 @@ jobs:
           cd site
           npm install
           npm run build
+          cp dist/index.html dist/404.html 
           cd -
       - uses: actions/configure-pages@v1
       - name: Upload artifact
