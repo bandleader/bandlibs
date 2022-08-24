@@ -62,8 +62,8 @@ section.py-4 bg=#AAA
 
   Each element goes on its own line, and consists of the tag name, optionally followed by <code> -- </code> and any text content:
   VugDocsExample.mb-4 > pre
-    -- h3 -- Welcome to Vug!
-    -- p -- Let's describe Vug in a paragraph.
+    raw -- h3 -- Welcome to Vug!
+    raw -- p -- Let's describe Vug in a paragraph.
   
   You can add comments after a <code>//&nbsp;</code>, like in Javascript:
     aside -- (make sure there's a space after the <code>//</code> -- this helps to disambiguate from things like <code>https://example.com</code>)
@@ -73,13 +73,13 @@ section.py-4 bg=#AAA
 
   You can create nested structures of elements simply by indenting them appropriately:
   VugDocsExample.mb-4 > pre
-    -- div
-    --   p -- This paragraph is inside the div.
-    --   p -- So is this one.
-    -- p -- Here's a paragraph outside of the div.
-    -- p
-    --   -- Here's some plain text inside the paragraph,
-    --   -- and another line of plain text.
+    raw -- div
+    raw --   p -- This paragraph is inside the div.
+    raw --   p -- So is this one.
+    raw -- p -- Here's a paragraph outside of the div.
+    raw -- p
+    raw --   -- Here's some plain text inside the paragraph,
+    raw --   -- and another line of plain text.
 
   ### Classes and IDs
   
@@ -91,10 +91,10 @@ section.py-4 bg=#AAA
   VugDocsExample.mb-4 > pre -- div.bold#customerName -- ACME Industries
   If the tag is `div`, you can just write classes and/or IDs, and skip the tag name:
   VugDocsExample.mb-4 > pre 
-    -- .row
-    --   .col-3 
-    --   .col-9#mainColumn 
-    -- #footer
+    raw -- .row
+    raw --   .col-3 
+    raw --   .col-9#mainColumn 
+    raw -- #footer
 
   ### Attributes and Inline Styles
   You can set attributes on elements just like in HTML:
@@ -168,25 +168,23 @@ section.py-4 bg=#AAA
   Sets a new variable in the current scope. This is useful where you want to refer to it more than once (to be more DRY, or to save computing it twice).
     aside -- (This is accomplished by compiling to a <code>v-for</code> loop over a single-element array.)
   VugDocsExample.mb-4 > pre 
-    -- div vg-each=customers
-    --   .card vg-let:fullName=`${it.firstName} ${it.lastName}`
-    --     .card-heading -- [[[[fullName]]]]
-    --     /{{''}}/ More elements here...
-    --     .card-body > a -- Send a message to [[[[fullName]]]]
+    raw -- div vg-each=customers
+    raw --   .card vg-let:fullName=`${it.firstName} ${it.lastName}`
+    raw --     .card-heading -- [[[[fullName]]]]
+    raw --     /{{''}}/ More elements here...
+    raw --     .card-body > a -- Send a message to [[[[fullName]]]]
 
   ##### `vg-do`
   Runs code on the element once, as soon as it is inserted. The element is available as `$el`.
     aside -- (accomplished using Vue's <a href="https://vuejs.org/guide/essentials/template-refs.html#function-refs">Function Refs</a> feature)
   VugDocsExample.mb-4 > pre 
-    -- input vg-do=$el.focus() 
-    -- div vg-do=customAnimationRoutine($el) 
+    raw -- input vg-do=$el.focus() 
+    raw -- div vg-do=customAnimationRoutine($el) 
   It is sometimes helpful to access global functions in these handlers (i.e. to break out of Vue's sandbox). Vug provides `${{''}}win` for this:
     aside -- (accomplished using `Array.constructor('return window')()`)
     aside -- (you can do this in any Vug attribute, like in `@click` handlers)
   VugDocsExample.mb-4 > pre 
-    -- input vg-do="${{''}}win.setTimeout(() => $el.focus(), 5000)"
-
-
+    raw -- input vg-do="${{''}}win.setTimeout(() => $el.focus(), 5000)"
 
 </template>
 
