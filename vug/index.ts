@@ -76,6 +76,7 @@ export function ViteTransformPlugin(opts: VugOptions = {}) {
         code = code.replace(scriptEndTag[0], '\n' + statements + '\n' + scriptEndTag)
       }
 
+      if (origCode.includes("// VUGDEBUG")) console.log(`===============\nVug output ${new Date()}\n${code}\n===============`)
       return code
     }
   }
