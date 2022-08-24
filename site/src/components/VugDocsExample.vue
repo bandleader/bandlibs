@@ -3,7 +3,8 @@ import { ref, computed, onMounted, watch, getCurrentInstance } from 'vue'
 import * as Vug from '../../../vug'
 const props = defineProps<{ code?: string }>()
 const initialInput = (function() {
-    let get = props.code || String(getCurrentInstance().slots.default()[0].children) 
+    const getCodeFromSlot = (children: any = getCurrentInstance().slots.default()[0].children): string => typeof children === 'string' ? children : children.children ? getCodeFromSlot(children.children) : Array.isArray(children) ? children.map(getCodeFromSlot).join("") : `Unknown children type: ${JSON.stringify(children)}`
+    let get = props.code || getCodeFromSlot()
     get = get.replace(/\[\[/g,'{').replace(/\]\]/g,'}')
     const lines = get.split('\n')
     const minIndent = Math.min(...lines.filter(x => x.trim().length).map(x => x.length - x.trimStart().length))
