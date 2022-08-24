@@ -40,17 +40,17 @@ section.bg-dark.text-secondary.px-4.py-5.text-center bg=#222!important > .py-5
     p
     p.fs-5.mb-4 c=#FFF -- Vug lets you write HTML so quickly, you can prototype at warp speed and push the code straight into production. Try it yourself: 
     .d-grid.gap-2.d-sm-flex.justify-content-sm-center
-      button.btn.btn-outline-info.btn-lg.px-4.me-sm-3.fw-bold type=button -- Get started
-      button.btn.btn-outline-light.btn-lg.px-4 type=button -- Docs
+      a.btn.btn-outline-info.btn-lg.px-4.me-sm-3.fw-bold type=button -- Get started
+      a.btn.btn-outline-light.btn-lg.px-4 type=button href=#documentation -- Docs
 section.py-4 bg=#AAA
   h2.text-center -- Try it now!
   .container > VugDocsExample > pre
     -- .text-center.p-2 bg=green c=#FFF -- Hello from Vug!
     --   button.btn.btn-primary -- ♥ Like
 
-.container.py-4
+.container.py-4#documentation
   css:[& aside] font-style=italic c=#777 d=inline
-  h2 -- Vug documentation
+  h1 -- Documentation
   p -- Vug is a concise language for expressing DOM elements, inspired by <a href="https://pugjs.org">Pug</a>, <a href="https://imba.io/docs/tags">Imba Elements</a>, and <a href="https://tailwindcss.com">Tailwind CSS</a>.
   
   h3 -- Basics
@@ -113,12 +113,18 @@ section.py-4 bg=#AAA
   h3 -- Custom Tag Types
   p -- Including flex macros or arg
 
-  h3 -- (Vue only) Stylesheets
+  h3
+    -- Stylesheets
+    s.badge.rounded-pill.bg-warning fs=0.4em -- Vue only
   p -- Including on the element itself
 
-  h3 -- (Vue only) Binding to Expressions
+  h3 
+    -- Binding to Expressions
+    s.badge.rounded-pill.bg-warning fs=0.4em -- Vue only
 
-  h3 -- (Vue only) Special Directives
+  h3
+    -- Special Directives
+    s.badge.rounded-pill.bg-warning fs=0.4em -- Vue only
   
   h5 > code -- vg-each
   p -- Vug provides a more concise syntax for loops (compiles down to a regular <code>v-for</code>). You can access the element via the variable <code>it</code>, and the index (or key of an object) via <code>it_i</code>.
