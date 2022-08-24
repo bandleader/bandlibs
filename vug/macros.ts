@@ -12,6 +12,7 @@
 import { VugNode, VugWord } from "./parsing"
 import * as SheetStyles from "./sheet-styles"
 import * as Styling from "./styling"
+import * as MarkdownSupport from "./markdown-support"
 
 export let v1compat = true
 
@@ -56,6 +57,7 @@ const vgEach = wordTransformer(w => w.key.startsWith("vg-each:") ? new VugWord("
 const allowReferencesToGlobals = wordTransformer(w => w.value.includes("$win") ? new VugWord(w.key, w.value.replace(/\$win/g, "(Array.constructor('return window')())"), w.isExpr) : w)
 
 export function runAll(node: VugNode): VugNode {
+    node = MarkdownSupport.fixMarkdownMacro(node)
     node = directChild(node)
     node = tagNameParser(node)
     node = splitDoubleClasses(node)

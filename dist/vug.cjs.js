@@ -282,6 +282,50 @@ function parseStyleVariants(key, start, attrs) {
     return ret;
 }
 
+function lineTransform(line) {
+    var convLine = function (txt) { return globalThis.convertMarkdownLine ? globalThis.convertMarkdownLine(txt) : txt; };
+    var re = function (regexp, transform) { return function (input) { var result = input.match(regexp); if (!result)
+        return null; return transform(result); }; };
+    var funcs = [
+        re(/^(#+) (.*)/, function (x) { return "h".concat(x[1].length, " -- ").concat(convLine(x[2])); }),
+        re(/^[-*] (.*)/, function (x) { return "markdownlistitem-ul -- ".concat(convLine(x[1])); }),
+        re(/^[0-9]+[.)] (.*)/, function (x) { return "markdownlistitem-ol -- ".concat(convLine(x[1])); }),
+        re(/^> (.*)/, function (x) { return "markdownlistitem-blockquote.blockquote -- ".concat(convLine(x[1])); }),
+        re(/^[+|] (.*)/, function (x) { return "p -- ".concat(convLine(x[1])); }),
+        re(/^\|\| (.*)/, function (x) { return "div -- ".concat(convLine(x[1])); }),
+        re(/^\|\|\| (.*)/, function (x) { return "-- ".concat(convLine(x[1])); }),
+    ];
+    var tryThem = funcs.find(function (f) { return f(line) !== null; });
+    if (tryThem)
+        return tryThem(line);
+    return line;
+}
+function fixMarkdownMacro(n) {
+    var foundAny = false, children = [], lastTag = "";
+    for (var _i = 0, _a = n.children; _i < _a.length; _i++) {
+        var c = _a[_i];
+        if (c.tag.startsWith("markdownlistitem-")) {
+            foundAny = true;
+            var kind = c.tag.split("-")[1];
+            var item = clone(c, { tag: kind === 'blockquote.blockquote' ? 'p' : "li" });
+            if (lastTag === c.tag) {
+                children.slice(-1)[0].children.push(item);
+            }
+            else {
+                var container = new VugNode(kind, [], [item]);
+                children.push(container);
+            }
+        }
+        else {
+            children.push(c);
+        }
+        lastTag = c.tag;
+    }
+    if (!foundAny)
+        return n;
+    return new VugNode(n.tag, n.words, children);
+}
+
 /* TODO
 - Debug things that aren't working properly:
     f:c.c.class1.class2 (class1 is taken as align-content, and class2 is discarded) (either use hyphens [but that conflicts with row], or go back to "al" or "fx" props)
@@ -339,6 +383,7 @@ var vgEachSimple = wordTransformer(function (w) { return w.key === "vg-each" ? n
 var vgEach = wordTransformer(function (w) { return w.key.startsWith("vg-each:") ? new VugWord("v-for", "(".concat(w.key.slice(8), ",").concat(w.key.slice(8), "_i) in ").concat(w.value), false) : w; });
 var allowReferencesToGlobals = wordTransformer(function (w) { return w.value.includes("$win") ? new VugWord(w.key, w.value.replace(/\$win/g, "(Array.constructor('return window')())"), w.isExpr) : w; });
 function runAll(node) {
+    node = fixMarkdownMacro(node);
     node = directChild(node);
     node = tagNameParser(node);
     node = splitDoubleClasses(node);
@@ -647,6 +692,7 @@ function parseLine(line) {
     line = splitTwo$1(line, "// ")[0]; // ignore comments
     if (line.startsWith("<"))
         line = "-- " + line; // allow HTML tags
+    line = lineTransform(line);
     if (line.startsWith("-- "))
         line = " " + line; // so that it gets detected, as we've trimmed
     var _a = splitTwo$1(line, " -- "), _wordPart = _a[0], innerHtml = _a[1];
@@ -690,8 +736,11 @@ function parseDoc(html) {
         var ln = lines_1[_i];
         _loop_1(ln);
     }
-    // Run macros
-    return out.map(function (x) { return runAll(x); });
+    // Run macros. Let's run it on a fake top-level element, so that macros can access the children of it
+    // Formerly simply: return out.map(x => Macros.runAll(x))
+    var doc = new VugNode("_doc", undefined, out);
+    var nodes = runAll(doc).children;
+    return nodes;
 }
 
 function compile(text) {

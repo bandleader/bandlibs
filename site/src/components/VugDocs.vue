@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import * as Vug from '../../../vug'
+import { marked } from '../../../node_modules/marked/lib/marked.esm.js'
 import VugDocsExample from './VugDocsExample.vue'
+
+;(globalThis as any).convertMarkdownLine = (text: string) => { const ret: string = marked.parse(text); return ret.slice(3, ret.length - 5) }
 
 const commentExampleCode = `h3 -- Welcome to Vug! // This is a comment\n// This is also a comment`
 

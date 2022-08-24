@@ -1,5 +1,6 @@
 import * as Macros from "./macros"
 import * as Emit from "./emit"
+import * as MarkdownSupport from './markdown-support'
 
 export class VugNode {
     constructor(public tag: string, public words: VugWord[] = [], public children: VugNode[] = []) {}
@@ -88,6 +89,7 @@ const htmlNode = (html: string) => new VugNode("_html", [new VugWord("_contents"
 function parseLine(line: string) {
     line = splitTwo(line, "// ")[0] // ignore comments
     if (line.startsWith("<")) line = "-- " + line // allow HTML tags
+    line = MarkdownSupport.lineTransform(line)
     if (line.startsWith("-- ")) line = " " + line // so that it gets detected, as we've trimmed
     let [_wordPart, innerHtml] = splitTwo(line, " -- ")
     if (!_wordPart) return htmlNode(innerHtml)
@@ -119,6 +121,9 @@ export function parseDoc(html: string) {
         else out.push(ln.node) // Or as a top-level node, if the stack is empty
         stack.push(ln) // Push ourselves onto the stack, in case we have children
     }
-    // Run macros
-    return out.map(x => Macros.runAll(x))
+    // Run macros. Let's run it on a fake top-level element, so that macros can access the children of it
+    // Formerly simply: return out.map(x => Macros.runAll(x))
+    const doc = new VugNode("_doc", undefined, out)
+    const nodes = Macros.runAll(doc).children
+    return nodes
 }
