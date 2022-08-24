@@ -5,10 +5,6 @@
 # abort on errors
 set -e
 
-# got an error without this
-git config user.email "you@example.com"
-git config user.name "Your Name"
-
 # build
 cd site
 npm install
@@ -22,6 +18,10 @@ cd dist
 
 git init
 git checkout -b main
+
+git config user.email "you@example.com" # got an error without this
+git config user.name "Your Name" # got an error without this
+
 git add -A
 git commit -m 'deploy'
 
