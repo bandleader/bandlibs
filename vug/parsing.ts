@@ -94,6 +94,7 @@ function parseLine(line: string) {
     let [_wordPart, innerHtml] = splitTwo(line, " -- ")
     if (!_wordPart) return htmlNode(innerHtml)
     const [tag, ...words] = splitThree( _wordPart.trim(), " ")
+    if (MarkdownSupport.aggressiveMarkdownParagraphDetection(tag, words)) return parseLine("| " + line)
     const words2 = words.map(w => {
         let [key, value] = splitTwo(w, "=")
         let [isExpr, parsedValue] = parseValue(value)

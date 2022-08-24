@@ -25,6 +25,13 @@ export function convertSingleLineOfText(txt: string) {
     return ret
 }
 
+export function aggressiveMarkdownParagraphDetection(tag: string, words: string[]): boolean {
+    // After parsing into a tag and words, returns whether the line still looks like a Markdown paragraph rather than a line containing an element, based on heuristics
+    const hasAndNotAtEnd = (text: string, char: string) => { const ind = text.indexOf(char); return ind >= 0 && ind != (text.length - char.length) }
+    const looksCodey = (w: string) => w === ">" || ["=", ".", ":", "#"].some(ch => hasAndNotAtEnd(w, ch))
+    return words.length >= 3 && !looksCodey(tag) && !words.slice(0, 3).some(looksCodey)
+}
+
 export function fixMarkdownMacro(n: VugNode) {
     // Handles list items and blockquotes, which need to be grouped together with siblings of the same type, into a container of the appropriate type
     // (markdownlistitem-ul)+       --->        ul > li
