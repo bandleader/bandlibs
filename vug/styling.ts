@@ -13,10 +13,17 @@ export function processCssProp(key: string, value: string): null | Record<string
     Supports shorthands, units, and soon macros. Meant for running from anywhere, not necessarily a lowering pass.
     Returns null if the key is not recognized.
     */
-    if (cssProperties.includes(key))
-        return { [key]: allowQUnits(value) };
-    if (imbaDict[key])
-        return { [imbaDict[key]]: allowQUnits(value) };
+    if (cssProperties.includes(key)) return { [key]: allowQUnits(value) }
+    if (imbaDict[key]) return { [imbaDict[key]]: allowQUnits(value) }
+    // Macros
+    if (key === "sz") return { "width": allowQUnits(value), "height": allowQUnits(value) }
+    if (key === "px") return { "padding-left": allowQUnits(value), "padding-right": allowQUnits(value) }
+    if (key === "py") return { "padding-top": allowQUnits(value), "padding-bottom": allowQUnits(value) }
+    if (key === "mx") return { "margin-left": allowQUnits(value), "margin-right": allowQUnits(value) }
+    if (key === "my") return { "margin-top": allowQUnits(value), "margin-bottom": allowQUnits(value) }
+    if (key === "circ" && !value) return { "border-radius": "100%" }
+    if (Macros.v1compat && key === "d") return { "display": cssDisplayShorthand[value] } // TODO not sure I want this, perhaps just use tag types, except b/i/if conflict, but can use full form for those. Or can use mainArg
+
     return null;
 }
 
@@ -34,24 +41,7 @@ function allowQUnits(value: string) {
     return value
 }
 
-export const quickUnits = Macros.wordTransformer(w => (w.key.startsWith("style_") && !w.isExpr && /^-?([0-9]*\.)?[0-9]+q$/.test(w.value)) ? new VugWord(w.key, parseFloat(w.value) * 0.25 + 'rem', false) : w) // Support the "q" numeric unit which is 0.25rem, similar to Bootstrap
-
 const cssDisplayShorthand = { b: "block",  i: "inline", f: "flex", g: "grid", ib: "inline-block", if: "inline-flex", ig: "inline-grid" }
-export function basicCssMacros(n: VugNode) {
-    const words = n.words.flatMap(w => 
-        w.key === "sz" ? [new VugWord("style_width", w.value, w.isExpr), new VugWord("style_height", w.value, w.isExpr)]  :
-        w.key === "px" ? [new VugWord("style_padding-left", w.value, w.isExpr), new VugWord("style_padding-right", w.value, w.isExpr)]  :
-        w.key === "py" ? [new VugWord("style_padding-top", w.value, w.isExpr), new VugWord("style_padding-bottom", w.value, w.isExpr)]  :
-        w.key === "mx" ? [new VugWord("style_margin-left", w.value, w.isExpr), new VugWord("style_margin-right", w.value, w.isExpr)]  :
-        w.key === "my" ? [new VugWord("style_margin-top", w.value, w.isExpr), new VugWord("style_margin-bottom", w.value, w.isExpr)]  :
-        (w.key === "circ" && !w.value && !w.isExpr) ? [new VugWord("style_border-radius", "100%", w.isExpr)]  :
-        // TODO not sure I want this, perhaps just use tag types, except b/i/if conflict, but can use full form for those.
-        // Or can use mainArg
-        (Macros.v1compat && w.key === "d" && !w.isExpr) ? [new VugWord("style_display", cssDisplayShorthand[w.value] || w.value, w.isExpr)]  :
-        [w]
-    )
-    return new VugNode(n.tag, words, n.children)
-}
 
 export function flexMacroFx(n: VugNode): VugNode {
     let value = n.getWordErrIfCalc("fx")
