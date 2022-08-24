@@ -21,7 +21,7 @@ export function clone(node: VugNode, changes: Record<string, string>) {
     for (const [k,v] of Object.entries(changes)) {
         if (k === 'tag') continue;
         else if (v === undefined) continue;
-        if (ret.words.find(x => x.key === k && x.isExpr)) throw `Clone can't overwrite attribute '${k}' that is bound to an expression`
+        if (ret.words.find(x => x.key === k && x.isExpr && v !== null)) throw `Clone can't overwrite attribute '${k}' that is bound to an expression`
         ret.words = ret.words.filter(x => x.key !== k)
         if (v !== null) ret.words.push(new VugWord(k, v, false))
     }
