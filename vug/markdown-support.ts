@@ -27,6 +27,10 @@ export function convertSingleLineOfText(txt: string) {
 
 export function aggressiveMarkdownParagraphDetection(tag: string, words: string[]): boolean {
     // After parsing into a tag and words, returns whether the line still looks like a Markdown paragraph rather than a line containing an element, based on heuristics
+    /* Known fail cases:
+        Let's talk about something          (because the quote causes it to be parsed as one word)
+            (maybe we should use simpler word parsing for this test. Though that needs reparsing so it'll be slow)
+    */
     const hasAndNotAtEnd = (text: string, char: string) => { const ind = text.indexOf(char); return ind >= 0 && ind != (text.length - char.length) }
     const looksCodey = (w: string) => w === ">" || ["=", ".", ":", "#"].some(ch => hasAndNotAtEnd(w, ch))
     return words.length >= 3 && !looksCodey(tag) && !words.slice(0, 3).some(looksCodey)
