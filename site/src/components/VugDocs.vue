@@ -203,6 +203,7 @@ section.py-4 bg=#AAA
   Classes can be applied conditionally. No need for parens here as it's necessarily an expression, but you can use it if there are spaces:
   VugDocsExample.mb-4 > pre > raw -- a.link .active=isActive
   VugDocsExample.mb-4 > pre > raw -- a.link .active=(curTab === 2)
+  VugDocsExample.mb-4 > pre > raw -- a.link .active.bold=(curTab === 3)
 
 
   ### Special Directives
