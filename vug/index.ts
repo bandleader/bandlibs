@@ -65,7 +65,6 @@ export function ViteTransformPlugin(opts: VugOptions = {}) {
       if (origCode.includes('route path=')) {
         const decls = "import * as VugVue from 'vue'"
         const statements = `
-          console.log('hi!')
           const inst = VugVue.getCurrentInstance()
           window.addEventListener('popstate', () => inst.update())
           setTimeout(() => inst.update(), 10)
