@@ -44,7 +44,7 @@ section.bg-dark.text-secondary.px-4.py-5.text-center bg=#222!important > .py-5
     p.fs-5.mb-4 c=#FFF -- Vug lets you write HTML so quickly, you can prototype at warp speed and push the code straight into production. Try it yourself: 
     .d-grid.gap-2.d-sm-flex.justify-content-sm-center
       a.btn.btn-outline-info.btn-lg.px-4.me-sm-3.fw-bold type=button -- Get started
-      a.btn.btn-outline-light.btn-lg.px-4 type=button onclick=$win._router_goto('/docs') -- Docs
+      a.btn.btn-outline-light.btn-lg.px-4 type=button onclick=router.push('/docs') -- Docs
 section.py-4 bg=#AAA
   h2.text-center -- Try it now!
   .container > VugDocsExample > pre

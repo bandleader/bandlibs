@@ -1,6 +1,10 @@
 <script setup lang="ts">
+import { getCurrentInstance } from 'vue';
 import MainPlayground from './components/MainPlayground.vue'
 import VugDocs from './components/VugDocs.vue';
+const inst = getCurrentInstance()
+window.addEventListener('popstate', () => inst!.update())
+setTimeout(() => inst!.update(), 10)
 </script>
 
 <template lang="vug">
