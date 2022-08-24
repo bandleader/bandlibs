@@ -227,7 +227,7 @@ section.py-4 bg=#AAA
 
   ##### `vg-do`
   Runs code on the element once, as soon as it is inserted. The element is available as `$el`.
-    aside -- (accomplished using Vue's <a href="https://vuejs.org/guide/essentials/template-refs.html#function-refs">Function Refs</a> feature)
+    aside -- (accomplished by abusing Vue's <a href="https://vuejs.org/guide/essentials/template-refs.html#function-refs">Function Refs</a> feature)
   VugDocsExample.mb-4 > pre 
     raw -- input vg-do=$el.focus() 
     raw -- div vg-do=customAnimationRoutine($el) 
