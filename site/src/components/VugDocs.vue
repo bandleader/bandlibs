@@ -52,7 +52,7 @@ section.py-4 bg=#AAA
     --   button.btn.btn-primary -- ♥ Like
 
 .container.py-4#documentation
-  css:[& aside] font-style=italic c=#777 d=inline
+  css:[& aside] font-style=italic c=#777 d=inline mx=1q
   # Documentation
   | Vug is a concise language for expressing DOM elements, inspired by [Pug](https://pugjs.org), [Imba Elements](https://imba.io/docs/tags), and [Tailwind CSS](https://tailwindcss.com).
   - Saves you **plenty** of time
