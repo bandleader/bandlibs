@@ -7,6 +7,8 @@ import * as Vug from '../vug'
 import { marked } from 'marked'
 globalThis.convertMarkdownLine = (text: string) => { const ret: string = marked.parse(text); return ret.slice(3, ret.length - 5) }
 
+process.env.NODE_ENV = 'development'
+
 // https://vitejs.dev/config/
 export default defineConfig({
   base: "/bandlibs",
