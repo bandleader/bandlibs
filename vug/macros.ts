@@ -131,7 +131,7 @@ function routing(n: VugNode): VugNode {
         win.setTimeout(onUpd, 10);
       }
     `.split("\n").map(x => x.split(" //")[0].trim()).join(" ") // So make sure you have semicolons on each line
-    const scriptAdder = new VugNode("template", [new VugWord("ref", script, true)])
+    const scriptAdder = new VugNode("div", [new VugWord("ref", script, true)])
     const container = new VugNode("template", [vIfTrue()], [scriptAdder, inner])
     return container
 }
