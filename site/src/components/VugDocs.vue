@@ -175,7 +175,7 @@ section.py-4 bg=#AAA
     -- div vg-each=customers
     --   .card vg-let:fullName=`${it.firstName} ${it.lastName}`
     --     .card-heading -- [[[[fullName]]]]
-    --     // More elements here...
+    --     /{{''}}/ More elements here...
     --     .card-body > a -- Send a message to [[[[fullName]]]]
 
   h5 > code -- vg-do
