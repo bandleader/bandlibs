@@ -4,8 +4,9 @@ import { VugNode } from "./parsing"
 export function lineTransformBasedOnPrefixes(line: string) {
     const convLine = convertSingleLineOfText
     const re = (regexp: RegExp, transform: (x: RegExpMatchArray)=>string) => (input: string) => { const result = input.match(regexp); if (!result) return null; return transform(result) }
+    const slug = (text: string) => text.replace(/ /g, '-').replace(/[^A-Za-z0-9א-ת_./\-]+/g, '').toLowerCase() // trying to match Marked
     const funcs: ((input: string) => string|null)[] = [
-        re(/^(#+) (.*)/, x => `h${x[1].length} -- ${convLine(x[2])}`),
+        re(/^(#+) (.*)/, x => `h${x[1].length} id=${JSON.stringify(slug(x[2]))} -- ${convLine(x[2])}`),
         re(/^[-*] (.*)/, x => `markdownlistitem-ul -- ${convLine(x[1])}`),
         re(/^[0-9]+[.)] (.*)/, x => `markdownlistitem-ol -- ${convLine(x[1])}`),
         re(/^> (.*)/, x => `markdownlistitem-blockquote.blockquote -- ${convLine(x[1])}`),
