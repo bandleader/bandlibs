@@ -115,9 +115,9 @@ function routing(n: VugNode): VugNode {
         // win.console.log('Running!');
         if (!win.router) {
             win.router = {
-                basePath: '/bandlibs',
+                basePath: '/bandlibs', // or ''
                 get pathname() { return win.location.pathname.replace(win.router.basePath, '') || '/' },
-                push(url) { win.history.pushState('', '', url); win.dispatchEvent(new win.Event('popstate')) },
+                push(url) { win.history.pushState('', '', win.router.basePath + url); win.dispatchEvent(new win.Event('popstate')) },
                 match: path => win.router.pathname === path ? [{ $router: win.router, $route: { path: win.router.pathname, params: {} } }] : [],
             };
             // win.console.log("Router initialized!");
