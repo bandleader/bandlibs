@@ -124,7 +124,7 @@ section.py-4 bg=#AAA
   
   p -- Being that Vug is all about conciseness, it seems natural to support Markdown directly in Vue templates. This is useful for text-heavy pages.
   VugDocsExample.mb-4 > pre
-    -- f:c.c bg=#222 p=5em
+    -- flex:c.c bg=#222 p=5em mb=1em
     --   .card > .card-body
     --     # Heading 1
     --     ## Heading 2
@@ -133,19 +133,21 @@ section.py-4 bg=#AAA
     --     ##### Heading 5
     --     ###### Heading 6
     --     
-    --     | Regular paragraphs of text must start with the pipe (|) character.
+    --     | _Regular_ paragraphs of text must start with the pipe (`|`) character.
     --     | Otherwise, they would be confused with regular elements.
     --     | Each line is a new paragraph.
 
-    -- d.alert.alert-info.p-4 
-    --   | You can mix regular elements and `Markdown`.
-    --   ### No problem at all.
     -- - You can of course use [Markdown Syntax](https://www.markdownguide.org/basic-syntax/) inside these lines. **Bold**, _italics_, [links](#), etc.
     -- - Unordered lists work too.
     --   1. As well as ordered ones.
-    --   1. Indentation works the usual way.
-    --   1. Everything should work.
+    --   2. Indentation works the usual way.
+    --   3. Everything should work.
     --   // - Starting a line with <code>#</code>, <code>##</code>, ... <code>######</code> will turn that line into a heading.
+
+    -- d.alert.alert-primary
+    --   | You can mix regular elements and _Markdown_.
+    --   ##### No problem at all.
+    --     span.badge.bg-success -- back to elements again
 
   h3
     -- Stylesheets
