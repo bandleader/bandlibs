@@ -53,8 +53,10 @@ section.py-4 bg=#AAA
 
 .container.py-4#documentation
   css:[& aside] font-style=italic c=#777 d=inline
-  h1 -- Documentation
-  p -- Vug is a concise language for expressing DOM elements, inspired by <a href="https://pugjs.org">Pug</a>, <a href="https://imba.io/docs/tags">Imba Elements</a>, and <a href="https://tailwindcss.com">Tailwind CSS</a>.
+  # Documentation
+  | Vug is a concise language for expressing DOM elements, inspired by [Pug](https://pugjs.org), [Imba Elements](https://imba.io/docs/tags), and [Tailwind CSS](https://tailwindcss.com).
+  - Saves you **plenty** of time
+  - Works well
   
   h3 -- Basics
 
