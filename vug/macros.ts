@@ -101,7 +101,7 @@ function customTagTypes(n: VugNode): VugNode {
 function routing(n: VugNode): VugNode {
     if (n.tag === "a" && n.getWord('to-route')) {
         const word = n.words.find(x => x.key === 'to-route')
-        const ret = clone(n, { 'to-route': null, onclick: "router.push(this.href); return false" })
+        const ret = clone(n, { 'to-route': null, onclick: "router.push(this.getAttribute('href')); return false" }) // getAttribute because href property returns the full URL with https://example.com!
         ret.words.push(new VugWord('href', word.value, word.isExpr)) // to allow calculated
         return ret
     }
