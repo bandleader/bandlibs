@@ -136,7 +136,7 @@ function parseStyleVariants(key: string, start = ".foo", attrs = "%%%") {
             blocks.unshift(`@media (prefers-reduced-motion: no-preference)`)
         else if (x === "motion-reduce")
             blocks.unshift(`@media (prefers-reduced-motion: reduce)`)
-        else if (!x) { } // it's just to ensure it's a rule
+        else if (!x) { } // nothing after the colon; perhaps it was there just to ensure it's a rule (though currently we any use * at the beginning)
 
         else
             throw `Unknown style variant: '${x}'`
