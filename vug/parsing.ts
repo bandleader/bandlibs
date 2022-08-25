@@ -77,7 +77,7 @@ function parseValue(value: string): [boolean, string] { // returns [isExpr, valu
     const opener = "({`".indexOf(first), closer = ")}`".indexOf(last)
     if (opener >= 0 && opener === closer && value.length > 1) return [true, (first === '(') ? value.slice(1, value.length - 1) : value] // parens, objects, template strings. Cut off parens
     if (!isNaN(Number(value))) return [true, value] // numbers
-    if ("\"'`".indexOf(first) >= 0) throw `Unterminated string quote in value: ${value}`
+    // Removed because it throws for things like `vg-let:foo="a b".split(' ')` which is perfectly legal. // if ("\"'`".indexOf(first) >= 0) throw `Unterminated string quote in value: ${value}`
     return [false, value]
 }  
 function splitTwo(text: string, sep: string) {
