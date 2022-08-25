@@ -1,3 +1,4 @@
+y
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue'
 import * as Vug from '../../../vug'
@@ -62,8 +63,8 @@ section.py-4 bg=#AAA
 
   Each element goes on its own line, and consists of the tag name, optionally followed by <code> -- </code> and any text content:
   VugDocsExample.mb-4 > pre
-    raw -- h3 -- Welcome to Vug!
-    raw -- p -- Let's describe Vug in a paragraph.
+    --raw-- h3 -- Welcome to Vug!
+    --raw-- p -- Let's describe Vug in a paragraph.
   
   You can add comments after a <code>//&nbsp;</code>, like in Javascript:
     aside -- (make sure there's a space after the <code>//</code> -- this helps to disambiguate from things like <code>https://example.com</code>)
@@ -73,33 +74,33 @@ section.py-4 bg=#AAA
 
   You can create nested structures of elements simply by indenting them appropriately:
   VugDocsExample.mb-4 > pre
-    raw -- div
-    raw --   p -- This paragraph is inside the div.
-    raw --   p -- So is this one.
-    raw -- p -- Here's a paragraph outside of the div.
-    raw -- p
-    raw --   -- Here's some plain text inside the paragraph,
-    raw --   -- and another line of plain text.
+    --raw-- div
+    --raw--   p -- This paragraph is inside the div.
+    --raw--   p -- So is this one.
+    --raw-- p -- Here's a paragraph outside of the div.
+    --raw-- p
+    --raw--   -- Here's some plain text inside the paragraph,
+    --raw--   -- and another line of plain text.
 
   In the case where an element has only one child, you can express it on one line using `>` (syntax similar to the CSS direct-child operator):
   VugDocsExample.mb-4 > pre
-    raw -- .card > .card-body -- Contents
-    raw -- ul > li > span -- List with a single list item containing a span
+    --raw-- .card > .card-body -- Contents
+    --raw-- ul > li > span -- List with a single list item containing a span
 
   ### Classes and IDs
   
   You can add CSS classes to to the tag name using the `.` character, just like in CSS itself:
   VugDocsExample.mb-4 > pre -- div.fancy -- Hello there
-  Multiple classes work too:
+  p -- Multiple classes work too:
   VugDocsExample.mb-4 > pre -- button.btn.btn-primary -- Save
   Similarly, you can set the ID with the `#` character:
   VugDocsExample.mb-4 > pre -- div.bold#customerName -- ACME Industries
   If the tag is `div`, you can just write classes and/or IDs, and skip the tag name:
   VugDocsExample.mb-4 > pre 
-    raw -- .row
-    raw --   .col-3 
-    raw --   .col-9#mainColumn 
-    raw -- #footer
+    --raw-- .row
+    --raw--   .col-3 
+    --raw--   .col-9#mainColumn 
+    --raw-- #footer
 
   ### Attributes and Inline Styles
   You can set attributes on elements just like in HTML:
@@ -139,53 +140,53 @@ section.py-4 bg=#AAA
   - `ib`, `inline-block`: short for `<div style="display: inline-block" />`
   - `f`, `flex`: short for `<div style="display: flex" />`
   VugDocsExample.mb-4 > pre
-    raw -- d -- This is a div
-    raw -- s.badge.bg-primary -- This is a span
-    raw -- ib bg=yellow -- This is an inline-block
-    raw -- f -- This is a flexbox
-    raw -- f:c.c h=5em bg=lightgreen -- Centered flexbox
+    --raw-- d -- This is a div
+    --raw-- s.badge.bg-primary -- This is a span
+    --raw-- ib bg=yellow -- This is an inline-block
+    --raw-- f -- This is a flexbox
+    --raw-- f:c.c h=5em bg=lightgreen -- Centered flexbox
 
   ### Markdown
     s.badge.rounded-pill.bg-danger fs=0.4em -- EXPERIMENTAL
   
   Being that Vug is all about conciseness, it seems natural to support Markdown directly in Vue templates. This is useful for text-heavy pages.
   VugDocsExample.mb-4 > pre
-    raw -- flex:c.c bg=#222 p=5em mb=1em
-    raw --   .card > .card-body
-    raw --     # Heading 1
-    raw --     ## Heading 2
-    raw --     ### Heading 3
-    raw --     #### Heading 4
-    raw --     ##### Heading 5
-    raw --     ###### Heading 6
-    raw --     
-    raw --     | _Regular_ paragraphs of text must start with the pipe (`|`) character.
-    raw --     | Otherwise, they would be confused with regular elements.
-    raw --     | Each line is a new paragraph.
+    --raw-- flex:c.c bg=#222 p=5em mb=1em
+    --raw--   .card > .card-body
+    --raw--     # Heading 1
+    --raw--     ## Heading 2
+    --raw--     ### Heading 3
+    --raw--     #### Heading 4
+    --raw--     ##### Heading 5
+    --raw--     ###### Heading 6
+    --raw--     
+    --raw--     | _Regular_ paragraphs of text must start with the pipe (`|`) character.
+    --raw--     | Otherwise, they would be confused with regular elements.
+    --raw--     | Each line is a new paragraph.
     
-    raw -- - You can of course use [Markdown Syntax](https://www.markdownguide.org/basic-syntax/) inside these lines. **Bold**, _italics_, [links](#), etc.
-    raw -- - Unordered lists work too.
-    raw --   1. As well as ordered ones.
-    raw --   2. Indentation works the usual way.
-    raw --   3. Everything should work.
-    raw --   // - Starting a line with <code>#</code>, <code>##</code>, ... <code>######</code> will turn that line into a heading.
+    --raw-- - You can of course use [Markdown Syntax](https://www.markdownguide.org/basic-syntax/) inside these lines. **Bold**, _italics_, [links](#), etc.
+    --raw-- - Unordered lists work too.
+    --raw--   1. As well as ordered ones.
+    --raw--   2. Indentation works the usual way.
+    --raw--   3. Everything should work.
+    --raw--   // - Starting a line with <code>#</code>, <code>##</code>, ... <code>######</code> will turn that line into a heading.
     
-    raw -- d.alert.alert-primary
-    raw --   | You can mix regular elements and _Markdown_.
-    raw --   ##### No problem at all.
-    raw --     span.badge.bg-success -- back to elements again
+    --raw-- d.alert.alert-primary
+    --raw--   | You can mix regular elements and _Markdown_.
+    --raw--   ##### No problem at all.
+    --raw--     span.badge.bg-success -- back to elements again
 
   ### Stylesheets Rules
     s.badge.rounded-pill.bg-warning fs=0.4em -- Vue only
   
   VugDocsExample.mb-4 > pre
-    raw -- div -- I'm green, but yellow on hover
-    raw --   css bg=green fs=2em
-    raw --   css:hover bg=yellow
+    --raw-- div -- I'm green, but yellow on hover
+    --raw--   css bg=green fs=2em
+    --raw--   css:hover bg=yellow
 
   On the element, prefix with `*`:
   VugDocsExample.mb-4 > pre
-    raw -- button fs=2em *bg=red *bg:hover=yellow
+    --raw-- button fs=2em *bg=red *bg:hover=yellow
   
   #### Variants
   When writing stylesheet rules, you can use the following variants to modify when or to what they should be applied:
@@ -238,30 +239,30 @@ section.py-4 bg=#AAA
   ### Binding to Expressions
     s.badge.rounded-pill.bg-warning fs=0.4em -- Vue only
   To bind an attribute to a dynamically computed expression, wrap the expression in parentheses:
-  VugDocsExample.mb-4 > pre > raw -- input value=(someObj.someProp)
+  VugDocsExample.mb-4 > pre --raw-- input value=(someObj.someProp)
   These can contain spaces:
-  VugDocsExample.mb-4 > pre > raw -- input value=(someObj.someProp + someVariable)
+  VugDocsExample.mb-4 > pre --raw-- input value=(someObj.someProp + someVariable)
   You can also bind to a template string:
   VugDocsExample.mb-4 > pre // TODO this should work even if in one line! Problem is it runs before the directChild macro 
-    raw -- input value=`${firstName} ${lastName}`
+    --raw-- input value=`${firstName} ${lastName}`
   Or an object literal:
-  VugDocsExample.mb-4 > pre > raw -- PersonCard person={name: "Fred", age: 40}
+  VugDocsExample.mb-4 > pre --raw-- PersonCard person={name: "Fred", age: 40}
   Or a number literal: (i.e. it will be bound as a number rather than a string)
-  VugDocsExample.mb-4 > pre > raw -- CustomTable lines=12
+  VugDocsExample.mb-4 > pre --raw-- CustomTable lines=12
   But note that in all other cases (i.e without parens or the options above), the value will be interpreted as a string:
   VugDocsExample.mb-4 > pre
-    raw -- /{{''}}/ This will be bound to the string 'numLines', not a variable
-    raw -- CustomTable lines=numLines 
+    --raw-- /{{''}}/ This will be bound to the string 'numLines', not a variable
+    --raw-- CustomTable lines=numLines 
   
   ##### Style Binding
   The same thing can be done for inline styles:
-  VugDocsExample.mb-4 > pre > raw -- div bg=(important ? 'red' : 'white')
+  VugDocsExample.mb-4 > pre --raw-- div bg=(important ? 'red' : 'white')
 
   ##### Conditional Classes
   Classes can be applied conditionally. No need for parens here as it's necessarily an expression, but you can use it if there are spaces:
-  VugDocsExample.mb-4 > pre > raw -- a.link .active=isActive
-  VugDocsExample.mb-4 > pre > raw -- a.link .active=(curTab === 2)
-  VugDocsExample.mb-4 > pre > raw -- a.link .active.bold=(curTab === 3)
+  VugDocsExample.mb-4 > pre --raw-- a.link .active=isActive
+  VugDocsExample.mb-4 > pre --raw-- a.link .active=(curTab === 2)
+  VugDocsExample.mb-4 > pre --raw-- a.link .active.bold=(curTab === 3)
 
 
   ### Special Directives
@@ -277,23 +278,22 @@ section.py-4 bg=#AAA
   Sets a new variable in the current scope. This is useful where you want to refer to it more than once (to be more DRY, or to save computing it twice).
     aside -- (This is accomplished by compiling to a <code>v-for</code> loop over a single-element array.)
   VugDocsExample.mb-4 > pre 
-    raw -- div vg-each=customers
-    raw --   .card vg-let:fullName=`${it.firstName} ${it.lastName}`
-    raw --     .card-heading -- [[[[fullName]]]]
-    raw --     /{{''}}/ More elements here...
-    raw --     .card-body > a -- Send a message to [[[[fullName]]]]
+    --raw-- div vg-each=customers
+    --raw--   .card vg-let:fullName=`${it.firstName} ${it.lastName}`
+    --raw--     .card-heading -- [[[[fullName]]]]
+    --raw--     .card-body > a -- Send a message to [[[[fullName]]]]
 
   ##### `vg-do`
   Runs code on the element once, as soon as it is inserted. The element is available as `$el`.
     aside -- (accomplished by abusing Vue's <a href="https://vuejs.org/guide/essentials/template-refs.html#function-refs">Function Refs</a> feature)
   VugDocsExample.mb-4 > pre 
-    raw -- input vg-do=$el.focus() 
-    raw -- div vg-do=customAnimationRoutine($el) 
+    --raw-- input vg-do=$el.focus() 
+    --raw-- div vg-do=customAnimationRoutine($el) 
   It is sometimes helpful to access global functions in these handlers (i.e. to break out of Vue's sandbox). Vug provides `${{''}}win` for this:
     aside -- (accomplished using `Array.constructor('return window')()`)
     aside -- (you can do this in any Vug attribute, like in `@click` handlers)
   VugDocsExample.mb-4 > pre 
-    raw -- input vg-do="${{''}}win.setTimeout(() => $el.focus(), 5000)"
+    --raw-- input vg-do="${{''}}win.setTimeout(() => $el.focus(), 5000)"
 
 </template>
 

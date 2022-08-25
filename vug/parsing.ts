@@ -86,15 +86,20 @@ function splitTwo(text: string, sep: string) {
     return [text.substr(0, pos), text.substr(pos + sep.length)]
 }
 const htmlNode = (html: string, raw = false) => new VugNode("_html", [new VugWord("_contents", raw ? html : MarkdownSupport.convertSingleLineOfText(html), false)])
+function splitByContentSeparator(line: string) {
+  // Returns the elementPart trimmed, BTW. And the contentPart not, because that's not desired sometimes.
+  const findContentSep = line.match(/(?<![^ ])--(raw--)? /) // That's negative lookbehind, to not match the `--` if it's preceded by anything but a space.
+  if (!findContentSep) return { elementPart: line.trim(), contentPart: "", contentIsRaw: false }
+  const optionalRaw = findContentSep[1]
+  return { elementPart: line.slice(0, findContentSep.index!).trim(), contentPart: line.slice(findContentSep.index! + 2 /*--*/ + (optionalRaw?.length || 0) + 1 /*space*/), contentIsRaw: !!optionalRaw }
+}
 function parseLine(line: string) {
     line = splitTwo(line, "// ")[0] // ignore comments
-    if (line.startsWith("<")) line = "-- " + line // allow HTML tags
+    if (line.startsWith("<")) line = `--raw-- ${line}` // allow HTML tags
     line = MarkdownSupport.lineTransformBasedOnPrefixes(line)
-    if (line.startsWith("-- ")) line = " " + line // so that it gets detected, as we've trimmed
-    let [_wordPart, innerHtml] = splitTwo(line, " -- ")
-    if (!_wordPart) return htmlNode(innerHtml)
-    if (_wordPart === 'raw') return htmlNode(innerHtml, true)
-    const [tag, ...words] = splitThree( _wordPart.trim(), " ")
+    const splitC = splitByContentSeparator(line)
+    if (!splitC.elementPart) return htmlNode(splitC.contentPart, splitC.contentIsRaw)
+    const [tag, ...words] = splitThree(splitC.elementPart, " ")
     if (MarkdownSupport.aggressiveMarkdownParagraphDetection(tag, words)) return parseLine("| " + line)
     const words2 = words.map(w => {
         let [key, value] = splitTwo(w, "=")
@@ -103,7 +108,7 @@ function parseLine(line: string) {
         if ((key[0] === '.' || key.startsWith("v-") || key.startsWith("x-")) && value) isExpr = true // .foo, v- and x- are always expressions (as long as they have a value)
         return new VugWord(key, parsedValue, isExpr)
     })
-    const children = innerHtml ? [htmlNode(innerHtml)] : []
+    const children = splitC.contentPart ? [htmlNode(splitC.contentPart, splitC.contentIsRaw)] : []
     return new VugNode(tag, words2, children)
 }
 export function parseDoc(html: string) {
