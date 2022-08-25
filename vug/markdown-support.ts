@@ -1,5 +1,6 @@
 import { clone } from "./macros"
 import { VugNode } from "./parsing"
+import { marked } from '../node_modules/marked/lib/marked.esm' // not sure why I can't do just 'marked'
 
 export function lineTransformBasedOnPrefixes(line: string) {
     const convLine = convertSingleLineOfText
@@ -20,8 +21,8 @@ export function lineTransformBasedOnPrefixes(line: string) {
 }
 
 export function convertSingleLineOfText(txt: string) {
-    if (!globalThis.convertMarkdown) return txt
-    let ret = (globalThis.convertMarkdown(txt) as string).replace(/\n/g, ' ').trim()
+    // if (!globalThis.convertMarkdown) return txt
+    let ret = (marked.parse(txt) as string).replace(/\n/g, ' ').trim()
     if (ret.startsWith("<p>")) ret = ret.slice(3, ret.length - 4)
     return ret
 }
