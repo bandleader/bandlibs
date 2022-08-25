@@ -1,6 +1,6 @@
 import { clone } from "./macros"
 import { VugNode } from "./parsing"
-import { marked } from '../node_modules/marked/lib/marked.esm' // not sure why I can't do just 'marked'
+import { marked } from '../node_modules/marked/lib/marked.esm.js' // not sure why I can't do just 'marked'. Also not sure why only when BUILDING, it fails unless I add the '.js'.
 
 export function lineTransformBasedOnPrefixes(line: string) {
     const convLine = convertSingleLineOfText
