@@ -161,7 +161,7 @@ function directChild(n: VugNode): VugNode {
     if (indOfArrow < 0) return n
     const secondTag = n.words[indOfArrow + 1]
     if (!secondTag) throw "Tag name expected after >"
-    if (secondTag.value) throw "Tag name after > cannot have a value. It's a tag, obviously"
+    if (secondTag.value) throw "Tag name after > cannot have a value (obviously, it's a tag, not an attribute!)"
     const secondTagWords = n.words.slice(indOfArrow + 2)
     const firstTagWords = n.words.slice(0, indOfArrow)
     return new VugNode(n.tag, firstTagWords, [new VugNode(secondTag.key, secondTagWords, n.children.slice())])
