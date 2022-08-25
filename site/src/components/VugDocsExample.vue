@@ -19,11 +19,11 @@ setInterval(() => { if (inputDiv.value) input.value = inputDiv.value.innerText }
 
 <template>
     <div class="row">
-        <div class="col-6">
+        <div class="col-md-6">
             <div class="subtitle">Vug</div>
             <div contenteditable class="code" style="color: #FFF" v-text="initialInput" ref="inputDiv" />
         </div>
-        <div class="col-6">
+        <div class="col-md-6">
             <a href="javascript:void(0)" class="subtitle nonLink hoverable" title="Switched to rendered output" @click="render = !render" v-text="render ? 'Rendered' : 'HTML'" />
             <div v-if="render" style="padding: 0.5em; background: #FFF; border: 1px solid #AAA" v-html="output" />
             <template v-else>
