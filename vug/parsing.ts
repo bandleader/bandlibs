@@ -47,12 +47,12 @@ export function splitThree(what: string, sepChar = " ") {
       if (ch === stack.slice(-1)[0]) {
         stack.pop()
       } else if (starter >= 0) {
-        stack.push(`'")}]\``[starter])
+        stack.push(`'")}]\``[starter]) // Add the expected closing char to the stack
       } 
       if (ch === sepChar && !stack.length) {
-        ret.push('')
+        ret.push('') // Start a new item
       } else {
-        ret[ret.length - 1] += ch
+        ret[ret.length - 1] += ch // Add to current item
       }
     }
     // if (stack.length) throw "Unterminated " + stack.slice(-1)[0]
