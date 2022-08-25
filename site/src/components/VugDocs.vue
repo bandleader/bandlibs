@@ -56,6 +56,8 @@ section.py-4 bg=#AAA
   # Documentation
   Vug is a concise language for expressing DOM elements, inspired by [Pug](https://pugjs.org), [Imba Elements](https://imba.io/docs/tags), and [Tailwind CSS](https://tailwindcss.com).
   
+  d bg=green width=40 height=50 -- foo
+  
   ### Basics
 
   Each element goes on its own line, and consists of the tag name, optionally followed by <code> -- </code> and any text content:
@@ -173,9 +175,65 @@ section.py-4 bg=#AAA
     raw --   ##### No problem at all.
     raw --     span.badge.bg-success -- back to elements again
 
-  ### Stylesheets
+  ### Stylesheets Rules
     s.badge.rounded-pill.bg-warning fs=0.4em -- Vue only
-  Including on the element itself
+  
+  VugDocsExample.mb-4 > pre
+    raw -- div -- I'm green, but yellow on hover
+    raw --   css bg=green fs=2em
+    raw --   css:hover bg=yellow
+
+  On the element, prefix with `*`:
+  VugDocsExample.mb-4 > pre
+    raw -- button fs=2em *bg=red *bg:hover=yellow
+  
+  #### Variants
+  When writing stylesheet rules, you can use the following variants to modify when or to what they should be applied:
+  // For selectors, preferably check that they exist and otherwise error...
+  - Any CSS selector, like `:hover`, `:focus`, `:active`, etc.
+  - CSS pseudo-selectors, like `::before`, `::after`, `::placeholder`, etc.
+  - The following CSS selector shorthands:
+    - `:even`, `:odd` (compiles to `:nth-child(even)` and `:nth-child(odd)`)
+    - `:first`, `:last` (compiles to `:first-child` and `:last-child`)
+  - The following special selectors provided by Vug:
+    - Responsive screen-width breakpoints (this applies your style if the current screen width is equal to or GREATER than the selected breakpoint):
+      s vg-each=("sm md lg xl 2xl".split(' ')) -- `:{{it}}`&nbsp;
+    - `:motion-safe, :motion-reduce`
+    - `:enabled` (compiles to `:not(:disabled)`)
+    - `:next` -- targets the adjacent element. Compiles to [`~`](https://developer.mozilla.org/en-US/docs/Web/CSS/Adjacent_sibling_combinator). Useful for things like `input:invalid:next.label`
+    - `:sibling` -- targets any adjacent element. Compiles to [`+`](https://developer.mozilla.org/en-US/docs/Web/CSS/General_sibling_combinator)
+    - `:child` -- targets any adjacent element. Compiles to [`+`](https://developer.mozilla.org/en-US/docs/Web/CSS/General_sibling_combinator)
+      // (See [here](https://tailwindcss.com/docs/hover-focus-and-other-states#styling-based-on-sibling-state)), not sure why the `.peer` class is important, they could have done `input:invalid:next.label`
+      // This is nearly perfect:
+      // input placeholder="Email address"
+      //   css:[&:focus::placeholder] o='0'
+      // div -- Email address
+      //   css pos=relative top=-1.73em left=0.2em transition="all 0.3s" pointer-events=none visibility=hidden o='0.5'
+      //   css:[input:not(:placeholder-shown) ~ &, input:focus ~ &] top=-3.25em visibility=initial o='1'
+    - `.` rules that apply only when a class is applied (TODO might be `:.active` or maybe `:class.active` or `:class-active` to avoid dots)
+    - `@` rules that create a block (TODO syntax incl custom ones. And maybe it should be `:@media...` or even the generic way `:[@media]`)...
+    - `~`, `+`, `>`? Or use selectors `:descendant:tag-p:class`
+    - Negation
+  
+  #### OLD
+  .alert bg=#FEA c=#222
+    div -- This section is under construction. There is confusion between actual `:selectors`, our custom ones, CSS modifiers like `.active`, our version of that `:.active`...
+    - Maybe support all the CSS selectors, including `.active`
+
+  - CSS selectors:
+    ul > li vg-each=(["hover", "focus", "active", "focus-within", "focus-visible", "disabled", "visited", "checked"]) -- `:{{it}}`
+  - Special CSS selectors:
+    
+    - `:.someClass`
+    - `:@someAtDirective(someParameter: 12px)`
+    template vg-let:brkpts=("sm md lg xl 2xl".split(' '))
+      - Responsive breakpoints:
+        
+      - Less-than those breakpoints: 
+        s vg-each=brkpts mr=2q -- `:<{{it}}`
+    - Negation: `:!hover`, `:!.active`, etc.
+
+
 
   ### Binding to Expressions
     s.badge.rounded-pill.bg-warning fs=0.4em -- Vue only
