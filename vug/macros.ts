@@ -1,12 +1,7 @@
 /* TODO
 - Debug things that aren't working properly:
     f:c.c.class1.class2 (class1 is taken as align-content, and class2 is discarded) (either use hyphens [but that conflicts with row], or go back to "al" or "fx" props)
-- Just rationalize args. 
-    They're a good idea, 
-    but they have to be right after tagname before any dot-modifiers/classes (because dot modifiers can contain colons), 
-    and can't contain dots because that ends it.
-    although maybe we can do `f:c-c[this can contain more colons and dots].text-center[this contains dots].foo` using splitThree. However we want dot modifiers to have colons without that...
-    maybe args can just be `f[args here].foo` and then it can be whatever we want. Nah
+    `d vg-let:foo="a b".split(' ')` throws `Unterminated string quote in value`
 */
 
 import { VugNode, VugWord } from "./parsing"
