@@ -60,6 +60,7 @@ export function ViteTransformPlugin(opts: VugOptions = {}) {
       const vugCode = code.substring(startOfCode, endOfCode)
       const output = (opts._tempLangVersion||1.2) >= 2 ? V2.compile(vugCode).toVueTemplate() : V1.v1Load(vugCode).toVueTemplate()
       code = code.substring(0, startOfTemplateTag) + "<template>" + output + code.substring(endOfCode) // We have to replace the template tag so the SFC compiler doesn't error because it doesn't know how to process Vue
+      // require('fs').writeFileSync(`${require('os').tmpdir()}/vugtmp_` + id.split("/").slice(-1)[0], code) // For easy debugging output uncomment
 
       // Inject some code (experimental)
       if (origCode.includes('route path=')) {
