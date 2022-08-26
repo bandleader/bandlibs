@@ -34,6 +34,6 @@ setInterval(() => { if (inputDiv.value) input.value = inputDiv.value.innerText }
 </template>
 
 <style scoped>
-    .code { width: 100%; padding: 0.5em; background: #333; font-family: 'Courier New', Courier, monospace; font-size: 0.8em; white-space: pre-wrap; }
+    .code { width: 100%; padding: 0.5em; background: #333; font-family: 'Courier New', Courier, monospace; font-size: 0.8em; white-space: pre-wrap; text-align: left; }
     .subtitle { float: right; background: #AAA; border-radius: 0.2em; opacity: 0.7; padding: 0.07rem 0.15rem; font-size: 0.7em; }
 </style>

@@ -4,6 +4,7 @@ import VugDocs from './components/VugDocs.vue';
 </script>
 
 <template lang="vug">
+route path=/vug/playground > MainPlayground
 route path=/vug > VugDocs
 route path=/
   f:|c.c h=100vh
