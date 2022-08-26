@@ -38,7 +38,7 @@ export function cssCustomTag(n: VugNode): VugNode {
     TODO
     - won't work for top-level CSS tags; we can make that work later once we have a way to put things in the <style> tag, see comment on vg-css. Or we can replace with a <noscript> tag with v-css...
     - consolidate css tags that have the same selector and args
-    - I don't know how this is catching args, tagNameParser was supposed to take it out and put it under _mainArg
+    - I don't know how this is catching args, tagNameParser was supposed to take it out and put it under 'type'
     - "opacity=0.5" errors with "Props of a CSS tag can't be expressions, since they're inserted as a stylesheet" since numbers are parsed as expressions
     */
     function cssStringForCssCustomTag(cssTag: VugNode): string {

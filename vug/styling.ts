@@ -22,7 +22,7 @@ export function processCssProp(key: string, value: string): null | Record<string
     if (key === "mx") return { "margin-left": allowQUnits(value), "margin-right": allowQUnits(value) }
     if (key === "my") return { "margin-top": allowQUnits(value), "margin-bottom": allowQUnits(value) }
     if (key === "circ" && !value) return { "border-radius": "100%" }
-    if (Macros.v1compat && key === "d") return { "display": cssDisplayShorthand[value] } // TODO not sure I want this, perhaps just use tag types, except b/i/if conflict, but can use full form for those. Or can use mainArg
+    if (Macros.v1compat && key === "d") return { "display": cssDisplayShorthand[value] } // TODO not sure I want this, perhaps just use tag types, except b/i/if conflict, but can use full form for those. Or can use the arg
 
     return null;
 }

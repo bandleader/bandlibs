@@ -60,7 +60,6 @@ export function runAll(node: VugNode): VugNode {
     node = routing(node)
     node = Styling.flexMacroFx(node)
     node = Styling.mainTransform(node)
-    node = customUsesOfArg(node)
     node = SheetStyles.sheetStyles(node)
     node = SheetStyles.cssCustomTag(node)
     node = SheetStyles.compileVgCss(node)
@@ -72,13 +71,6 @@ export function runAll(node: VugNode): VugNode {
     return new VugNode(node.tag, node.words, node.children.map(c => runAll(c)))
 }
 
-function customUsesOfArg(n: VugNode): VugNode {
-    // For now just convert it into 'type'. For inputs, buttons, etc
-    // Run this AFTER anything that uses it in a different way, like 'flex'
-    if (n.getWord("_mainArg")) return clone(n, { _mainArg: null, type: n.getWordErrIfCalc("_mainArg") })
-    return n
-}
-
 function customTagTypes(n: VugNode): VugNode {
     if (n.tag === 'd') return clone(n, { tag: "div" })
     if (n.tag === 's') return clone(n, { tag: "span" })
@@ -86,7 +78,7 @@ function customTagTypes(n: VugNode): VugNode {
     if (v1compat && n.tag === 'fc') n = clone(n, { tag: "f", 'style_flex-direction': 'column' })
     if (n.tag === 'f') n = clone(n, { tag: "flex" })
     if (v1compat && n.tag === "flex" && n.getWord("al")) n = clone(n, { fx: n.getWordErrIfCalc("al"), al: null }) 
-    if (n.tag === 'flex') return clone(n, { tag: "div", style_display: "flex", fx: n.getWord("_mainArg") || undefined, _mainArg: null })
+    if (n.tag === 'flex') return clone(n, { tag: "div", style_display: "flex", fx: n.getWord("type") || undefined, type: null })
     if (n.tag === 'ib'|| n.tag === 'inline-block') return clone(n, { tag: "div", style_display: "inline-block" })
     return n
 }
@@ -153,7 +145,7 @@ function tagNameParser(n: VugNode): VugNode {
     const words = n.words.slice()
     for (const w of classes) words.push(new VugWord("." + w, '', false))
     for (const w of ids) words.push(new VugWord("id", w, false))
-    for (const w of args) words.push(new VugWord("_mainArg", w, false))
+    for (const w of args) words.push(new VugWord("type", w, false))
     return new VugNode(tag, words, n.children)
 }
 function directChild(n: VugNode): VugNode {
