@@ -5,6 +5,6 @@ import * as Vug from '../vug'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: "/bandlibs",
+  // base: "/bandlibs",
   plugins: [Vug.ViteTransformPlugin({_tempLangVersion: 2}), vue()],
 })
