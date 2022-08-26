@@ -54,7 +54,7 @@ section.py-4 bg=#AAA
   # Documentation
   Vug is a concise language for expressing DOM elements, inspired by [Pug](https://pugjs.org), [Imba Elements](https://imba.io/docs/tags), and [Tailwind CSS](https://tailwindcss.com).
   
-  d bg=green width=40 height=50 -- foo
+  // d bg=green width=40 height=50 -- foo
   
   ### Basics
 
