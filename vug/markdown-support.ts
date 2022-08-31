@@ -1,6 +1,6 @@
 import { clone } from "./macros"
 import { VugNode } from "./parsing"
-import { marked } from './marked.esm'
+import { marked } from './marked.esm.js'
 
 export function lineTransformBasedOnPrefixes(line: string) {
     const convLine = convertSingleLineOfText
