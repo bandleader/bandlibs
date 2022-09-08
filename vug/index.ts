@@ -83,7 +83,7 @@ export function ViteTransformPlugin(opts: VugOptions = {}) {
   }
 }
 
-export function load(vugCode: string, opts: VugOptions = {}): { ast: any, toVueTemplate: (whitespace?: boolean) => string } {
+export function load(vugCode: string, opts: VugOptions = {}): { ast: any, toVueTemplate: (whitespace?: boolean) => string, toRenderFunc: () => string } {
   const useV2 = (opts._tempLangVersion||1.2) >= 2
   if (!useV2) return V1.v1Load(vugCode)
   return V2.compile(vugCode)  

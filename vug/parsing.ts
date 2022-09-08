@@ -1,6 +1,7 @@
 import * as Macros from "./macros"
 import * as Emit from "./emit"
 import * as MarkdownSupport from './markdown-support'
+import * as EmitRenderFunc from "./emit-renderFunc"
 
 export class VugNode {
     constructor(public tag: string, public words: VugWord[] = [], public children: VugNode[] = []) {}
@@ -21,7 +22,8 @@ export function compile(text: string){
     return { 
         ast, 
         toAstJson: () => JSON.stringify(ast, undefined, 2), 
-        toVueTemplate: () => ast.map(x => Emit.emitVueTemplate(x, true)).join("\n") 
+        toVueTemplate: () => ast.map(x => Emit.emitVueTemplate(x, true)).join("\n") ,
+        toRenderFunc: () => EmitRenderFunc.renderAst(ast),
     }
 }
 
