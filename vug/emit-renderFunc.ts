@@ -5,8 +5,15 @@ import { VugNode } from "./parsing"
   // See also: https://vuejs.org/guide/extras/rendering-mechanism.html
   // This is helpful: https://babeljs.io/repl
 
-export function renderAst(nodes: VugNode[]) {
-  return nodes.length === 1 ? renderNode(nodes[0]) : renderNode(new VugNode("Fragment", undefined, nodes)) // for React, should be React.Fragment I think
+interface RenderFuncOpts {
+  h: "/*#__PURE__*/React.createElement"|"h"|string
+  className: "className"|string
+  Fragment: "React.Fragment"|"Vue.Fragment"|string
+}
+const vueDefaultOpts: RenderFuncOpts = { Fragment: "Vue.Fragment", className: "className", h: "h" }
+
+export function renderAst(nodes: VugNode[], opts: RenderFuncOpts = vueDefaultOpts) {
+  return nodes.length === 1 ? renderNode(nodes[0], opts) : renderNode(new VugNode(vueDefaultOpts.Fragment, undefined, nodes), opts) // for React, should be React.Fragment I think
 }
 
 function basicVueDirectivesToJsx(v: VugNode) {
@@ -35,7 +42,7 @@ function basicVueDirectivesToJsx(v: VugNode) {
 
 // TODO: non-HTML tags should be done as Expr i.e. it's a component in scope
 
-function renderNode(node: VugNode, opts = {ce: "/*#__PURE__*/React.createElement", className: "className"}) {
+function renderNode(node: VugNode, opts: RenderFuncOpts = vueDefaultOpts) {
   node = basicVueDirectivesToJsx(node)
   if (node.tag==="_html") return JSON.stringify(node.getWordErrIfCalc("_contents") || "") // TODO not really, as this will be a text node in a render function, whereas this can contain HTML tags (and was converted from Markdown). We have to really parse it in the parser... or maybe it's legit to say you can't do this if you're gonna use the render func maker
   const attrExprText = new Map<string, string>()
@@ -63,10 +70,10 @@ function renderNode(node: VugNode, opts = {ce: "/*#__PURE__*/React.createElement
   const out: string[] = []
   if (node.tag === "slot") {
     const identifier = `slots.${node.getWordErrIfCalc("name")}` // TODO support calculated name
-    const children = node.children.length ? `\n${indent(renderAst(node.children))}\n` : 'null'
+    const children = node.children.length ? `\n${indent(renderAst(node.children, opts))}\n` : 'null'
     out.push(`${identifier} ? ${identifier}(${mapToObj(attrExprText)}) : ${children}`) // TODO remove "name"
   } else {
-    out.push(`${opts.ce}(${JSON.stringify(node.tag)}, `)
+    out.push(`${opts.h}(${JSON.stringify(node.tag)}, `)
     if (attrExprText.size) out.push(mapToObj(attrExprText))
     else out.push("null")
     // Children
