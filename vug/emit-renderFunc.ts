@@ -1,15 +1,47 @@
 import { partition } from "../utils"
 import { VugNode } from "./parsing"
 
+  // Based on: https://vuejs.org/guide/extras/render-function.html
+  // See also: https://vuejs.org/guide/extras/rendering-mechanism.html
+  // This is helpful: https://babeljs.io/repl
+
 export function renderAst(nodes: VugNode[]) {
-  return nodes.length === 1 ? renderNode(nodes[0]) : renderNode(new VugNode("", undefined, nodes))
+  return nodes.length === 1 ? renderNode(nodes[0]) : renderNode(new VugNode("Fragment", undefined, nodes)) // for React, should be React.Fragment I think
 }
+
+function basicVueDirectivesToJsx(v: VugNode) {
+  /*
+  Based on: https://vuejs.org/guide/extras/render-function.html#render-function-recipes
+  TODO:
+  - if any elements have v-if, v-else-if, v-else, convert them to a ternary expression. Has to be done at parent level
+  - v-for -> map
+  - seems v-html has to be done too, using innerHTML
+  - and v-text, maybe innerText, or just add a text node: String(expr)
+  - and v-show, using display: none/null I guess
+  - v-model
+    - .number etc -- how?
+
+  - @click to onClick, but convert to a function if it has anything but alphanumeric and dots. 
+    - modifiers -- concat any modifiers in Title case for passive, etc, for others, use Vue.withModifiers
+  - does :is tag have to be converted?
+  - Built-in components
+  - custom directives
+  // - slots incl passing data
+  - calling slots incl passing children to slots
+  */
+ return new VugNode(v.tag, v.words, v.children)
+}
+
+
+// TODO: non-HTML tags should be done as Expr i.e. it's a component in scope
+
 function renderNode(node: VugNode, opts = {ce: "/*#__PURE__*/React.createElement", className: "className"}) {
-  if (node.tag==="_html") return JSON.stringify(node.getWordErrIfCalc("_contents") || "")
+  node = basicVueDirectivesToJsx(node)
+  if (node.tag==="_html") return JSON.stringify(node.getWordErrIfCalc("_contents") || "") // TODO not really, as this will be a text node in a render function, whereas this can contain HTML tags (and was converted from Markdown). We have to really parse it in the parser... or maybe it's legit to say you can't do this if you're gonna use the render func maker
   const attrExprText = new Map<string, string>()
   const styleExprText = new Map<string, string>()
   const classExprText = new Map<string, string>()
-  const mapToObj = (m: Map<string,string>) => ' { ' + Array.from(m.entries()).map(([k,v]) => `${JSON.stringify(k)}: ${v}`).join(", ") + ' } '
+  const mapToObj = (m: Map<string,string>) => '{ ' + Array.from(m.entries()).map(([k,v]) => `${JSON.stringify(k)}: ${v}`).join(", ") + ' }'
   for (const x of node.words) {
     const exprText = !x.value ? 'true' : x.isExpr ? x.value : JSON.stringify(x.value)
     if (x.key.startsWith("style_")) {
@@ -29,14 +61,20 @@ function renderNode(node: VugNode, opts = {ce: "/*#__PURE__*/React.createElement
     }
   }
   const out: string[] = []
-  out.push(`${opts.ce}(${JSON.stringify(node.tag)}, `)
-  if (attrExprText.size) out.push(mapToObj(attrExprText))
-  else out.push("null")
-  // Children
-  for (const x of node.children) {
-    out.push(",\n" + renderNode(x, opts).split("\n").map(x => `  ${x}`).join("\n"))
+  if (node.tag === "slot") {
+    const identifier = `slots.${node.getWordErrIfCalc("name")}` // TODO support calculated name
+    const children = node.children.length ? `\n${indent(renderAst(node.children))}\n` : 'null'
+    out.push(`${identifier} ? ${identifier}(${mapToObj(attrExprText)}) : ${children}`) // TODO remove "name"
+  } else {
+    out.push(`${opts.ce}(${JSON.stringify(node.tag)}, `)
+    if (attrExprText.size) out.push(mapToObj(attrExprText))
+    else out.push("null")
+    // Children
+    for (const x of node.children) {
+      out.push(",\n" + indent(renderNode(x, opts)))
+    }
+    out.push(")")
   }
-  out.push(")")
   return out.join("")
 }
 
@@ -58,3 +96,5 @@ function caseChange(txt: string) {
     toSnake() { return words.join("-") },
   }
 }
+
+function indent(text: string) { return text.split("\n").map(x => `  ${x}`).join("\n") }
