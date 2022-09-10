@@ -22,7 +22,7 @@ function basicVueDirectivesToJsx(v: VugNode) {
   TODO:
   - if any elements have v-if, v-else-if, v-else, convert them to a ternary expression. Has to be done at parent level
   - v-for -> map
-  - seems v-html has to be done too, using innerHTML
+  - seems v-html has to be done too, using innerHTML -- I think for React dangerouslySetInnerHTML to {html: contents}
   - and v-text, maybe innerText, or just add a text node: String(expr)
   - and v-show, using display: none/null I guess
   - v-model
