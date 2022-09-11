@@ -51,7 +51,9 @@ export function flexMacroFx(n: VugNode): VugNode {
     let reverse = false, row = false, column = false
     if (value[0] === "!") { reverse = true; value = value.slice(1) }
     if (value[0] === "|") { column = true; value = value.slice(1) }
+    if (value[0] === "v") { column = true; value = value.slice(1) }
     if (value[0] === "-") { row = true; value = value.slice(1) }
+    if (value[0] === "h") { row = true; value = value.slice(1) }
     if (value[0] === "!") { reverse = true; value = value.slice(1) }    
     let direction = column ? 'column' : (reverse || row) ? 'row' : '' // If reverse was specified, we have to specify row (which is the default)
     if (reverse) direction += "-reverse"
