@@ -61,15 +61,15 @@ export function flexMacroFx(n: VugNode): VugNode {
     // Alignment etc
     const flexAlignmentShorthands = {
         c: "center",
-        fs: "flex-start",
-        fe: "flex-end",
-        s: "start",
-        e: "end",
+        s: "flex-start",
+        e: "flex-end",
+        // s: "start",
+        // e: "end",
         l: "left",
         r: "right",
         x: "stretch",                                    
     }
-    const [jc, ai, ac] = value.split(".").map(x => flexAlignmentShorthands[x] || x)
+    const [jc, ai, ac] = value.replace(/[.,]/g, '').split('').map(x => flexAlignmentShorthands[x] || x)
     if (jc) obj['style_justify-content'] = jc
     if (ai) obj['style_align-items'] = ai
     if (ac) obj['style_align-content'] = ac
