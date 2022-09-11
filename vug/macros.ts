@@ -145,7 +145,7 @@ function tagNameParser(n: VugNode): VugNode {
     const words = n.words.slice()
     for (const w of classes) words.push(new VugWord("." + w, '', false))
     for (const w of ids) words.push(new VugWord("id", w, false))
-    for (const w of args) words.push(new VugWord("type", w, false))
+    for (const w of args) words.push(new VugWord(['slot','transition','transition-group','transitiongroup'].includes(tag.toLowerCase()) ? "name" : "type", w, false))
     return new VugNode(tag, words, n.children)
 }
 function directChild(n: VugNode): VugNode {
