@@ -5,15 +5,15 @@ import { VugNode } from "./parsing"
   // See also: https://vuejs.org/guide/extras/rendering-mechanism.html
   // This is helpful: https://babeljs.io/repl
 
-interface RenderFuncOpts {
-  h: "/*#__PURE__*/React.createElement"|"h"|string
-  className: "className"|string
-  Fragment: "React.Fragment"|"Vue.Fragment"|string
+export interface RenderFuncOpts {
+  h?: "/*#__PURE__*/React.createElement"|"h"|string
+  className?: "className"|string
+  Fragment?: "React.Fragment"|"Vue.Fragment"|string
 }
 const vueDefaultOpts: RenderFuncOpts = { Fragment: "Vue.Fragment", className: "className", h: "h" }
 
 export function renderAst(nodes: VugNode[], opts: RenderFuncOpts = vueDefaultOpts) {
-  return nodes.length === 1 ? renderNode(nodes[0], opts) : renderNode(new VugNode(vueDefaultOpts.Fragment, undefined, nodes), opts) // for React, should be React.Fragment I think
+  return nodes.length === 1 ? renderNode(nodes[0], opts) : renderNode(new VugNode(opts.Fragment || vueDefaultOpts.Fragment, undefined, nodes), opts) // for React, should be React.Fragment I think
 }
 
 function basicVueDirectivesToJsx(v: VugNode) {
@@ -42,7 +42,7 @@ function basicVueDirectivesToJsx(v: VugNode) {
 
 // TODO: non-HTML tags should be done as Expr i.e. it's a component in scope
 
-function renderNode(node: VugNode, opts: RenderFuncOpts = vueDefaultOpts) {
+function renderNode(node: VugNode, opts?: RenderFuncOpts) {
   node = basicVueDirectivesToJsx(node)
   if (node.tag==="_html") return JSON.stringify(node.getWordErrIfCalc("_contents") || "") // TODO not really, as this will be a text node in a render function, whereas this can contain HTML tags (and was converted from Markdown). We have to really parse it in the parser... or maybe it's legit to say you can't do this if you're gonna use the render func maker
   const attrExprText = new Map<string, string>()
@@ -60,9 +60,9 @@ function renderNode(node: VugNode, opts: RenderFuncOpts = vueDefaultOpts) {
       const stringExprs: string[] = []
       if (sStatic.length) stringExprs.push(JSON.stringify(sStatic.map(x => x[0]).join(" ")))
       sCalc.forEach(([k,v]) => stringExprs.push(`((${v}) ? ${JSON.stringify(' ' + k)} : "")`))
-      attrExprText.set(opts.className, stringExprs.join(" + "))
-      // attrExprText.set(opts.className, sStatic.join(" ") + sCalc.length  [...classExprText.entries()].map(([k,v],i) => exprText === 'true' ? JSON.stringify(' ' + k) : `((${v}) ? ${JSON.stringify(' ' + k)} : "")`).join(" + "))
-      // attrExprText.set(opts.className, `classNames(${mapToObj(classExprText)})`)
+      attrExprText.set(opts.className || vueDefaultOpts.className, stringExprs.join(" + "))
+      // attrExprText.set(opts.className || vueDefaultOpts.className, sStatic.join(" ") + sCalc.length  [...classExprText.entries()].map(([k,v],i) => exprText === 'true' ? JSON.stringify(' ' + k) : `((${v}) ? ${JSON.stringify(' ' + k)} : "")`).join(" + "))
+      // attrExprText.set(opts.className || vueDefaultOpts.className, `classNames(${mapToObj(classExprText)})`)
     } else {
       attrExprText.set(x.key, exprText)
     }
@@ -73,7 +73,7 @@ function renderNode(node: VugNode, opts: RenderFuncOpts = vueDefaultOpts) {
     const children = node.children.length ? `\n${indent(renderAst(node.children, opts))}\n` : 'null'
     out.push(`${identifier} ? ${identifier}(${mapToObj(attrExprText)}) : ${children}`) // TODO remove "name"
   } else {
-    out.push(`${opts.h}(${JSON.stringify(node.tag)}, `)
+    out.push(`${opts.h || vueDefaultOpts.h}(${JSON.stringify(node.tag)}, `)
     if (attrExprText.size) out.push(mapToObj(attrExprText))
     else out.push("null")
     // Children

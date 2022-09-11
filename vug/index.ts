@@ -49,6 +49,12 @@ export function ViteTransformPlugin(opts: VugOptions = {}) {
     name: 'vite-plugin-vue-vug',
     enforce: "pre" as const,
     transform(code: string, id: string) {
+      const isVueFile = id.endsWith('.vue')
+      if (!isVueFile && !/\.m?(j|t)sx?$/.test(id)) return;
+      const compile = (what: string) => (opts._tempLangVersion||1.2) >= 2 ? V2.compile(what) : V1.v1Load(what)
+      
+      code = transformVugTemplateStrings(code)
+
       if (!id.endsWith(".vue")) return;
       const origCode = code
 
@@ -58,7 +64,7 @@ export function ViteTransformPlugin(opts: VugOptions = {}) {
       const startOfCode = code.indexOf(">", startOfTemplateTag) + 1
       const endOfCode = code.lastIndexOf("</template>")
       const vugCode = code.substring(startOfCode, endOfCode)
-      const output = (opts._tempLangVersion||1.2) >= 2 ? V2.compile(vugCode).toVueTemplate() : V1.v1Load(vugCode).toVueTemplate()
+      const output = compile(vugCode).toVueTemplate()
       code = code.substring(0, startOfTemplateTag) + "<template>" + output + code.substring(endOfCode) // We have to replace the template tag so the SFC compiler doesn't error because it doesn't know how to process Vue
       // require('fs').writeFileSync(`${require('os').tmpdir()}/vugtmp_` + id.split("/").slice(-1)[0], code) // For easy debugging output uncomment
 
@@ -89,32 +95,32 @@ export function load(vugCode: string, opts: VugOptions = {}): { ast: any, toVueT
   return V2.compile(vugCode)  
 }
 
-export function transformVugReact(code: string) {
+export function vug(vugCode: TemplateStringsArray, ...args: unknown[]) { throw "Vug.vug() template-tag function was called at runtime -- this means that you haven't properly set up a compile-time plugin to replace calls to it. If you meant to convert Vug code at runtime, use one of the provided methods for doing so." }
+
+export function transformVugTemplateStrings(code: string, opts: {templateTag?: string} = {}) {
+  let weFoundOne = false
+  const templateTag = opts.templateTag || 'vug'
+  const hFuncAlias = "_vugHFunc"
   while (true) {
-    const ind = code.indexOf("vugReact`")
+
+    const ind = code.indexOf(templateTag + "`")
     if (ind<0) break;
-    const end = code.indexOf("`", ind+10)
-    let contents = code.substring(ind+9, end)
+    weFoundOne = true;
+    const end = code.indexOf("`", ind+templateTag.length+1)
+    let contents = code.substring(ind+templateTag.length+1, end)
     
     contents = contents.replace(/@click/g, ':onClick') // temp to support Vue syntax
-    let converted = V1.v1Load(contents).toRenderFunc()
+    let converted = V2.compile(contents).toRenderFunc({h: hFuncAlias}) // callback(contents)
     converted = converted.replace(/\{\{/g, '" + ') // temp to support Vue syntax
     converted = converted.replace(/\}\}/g, ' + "') // temp to support Vue syntax
 
     code = code.slice(0, ind) + converted + code.slice(end+1)
-    console.log(code)
   }
+  if (weFoundOne) {
+    // replace imports
+    code = code.replace(/import \{ vug \} from ['"][^'"\n]*vug[^'"\n]*['"]/g, `import { h as ${hFuncAlias} } from 'vue'`)
+  } 
   return code
-}
-export function ViteReactPlugin() {
-  return {
-    name: 'vite-plugin-react-vug',
-    enforce: "pre" as const,
-    transform(code: string, id: string) {
-      if (!/\.m?(j|t)sx?$/.test(id)) return;
-      return transformVugReact(code)
-    }
-  }
 }
 export const VueConsolidatePlugin = () => ({
   // Implements Vite's `consolidate` interface: https://github.com/vuejs/core/blob/471f66a1f6cd182f3e106184b2e06f7753382996/packages/compiler-sfc/src/compileTemplate.ts#L89  

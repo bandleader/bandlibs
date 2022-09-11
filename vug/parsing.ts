@@ -23,7 +23,7 @@ export function compile(text: string){
         ast, 
         toAstJson: () => JSON.stringify(ast, undefined, 2), 
         toVueTemplate: () => ast.map(x => Emit.emitVueTemplate(x, true)).join("\n") ,
-        toRenderFunc: () => EmitRenderFunc.renderAst(ast),
+        toRenderFunc: (renderFuncOpts?: EmitRenderFunc.RenderFuncOpts) => EmitRenderFunc.renderAst(ast, renderFuncOpts),
     }
 }
 
