@@ -15972,6 +15972,35 @@ function __generator(thisArg, body) {
     }
 }
 
+function __values(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+}
+
+function __read(o, n) {
+    var m = typeof Symbol === "function" && o[Symbol.iterator];
+    if (!m) return o;
+    var i = m.call(o), r, ar = [], e;
+    try {
+        while ((n === void 0 || n-- > 0) && !(r = i.next()).done) ar.push(r.value);
+    }
+    catch (error) { e = { error: error }; }
+    finally {
+        try {
+            if (r && !r.done && (m = i["return"])) m.call(i);
+        }
+        finally { if (e) throw e.error; }
+    }
+    return ar;
+}
+
 function __spreadArray(to, from, pack) {
     if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
         if (ar || !(i in from)) {
@@ -16000,16 +16029,27 @@ function propRequired(moreOpts) {
     return o;
 }
 function classComponent(cl, opts) {
+    var e_1, _a, e_2, _b, e_3, _c;
     if (typeof cl === 'object')
         return cl; // This is a regular Vue component, just return
     if (typeof cl !== 'function')
         throw "VueClassPlus: Expected a class, not " + typeof cl;
     var propsToIgnore = ['prototype', 'length', 'name', 'caller', 'callee'];
     var copyData = function (source, target) {
+        var e_4, _a;
         var insPropsOnly = Object.getOwnPropertyNames(source).filter(function (x) { return !propsToIgnore.includes(x); });
-        for (var _i = 0, insPropsOnly_1 = insPropsOnly; _i < insPropsOnly_1.length; _i++) {
-            var prop_1 = insPropsOnly_1[_i];
-            target[prop_1] = source[prop_1];
+        try {
+            for (var insPropsOnly_1 = __values(insPropsOnly), insPropsOnly_1_1 = insPropsOnly_1.next(); !insPropsOnly_1_1.done; insPropsOnly_1_1 = insPropsOnly_1.next()) {
+                var prop_1 = insPropsOnly_1_1.value;
+                target[prop_1] = source[prop_1];
+            }
+        }
+        catch (e_4_1) { e_4 = { error: e_4_1 }; }
+        finally {
+            try {
+                if (insPropsOnly_1_1 && !insPropsOnly_1_1.done && (_a = insPropsOnly_1["return"])) _a.call(insPropsOnly_1);
+            }
+            finally { if (e_4) throw e_4.error; }
         }
     };
     // Allow `opts` to be specified as a method on the class, or as a static object
@@ -16067,21 +16107,48 @@ function classComponent(cl, opts) {
         // If we were successful, ignore the prop in subsequent checks
         propsToIgnore.push(prop);
     };
-    // Populate methods/computeds/props from the class's prototype
-    for (var _i = 0, _a = Object.getOwnPropertyNames(cl.prototype); _i < _a.length; _i++) {
-        var prop_2 = _a[_i];
-        consumeProp(cl.prototype, prop_2);
+    try {
+        // Populate methods/computeds/props from the class's prototype
+        for (var _d = __values(Object.getOwnPropertyNames(cl.prototype)), _e = _d.next(); !_e.done; _e = _d.next()) {
+            var prop_2 = _e.value;
+            consumeProp(cl.prototype, prop_2);
+        }
     }
-    // Experimental: check static properties
-    for (var _b = 0, _c = Object.getOwnPropertyNames(cl); _b < _c.length; _b++) {
-        var prop_3 = _c[_b];
-        consumeProp(cl, prop_3);
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (_e && !_e.done && (_a = _d["return"])) _a.call(_d);
+        }
+        finally { if (e_1) throw e_1.error; }
+    }
+    try {
+        // Experimental: check static properties
+        for (var _f = __values(Object.getOwnPropertyNames(cl)), _g = _f.next(); !_g.done; _g = _f.next()) {
+            var prop_3 = _g.value;
+            consumeProp(cl, prop_3);
+        }
+    }
+    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+    finally {
+        try {
+            if (_g && !_g.done && (_b = _f["return"])) _b.call(_f);
+        }
+        finally { if (e_2) throw e_2.error; }
     }
     // Experimental: check instance properties
     var dummyInstance = new cl();
-    for (var _d = 0, _e = Object.getOwnPropertyNames(dummyInstance); _d < _e.length; _d++) {
-        var prop_4 = _e[_d];
-        consumeProp(dummyInstance, prop_4, true);
+    try {
+        for (var _h = __values(Object.getOwnPropertyNames(dummyInstance)), _j = _h.next(); !_j.done; _j = _h.next()) {
+            var prop_4 = _j.value;
+            consumeProp(dummyInstance, prop_4, true);
+        }
+    }
+    catch (e_3_1) { e_3 = { error: e_3_1 }; }
+    finally {
+        try {
+            if (_j && !_j.done && (_c = _h["return"])) _c.call(_h);
+        }
+        finally { if (e_3) throw e_3.error; }
     }
     // Done!
     return ret;
@@ -16158,7 +16225,15 @@ function flexArg(n) {
         column = true;
         value = value.slice(1);
     }
+    if (value[0] === "v") {
+        column = true;
+        value = value.slice(1);
+    }
     if (value[0] === "-") {
+        row = true;
+        value = value.slice(1);
+    }
+    if (value[0] === "h") {
         row = true;
         value = value.slice(1);
     }
@@ -16175,15 +16250,15 @@ function flexArg(n) {
     // Alignment etc
     var flexAlignmentShorthands = {
         c: "center",
-        fs: "flex-start",
-        fe: "flex-end",
-        s: "start",
-        e: "end",
+        s: "flex-start",
+        e: "flex-end",
+        // s: "start",
+        // e: "end",
         l: "left",
         r: "right",
         x: "stretch"
     };
-    var _a = value.split(",").map(function (x) { return flexAlignmentShorthands[x] || x; }), jc = _a[0], ai = _a[1], ac = _a[2];
+    var _a = __read(value.replace(/[.,]/g, '').split('').map(function (x) { return flexAlignmentShorthands[x] || x; }), 3), jc = _a[0], ai = _a[1], ac = _a[2];
     if (jc)
         obj['style_justify-content'] = jc;
     if (ai)
@@ -16218,7 +16293,7 @@ function sheetStyles(n) {
     });
     if (!newCssTags.length)
         return n;
-    return new VugNode(n.tag, ourWords, __spreadArray(__spreadArray([], newCssTags, true), n.children, true));
+    return new VugNode(n.tag, ourWords, __spreadArray(__spreadArray([], __read(newCssTags), false), __read(n.children), false));
 }
 function cssCustomTag(n) {
     /* Handles lines like:
@@ -16237,6 +16312,7 @@ function cssCustomTag(n) {
     - "opacity=0.5" errors with "Props of a CSS tag can't be expressions, since they're inserted as a stylesheet" since numbers are parsed as expressions
     */
     function cssStringForCssCustomTag(cssTag) {
+        var e_1, _a;
         var selector = cssTag.getWordErrIfCalc("selector") || cssTag.getWordErrIfCalc("s") || '&';
         var rule = cssTag.children.map(function (x) { return x.getWord("_contents"); }).join(" ");
         var attrs = cssTag.words.filter(function (x) { return x.key !== "selector" && x.key !== "s"; });
@@ -16247,15 +16323,24 @@ function cssCustomTag(n) {
                 throw "Can't have attributes when a selector is specified."; // TODO maybe allow as long as there's %%% etc
         }
         else { // no braces. Parse words
-            for (var _i = 0, attrs_1 = attrs; _i < attrs_1.length; _i++) {
-                var prop_1 = attrs_1[_i];
-                if (prop_1.isExpr)
-                    throw "Props of a CSS tag can't be expressions, since they're inserted as a stylesheet";
-                var x = processCssProp(prop_1.key, prop_1.value);
-                if (!x)
-                    throw "Unrecognized CSS property (of a CSS tag): " + prop_1.key;
-                for (var k in x)
-                    rule = "".concat(k, ": ").concat(x[k], "; ").concat(rule); // TODO reverse really
+            try {
+                for (var attrs_1 = __values(attrs), attrs_1_1 = attrs_1.next(); !attrs_1_1.done; attrs_1_1 = attrs_1.next()) {
+                    var prop_1 = attrs_1_1.value;
+                    if (prop_1.isExpr)
+                        throw "Props of a CSS tag can't be expressions, since they're inserted as a stylesheet";
+                    var x = processCssProp(prop_1.key, prop_1.value);
+                    if (!x)
+                        throw "Unrecognized CSS property (of a CSS tag): " + prop_1.key;
+                    for (var k in x)
+                        rule = "".concat(k, ": ").concat(x[k], "; ").concat(rule); // TODO reverse really
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (attrs_1_1 && !attrs_1_1.done && (_a = attrs_1["return"])) _a.call(attrs_1);
+                }
+                finally { if (e_1) throw e_1.error; }
             }
             rule = parseStyleVariants(cssTag.tag, selector, rule); // parse arg
         }
@@ -16266,7 +16351,7 @@ function cssCustomTag(n) {
     if (!cssChildren.length)
         return n;
     var text = cssChildren.map(cssStringForCssCustomTag).join(" ");
-    return new VugNode(n.tag, __spreadArray(__spreadArray([], n.words, true), [new VugWord("vg-css", text, false)], false), n.children.filter(function (x) { return !isCssChild(x); }));
+    return new VugNode(n.tag, __spreadArray(__spreadArray([], __read(n.words), false), [new VugWord("vg-css", text, false)], false), n.children.filter(function (x) { return !isCssChild(x); }));
 }
 function compileVgCss(n) {
     /* Allows directive on any element: vg-css="& { background: green } &:hover { background: red }"
@@ -16291,6 +16376,7 @@ function compileVgCss(n) {
     return clone(n, { "vg-css": null, ":ref": "$el => { ".concat(script, " }") });
 }
 function parseStyleVariants(key, start, attrs) {
+    var e_2, _a, e_3, _b;
     if (start === void 0) { start = ".foo"; }
     if (attrs === void 0) { attrs = "%%%"; }
     // Returns ".foo:extraThings { %%% }"
@@ -16298,42 +16384,60 @@ function parseStyleVariants(key, start, attrs) {
     var parts = splitThree(key, ":").slice(1);
     var respBrkpts = { sm: 640, md: 768, lg: 1024, xl: 1280, "2xl": 1536 };
     var sel = start, blocks = [];
-    for (var _i = 0, parts_1 = parts; _i < parts_1.length; _i++) {
-        var x = parts_1[_i];
-        if (["hover", "focus", "active", "focus-within", "focus-visible", "disabled", "visited", "checked"].includes(x))
-            sel = "".concat(sel, ":").concat(x);
-        else if (x === "last" || x === "first")
-            sel = "".concat(sel, ":").concat(x, "-child");
-        else if (x === "odd" || x === "even")
-            sel = "".concat(sel, ":nth-child(").concat(x, ")");
-        else if (x[0] === '.')
-            sel = "".concat(sel).concat(x);
-        else if (x[0] === '!') { // negation -- experimental and hacky
-            var plchldr = '.dummySelectorHREKJSBLLI';
-            var done = parseStyleVariants("thisPartIsIgnored:" + x.slice(1), plchldr, '%%%').split('{')[0].trim();
-            var whatAdded = done.slice(done.indexOf(plchldr) + plchldr.length);
-            sel = "".concat(sel, ":not(").concat(whatAdded, ")");
+    try {
+        for (var parts_1 = __values(parts), parts_1_1 = parts_1.next(); !parts_1_1.done; parts_1_1 = parts_1.next()) {
+            var x = parts_1_1.value;
+            if (["hover", "focus", "active", "focus-within", "focus-visible", "disabled", "visited", "checked"].includes(x))
+                sel = "".concat(sel, ":").concat(x);
+            else if (x === "last" || x === "first")
+                sel = "".concat(sel, ":").concat(x, "-child");
+            else if (x === "odd" || x === "even")
+                sel = "".concat(sel, ":nth-child(").concat(x, ")");
+            else if (x[0] === '.')
+                sel = "".concat(sel).concat(x);
+            else if (x[0] === '!') { // negation -- experimental and hacky
+                var plchldr = '.dummySelectorHREKJSBLLI';
+                var done = parseStyleVariants("thisPartIsIgnored:" + x.slice(1), plchldr, '%%%').split('{')[0].trim();
+                var whatAdded = done.slice(done.indexOf(plchldr) + plchldr.length);
+                sel = "".concat(sel, ":not(").concat(whatAdded, ")");
+            }
+            else if (x[0] === '[' && x[x.length - 1] === ']')
+                sel = x.slice(1, x.length - 1).replace(/\&/g, sel);
+            else if (x[0] === '@')
+                blocks.unshift(x);
+            else if (x[0] === "<" && respBrkpts[x.slice(1)])
+                blocks.unshift("@media (max-width: ".concat(respBrkpts[x.slice(1)] - 1, "px)"));
+            else if (respBrkpts[x])
+                blocks.unshift("@media (min-width: ".concat(respBrkpts[x], "px)"));
+            else if (x === "motion-safe")
+                blocks.unshift("@media (prefers-reduced-motion: no-preference)");
+            else if (x === "motion-reduce")
+                blocks.unshift("@media (prefers-reduced-motion: reduce)");
+            else if (!x) { } // nothing after the colon; perhaps it was there just to ensure it's a rule (though currently we any use * at the beginning)
+            else
+                throw "Unknown style variant: '".concat(x, "'");
         }
-        else if (x[0] === '[' && x[x.length - 1] === ']')
-            sel = x.slice(1, x.length - 1).replace(/\&/g, sel);
-        else if (x[0] === '@')
-            blocks.unshift(x);
-        else if (x[0] === "<" && respBrkpts[x.slice(1)])
-            blocks.unshift("@media (max-width: ".concat(respBrkpts[x.slice(1)] - 1, "px)"));
-        else if (respBrkpts[x])
-            blocks.unshift("@media (min-width: ".concat(respBrkpts[x], "px)"));
-        else if (x === "motion-safe")
-            blocks.unshift("@media (prefers-reduced-motion: no-preference)");
-        else if (x === "motion-reduce")
-            blocks.unshift("@media (prefers-reduced-motion: reduce)");
-        else if (!x) ; // nothing after the colon; perhaps it was there just to ensure it's a rule (though currently we any use * at the beginning)
-        else
-            throw "Unknown style variant: '".concat(x, "'");
+    }
+    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+    finally {
+        try {
+            if (parts_1_1 && !parts_1_1.done && (_a = parts_1["return"])) _a.call(parts_1);
+        }
+        finally { if (e_2) throw e_2.error; }
     }
     var ret = "".concat(sel, " { ").concat(attrs, " }");
-    for (var _a = 0, blocks_1 = blocks; _a < blocks_1.length; _a++) {
-        var b = blocks_1[_a];
-        ret = "".concat(b, " {\n") + ret.split("\n").map(function (x) { return "  ".concat(x); }).join("\n") + "\n}";
+    try {
+        for (var blocks_1 = __values(blocks), blocks_1_1 = blocks_1.next(); !blocks_1_1.done; blocks_1_1 = blocks_1.next()) {
+            var b = blocks_1_1.value;
+            ret = "".concat(b, " {\n") + ret.split("\n").map(function (x) { return "  ".concat(x); }).join("\n") + "\n}";
+        }
+    }
+    catch (e_3_1) { e_3 = { error: e_3_1 }; }
+    finally {
+        try {
+            if (blocks_1_1 && !blocks_1_1.done && (_b = blocks_1["return"])) _b.call(blocks_1);
+        }
+        finally { if (e_3) throw e_3.error; }
     }
     return ret;
 }
@@ -19165,29 +19269,39 @@ function aggressiveMarkdownParagraphDetection(tag, words) {
     return words.length >= 3 && !looksCodey(tag) && !words.slice(0, 3).some(looksCodey);
 }
 function fixMarkdownMacro(n) {
+    var e_1, _a;
     // Handles list items and blockquotes, which need to be grouped together with siblings of the same type, into a container of the appropriate type
     // (markdownlistitem-ul)+       --->        ul > li
     // (markdownlistitem-ol)+       --->        ol > li
     // (blockquote.blockquote)+     --->        blockquote.blockquote > p
     var foundAny = false, children = [], lastTag = "";
-    for (var _i = 0, _a = n.children; _i < _a.length; _i++) {
-        var c = _a[_i];
-        if (c.tag.startsWith("markdownlistitem-")) {
-            foundAny = true;
-            var kind = c.tag.split("-")[1];
-            var item = clone(c, { tag: kind === 'blockquote.blockquote' ? 'p' : "li" });
-            if (lastTag === c.tag) {
-                children.slice(-1)[0].children.push(item);
+    try {
+        for (var _b = __values(n.children), _c = _b.next(); !_c.done; _c = _b.next()) {
+            var c = _c.value;
+            if (c.tag.startsWith("markdownlistitem-")) {
+                foundAny = true;
+                var kind = c.tag.split("-")[1];
+                var item = clone(c, { tag: kind === 'blockquote.blockquote' ? 'p' : "li" });
+                if (lastTag === c.tag) {
+                    children.slice(-1)[0].children.push(item);
+                }
+                else {
+                    var container = new VugNode(kind, [], [item]);
+                    children.push(container);
+                }
             }
             else {
-                var container = new VugNode(kind, [], [item]);
-                children.push(container);
+                children.push(c);
             }
+            lastTag = c.tag;
         }
-        else {
-            children.push(c);
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
         }
-        lastTag = c.tag;
+        finally { if (e_1) throw e_1.error; }
     }
     if (!foundAny)
         return n;
@@ -19200,6 +19314,7 @@ function fixMarkdownMacro(n) {
     `d vg-let:foo="a b".split(' ')` throws `Unterminated string quote in value`
 */
 function clone(node, changes) {
+    var e_1, _a;
     var ret = new VugNode(changes.tag || node.tag, node.words, node.children);
     var _loop_1 = function (k, v) {
         if (k === 'tag')
@@ -19212,9 +19327,18 @@ function clone(node, changes) {
         if (v !== null)
             ret.words.push(new VugWord(k, v, false));
     };
-    for (var _i = 0, _a = Object.entries(changes); _i < _a.length; _i++) {
-        var _b = _a[_i], k = _b[0], v = _b[1];
-        _loop_1(k, v);
+    try {
+        for (var _b = __values(Object.entries(changes)), _c = _b.next(); !_c.done; _c = _b.next()) {
+            var _d = __read(_c.value, 2), k = _d[0], v = _d[1];
+            _loop_1(k, v);
+        }
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
+        }
+        finally { if (e_1) throw e_1.error; }
     }
     return ret;
 }
@@ -19248,6 +19372,7 @@ var allowReferencesToGlobals = wordTransformer(function (w) { return w.value.inc
 function runAll(node) {
     node = fixMarkdownMacro(node);
     node = directChild(node);
+    node = doAwaitAttribute(node);
     node = tagNameParser(node);
     node = splitDoubleClasses(node);
     node = customTagTypes(node);
@@ -19263,6 +19388,18 @@ function runAll(node) {
     node = vgEach(node);
     node = allowReferencesToGlobals(node);
     return new VugNode(node.tag, node.words, node.children.map(function (c) { return runAll(c); }));
+}
+function doAwaitAttribute(n) {
+    // const awaitWords = n.words.filter(x => x.key.startsWith("await-"))
+    // if (!awaitWords.length) return n
+    // return new VugNode(n.tag, n.words.map(w => awaitWords.includes(w) ? new VugWord(w.key.slice(6),)))
+    var word = n.words.find(function (w) { return w.key === 'await' || w.key.startsWith('await:'); });
+    if (!word)
+        return n;
+    var varName = word.value.split(":")[1] || 'value';
+    var thisWithAwaitRemoved = clone(n, { await: null });
+    var tmplt = new VugNode("template", [new VugWord('v-slot', "{value: ".concat(varName, "}"), true)], [thisWithAwaitRemoved]);
+    return new VugNode("async-value", [new VugWord('promise', n.getWord('await') || '', true)], [tmplt]);
 }
 function customTagTypes(n) {
     if (n.tag === 'd')
@@ -19310,7 +19447,8 @@ function splitDoubleClasses(n) {
     }), n.children);
 }
 function tagNameParser(n) {
-    var _a;
+    var e_2, _a, e_3, _b, e_4, _c;
+    var _d;
     var parts = n.tag.split('').reduce(function (list, char) {
         if (/[A-Za-z0-9_,|!\-]/.test(char))
             list.slice(-1)[0].text += char;
@@ -19318,7 +19456,7 @@ function tagNameParser(n) {
             list.push({ prefix: char, text: "" }); //TODO allow prefixes consisting of double special characters, i.e. push onto previous
         return list;
     }, [{ text: '', prefix: '' }]).filter(function (x) { return x.text; });
-    var tag = ((_a = parts.filter(function (x) { return !x.prefix; })[0]) === null || _a === void 0 ? void 0 : _a.text) || 'div';
+    var tag = ((_d = parts.filter(function (x) { return !x.prefix; })[0]) === null || _d === void 0 ? void 0 : _d.text) || 'div';
     var classes = parts.filter(function (x) { return x.prefix === '.'; }).map(function (x) { return x.text; });
     var ids = parts.filter(function (x) { return x.prefix === '#'; }).map(function (x) { return x.text; });
     var args = parts.filter(function (x) { return x.prefix === ':'; }).map(function (x) { return x.text; });
@@ -19328,17 +19466,44 @@ function tagNameParser(n) {
         throw "Can't have more than 1 arg in tag name: '".concat(n.tag, "'");
     // TODO ensure we recognize all parts
     var words = n.words.slice();
-    for (var _i = 0, classes_1 = classes; _i < classes_1.length; _i++) {
-        var w = classes_1[_i];
-        words.push(new VugWord("." + w, '', false));
+    try {
+        for (var classes_1 = __values(classes), classes_1_1 = classes_1.next(); !classes_1_1.done; classes_1_1 = classes_1.next()) {
+            var w = classes_1_1.value;
+            words.push(new VugWord("." + w, '', false));
+        }
     }
-    for (var _b = 0, ids_1 = ids; _b < ids_1.length; _b++) {
-        var w = ids_1[_b];
-        words.push(new VugWord("id", w, false));
+    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+    finally {
+        try {
+            if (classes_1_1 && !classes_1_1.done && (_a = classes_1["return"])) _a.call(classes_1);
+        }
+        finally { if (e_2) throw e_2.error; }
     }
-    for (var _c = 0, args_1 = args; _c < args_1.length; _c++) {
-        var w = args_1[_c];
-        words.push(new VugWord("type", w, false));
+    try {
+        for (var ids_1 = __values(ids), ids_1_1 = ids_1.next(); !ids_1_1.done; ids_1_1 = ids_1.next()) {
+            var w = ids_1_1.value;
+            words.push(new VugWord("id", w, false));
+        }
+    }
+    catch (e_3_1) { e_3 = { error: e_3_1 }; }
+    finally {
+        try {
+            if (ids_1_1 && !ids_1_1.done && (_b = ids_1["return"])) _b.call(ids_1);
+        }
+        finally { if (e_3) throw e_3.error; }
+    }
+    try {
+        for (var args_1 = __values(args), args_1_1 = args_1.next(); !args_1_1.done; args_1_1 = args_1.next()) {
+            var w = args_1_1.value;
+            words.push(new VugWord(['slot', 'transition', 'transition-group', 'transitiongroup'].includes(tag.toLowerCase()) ? "name" : "type", w, false));
+        }
+    }
+    catch (e_4_1) { e_4 = { error: e_4_1 }; }
+    finally {
+        try {
+            if (args_1_1 && !args_1_1.done && (_c = args_1["return"])) _c.call(args_1);
+        }
+        finally { if (e_4) throw e_4.error; }
     }
     return new VugNode(tag, words, n.children);
 }
@@ -19377,22 +19542,33 @@ function waitForLoad(el) {
     });
 }
 function partition(arr, fn, minGroups) {
+    var e_1, _a;
     if (minGroups === void 0) { minGroups = 2; }
     // Usage: const [trueOnes, falseOnes] = partition(arr, x => trueOrFalse)
     // Or:    const [one, two, three] = partition(arr, x => num, 3) // use the last argument to create a min number of groups
     var ret = Array.from(Array(minGroups)).map(function () { return []; });
-    for (var _i = 0, arr_1 = arr; _i < arr_1.length; _i++) {
-        var i = arr_1[_i];
-        var k = fn(i);
-        var ind = typeof k === 'number' ? k : !!k ? 0 : 1;
-        while (ret.length < (ind + 1))
-            ret.push([]);
-        ret[ind].push(i);
+    try {
+        for (var arr_1 = __values(arr), arr_1_1 = arr_1.next(); !arr_1_1.done; arr_1_1 = arr_1.next()) {
+            var i = arr_1_1.value;
+            var k = fn(i);
+            var ind = typeof k === 'number' ? k : !!k ? 0 : 1;
+            while (ret.length < (ind + 1))
+                ret.push([]);
+            ret[ind].push(i);
+        }
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (arr_1_1 && !arr_1_1.done && (_a = arr_1["return"])) _a.call(arr_1);
+        }
+        finally { if (e_1) throw e_1.error; }
     }
     return ret;
 }
 
 function emitVueTemplate(node, whitespace) {
+    var e_1, _a;
     if (whitespace === void 0) { whitespace = false; }
     var out = [];
     if (node.tag === '_html') {
@@ -19407,8 +19583,8 @@ function emitVueTemplate(node, whitespace) {
         var block = function (items, funcs) { var _a, _b; if (!items.length)
             return; (_a = funcs.start) === null || _a === void 0 ? void 0 : _a.call(funcs); items.forEach(function (x, i) { var _a; if (i)
             (_a = funcs.between) === null || _a === void 0 ? void 0 : _a.call(funcs); funcs.each(x, i); }); (_b = funcs.end) === null || _b === void 0 ? void 0 : _b.call(funcs); };
-        var _a = partition(node.words, function (x) { return x.key.startsWith("style_") ? 0 : x.key.startsWith(".") ? 1 : 2; }, 3), style = _a[0], klass = _a[1], attr = _a[2];
-        var _b = partition(klass, function (x) { return x.isExpr; }), classExpr = _b[0], classStatic = _b[1];
+        var _b = __read(partition(node.words, function (x) { return x.key.startsWith("style_") ? 0 : x.key.startsWith(".") ? 1 : 2; }, 3), 3), style = _b[0], klass = _b[1], attr = _b[2];
+        var _c = __read(partition(klass, function (x) { return x.isExpr; }), 2), classExpr = _c[0], classStatic = _c[1];
         block(classStatic, {
             start: function () { return out.push(' class="'); },
             each: function (x) { out.push(x.key.slice(1)); if (x.value)
@@ -19425,7 +19601,7 @@ function emitVueTemplate(node, whitespace) {
             between: function () { return out.push(", "); },
             end: function () { return out.push("}'"); }
         });
-        var _c = partition(style, function (x) { return x.isExpr; }), styleExpr = _c[0], styleStatic = _c[1];
+        var _d = __read(partition(style, function (x) { return x.isExpr; }), 2), styleExpr = _d[0], styleStatic = _d[1];
         block(styleStatic, {
             start: function () { return out.push(' style="'); },
             each: function (x) { return out.push(x.key.slice(6), ": ", x.value); },
@@ -19461,14 +19637,23 @@ function emitVueTemplate(node, whitespace) {
         var needsIndent = whitespace && (node.children.length > 1 || (node.children[0] && (node.children[0].tag !== "_html" || (node.children[0].getWord("_contents") || '').includes('\n'))));
         if (needsIndent)
             out.push("\n");
-        for (var _i = 0, _d = node.children; _i < _d.length; _i++) {
-            var c = _d[_i];
-            if (needsIndent && c !== node.children[0])
-                out.push("\n");
-            var txt = emitVueTemplate(c, whitespace);
-            if (needsIndent)
-                txt = txt.split("\n").map(function (l) { return "  ".concat(l); }).join('\n'); // Indent
-            out.push(txt);
+        try {
+            for (var _e = __values(node.children), _f = _e.next(); !_f.done; _f = _e.next()) {
+                var c = _f.value;
+                if (needsIndent && c !== node.children[0])
+                    out.push("\n");
+                var txt = emitVueTemplate(c, whitespace);
+                if (needsIndent)
+                    txt = txt.split("\n").map(function (l) { return "  ".concat(l); }).join('\n'); // Indent
+                out.push(txt);
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_f && !_f.done && (_a = _e["return"])) _a.call(_e);
+            }
+            finally { if (e_1) throw e_1.error; }
         }
         if (needsIndent)
             out.push("\n");
@@ -19478,6 +19663,138 @@ function emitVueTemplate(node, whitespace) {
         out.push("</".concat(node.tag, ">"));
     return out.join("");
 }
+
+var vueDefaultOpts = { Fragment: "Vue.Fragment", className: "className", h: "h" };
+function renderAst(nodes, opts) {
+    if (opts === void 0) { opts = vueDefaultOpts; }
+    return nodes.length === 1 ? renderNode(nodes[0], opts) : renderNode(new VugNode(opts.Fragment || vueDefaultOpts.Fragment, undefined, nodes), opts); // for React, should be React.Fragment I think
+}
+function basicVueDirectivesToJsx(v) {
+    /*
+    Based on: https://vuejs.org/guide/extras/render-function.html#render-function-recipes
+    TODO:
+    - if any elements have v-if, v-else-if, v-else, convert them to a ternary expression. Has to be done at parent level
+    - v-for -> map
+    - seems v-html has to be done too, using innerHTML -- I think for React dangerouslySetInnerHTML to {html: contents}
+    - and v-text, maybe innerText, or just add a text node: String(expr)
+    - and v-show, using display: none/null I guess
+    - v-model
+      - .number etc -- how?
+  
+    - @click to onClick, but convert to a function if it has anything but alphanumeric and dots.
+      - modifiers -- concat any modifiers in Title case for passive, etc, for others, use Vue.withModifiers
+    - does :is tag have to be converted?
+    - Built-in components
+    - custom directives
+    // - slots incl passing data
+    - calling slots incl passing children to slots
+    */
+    return new VugNode(v.tag, v.words, v.children);
+}
+// TODO: non-HTML tags should be done as Expr i.e. it's a component in scope
+function renderNode(node, opts) {
+    var e_1, _a, e_2, _b;
+    node = basicVueDirectivesToJsx(node);
+    if (node.tag === "_html")
+        return JSON.stringify(node.getWordErrIfCalc("_contents") || ""); // TODO not really, as this will be a text node in a render function, whereas this can contain HTML tags (and was converted from Markdown). We have to really parse it in the parser... or maybe it's legit to say you can't do this if you're gonna use the render func maker
+    var attrExprText = new Map();
+    var styleExprText = new Map();
+    var classExprText = new Map();
+    var mapToObj = function (m) { return '{ ' + Array.from(m.entries()).map(function (_a) {
+        var _b = __read(_a, 2), k = _b[0], v = _b[1];
+        return "".concat(JSON.stringify(k), ": ").concat(v);
+    }).join(", ") + ' }'; };
+    var _loop_1 = function (x) {
+        var exprText = !x.value ? 'true' : x.isExpr ? x.value : JSON.stringify(x.value);
+        if (x.key.startsWith("style_")) {
+            styleExprText.set(caseChange$1(x.key.slice(6)).toCamel(), exprText);
+            attrExprText.set('style', mapToObj(styleExprText));
+        }
+        else if (x.key.startsWith(".")) {
+            classExprText.set(x.key.slice(1), exprText);
+            var _g = __read(partition(__spreadArray([], __read(classExprText.entries()), false), function (_a) {
+                var _b = __read(_a, 2), k = _b[0], v = _b[1];
+                return v === 'true';
+            }), 2), sStatic = _g[0], sCalc = _g[1];
+            var stringExprs_1 = [];
+            if (sStatic.length)
+                stringExprs_1.push(JSON.stringify(sStatic.map(function (x) { return x[0]; }).join(" ")));
+            sCalc.forEach(function (_a) {
+                var _b = __read(_a, 2), k = _b[0], v = _b[1];
+                return stringExprs_1.push("((".concat(v, ") ? ").concat(JSON.stringify(' ' + k), " : \"\")"));
+            });
+            attrExprText.set(opts.className || vueDefaultOpts.className, stringExprs_1.join(" + "));
+            // attrExprText.set(opts.className || vueDefaultOpts.className, sStatic.join(" ") + sCalc.length  [...classExprText.entries()].map(([k,v],i) => exprText === 'true' ? JSON.stringify(' ' + k) : `((${v}) ? ${JSON.stringify(' ' + k)} : "")`).join(" + "))
+            // attrExprText.set(opts.className || vueDefaultOpts.className, `classNames(${mapToObj(classExprText)})`)
+        }
+        else {
+            attrExprText.set(x.key, exprText);
+        }
+    };
+    try {
+        for (var _c = __values(node.words), _d = _c.next(); !_d.done; _d = _c.next()) {
+            var x = _d.value;
+            _loop_1(x);
+        }
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (_d && !_d.done && (_a = _c["return"])) _a.call(_c);
+        }
+        finally { if (e_1) throw e_1.error; }
+    }
+    var out = [];
+    if (node.tag === "slot") {
+        var identifier = "slots.".concat(node.getWordErrIfCalc("name")); // TODO support calculated name
+        var children = node.children.length ? "\n".concat(indent(renderAst(node.children, opts)), "\n") : 'null';
+        out.push("".concat(identifier, " ? ").concat(identifier, "(").concat(mapToObj(attrExprText), ") : ").concat(children)); // TODO remove "name"
+    }
+    else {
+        out.push("".concat(opts.h || vueDefaultOpts.h, "(").concat(JSON.stringify(node.tag), ", "));
+        if (attrExprText.size)
+            out.push(mapToObj(attrExprText));
+        else
+            out.push("null");
+        try {
+            // Children
+            for (var _e = __values(node.children), _f = _e.next(); !_f.done; _f = _e.next()) {
+                var x = _f.value;
+                out.push(",\n" + indent(renderNode(x, opts)));
+            }
+        }
+        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+        finally {
+            try {
+                if (_f && !_f.done && (_b = _e["return"])) _b.call(_e);
+            }
+            finally { if (e_2) throw e_2.error; }
+        }
+        out.push(")");
+    }
+    return out.join("");
+}
+function caseChange$1(txt) {
+    var words = [];
+    var isCapital = function (ch) { return ch === ch.toUpperCase(); };
+    txt.split('').forEach(function (x, i) {
+        var xLower = x.toLowerCase(), prevWord = words[words.length - 1], prevLetter = txt[i - 1];
+        if (x === "-")
+            return;
+        // We add a word if there's no previous word, or if we're after a hyphen, or if we're a first capital (before us was not a capital)
+        if (!prevWord || prevLetter === "-" || (isCapital(x) && !isCapital(prevLetter)))
+            return words.push(xLower);
+        // Otherwise add to previous word
+        words[words.length - 1] += xLower;
+    });
+    var PascalWord = function (x) { return x[0].toUpperCase() + x.slice(1); };
+    return {
+        toPascal: function () { return words.map(PascalWord).join(""); },
+        toCamel: function () { return words.map(function (x, i) { return i ? PascalWord(x) : x; }).join(""); },
+        toSnake: function () { return words.join("-"); }
+    };
+}
+function indent(text) { return text.split("\n").map(function (x) { return "  ".concat(x); }).join("\n"); }
 
 var VugNode = /** @class */ (function () {
     function VugNode(tag, words, children) {
@@ -19511,10 +19828,12 @@ function compile$1(text) {
     return {
         ast: ast,
         toAstJson: function () { return JSON.stringify(ast, undefined, 2); },
-        toVueTemplate: function () { return ast.map(function (x) { return emitVueTemplate(x, true); }).join("\n"); }
+        toVueTemplate: function () { return ast.map(function (x) { return emitVueTemplate(x, true); }).join("\n"); },
+        toRenderFunc: function (renderFuncOpts) { return renderAst(ast, renderFuncOpts); }
     };
 }
 function splitThree(what, sepChar) {
+    var e_1, _a;
     if (sepChar === void 0) { sepChar = " "; }
     // Splits on a char EXCEPT when that char occurs within quotes, parens, braces, curlies
     // MAYBE allow sepChar to be >1 char long?
@@ -19523,30 +19842,39 @@ function splitThree(what, sepChar) {
     var ret = [''];
     var stack = [];
     var escaping = false;
-    for (var _i = 0, _a = what.split(''); _i < _a.length; _i++) {
-        var ch = _a[_i];
-        var starter = "'\"({[`".indexOf(ch);
-        if (escaping) {
-            ret[ret.length - 1] += ch;
-            escaping = false;
-            continue;
+    try {
+        for (var _b = __values(what.split('')), _c = _b.next(); !_c.done; _c = _b.next()) {
+            var ch = _c.value;
+            var starter = "'\"({[`".indexOf(ch);
+            if (escaping) {
+                ret[ret.length - 1] += ch;
+                escaping = false;
+                continue;
+            }
+            else if (ch === '\\') {
+                escaping = true;
+                continue;
+            }
+            if (ch === stack.slice(-1)[0]) {
+                stack.pop();
+            }
+            else if (starter >= 0) {
+                stack.push("'\")}]`"[starter]); // Add the expected closing char to the stack
+            }
+            if (ch === sepChar && !stack.length) {
+                ret.push(''); // Start a new item
+            }
+            else {
+                ret[ret.length - 1] += ch; // Add to current item
+            }
         }
-        else if (ch === '\\') {
-            escaping = true;
-            continue;
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
         }
-        if (ch === stack.slice(-1)[0]) {
-            stack.pop();
-        }
-        else if (starter >= 0) {
-            stack.push("'\")}]`"[starter]); // Add the expected closing char to the stack
-        }
-        if (ch === sepChar && !stack.length) {
-            ret.push(''); // Start a new item
-        }
-        else {
-            ret[ret.length - 1] += ch; // Add to current item
-        }
+        finally { if (e_1) throw e_1.error; }
     }
     // if (stack.length) throw "Unterminated " + stack.slice(-1)[0]
     return ret;
@@ -19600,12 +19928,12 @@ function parseLine(line) {
     var splitC = splitByContentSeparator(line);
     if (!splitC.elementPart)
         return htmlNode(splitC.contentPart, splitC.contentIsRaw);
-    var _a = splitThree(splitC.elementPart, " "), tag = _a[0], words = _a.slice(1);
+    var _a = __read(splitThree(splitC.elementPart, " ")), tag = _a[0], words = _a.slice(1);
     if (aggressiveMarkdownParagraphDetection(tag, words))
         return parseLine("| " + line);
     var words2 = words.map(function (w) {
-        var _a = splitTwo$1(w, "="), key = _a[0], value = _a[1];
-        var _b = parseValue(value), isExpr = _b[0], parsedValue = _b[1];
+        var _a = __read(splitTwo$1(w, "="), 2), key = _a[0], value = _a[1];
+        var _b = __read(parseValue(value), 2), isExpr = _b[0], parsedValue = _b[1];
         if (key[0] === ':') {
             key = key.slice(1);
             isExpr = true;
@@ -19618,6 +19946,7 @@ function parseLine(line) {
     return new VugNode(tag, words2, children);
 }
 function parseDoc(html) {
+    var e_2, _a;
     var lines = html.replace(/\t/g, "        ") // Convert tabs to 8 spaces, like Python 2. People shouldn't mix tabs and spaces anyway
         .split("\n").map(function (ln) {
         var trimmed = ln.trimStart();
@@ -19636,9 +19965,18 @@ function parseDoc(html) {
             out.push(ln.node); // Or as a top-level node, if the stack is empty
         stack.push(ln); // Push ourselves onto the stack, in case we have children
     };
-    for (var _i = 0, lines_1 = lines; _i < lines_1.length; _i++) {
-        var ln = lines_1[_i];
-        _loop_1(ln);
+    try {
+        for (var lines_1 = __values(lines), lines_1_1 = lines_1.next(); !lines_1_1.done; lines_1_1 = lines_1.next()) {
+            var ln = lines_1_1.value;
+            _loop_1(ln);
+        }
+    }
+    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+    finally {
+        try {
+            if (lines_1_1 && !lines_1_1.done && (_a = lines_1["return"])) _a.call(lines_1);
+        }
+        finally { if (e_2) throw e_2.error; }
     }
     // Run macros. Let's run it on a fake top-level element, so that macros can access the children of it
     // Formerly simply: return out.map(x => Macros.runAll(x))
@@ -19734,20 +20072,30 @@ var cssDisplayShortcuts = {
     ig: "inline-grid"
 };
 function processLine(line) {
+    var e_1, _a, e_2, _b, e_3, _c;
     line = splitTwo(line, "// ")[0]; // ignore comments
     if (line.startsWith("<"))
         line = "-- " + line; //return { tag: "html", attrs: [], innerHtml: line, children: [] }
     if (line.startsWith("-- "))
         line = " " + line; // so that it gets detected
-    var _a = splitTwo(line, " -- "), wordPart = _a[0], innerHtml = _a[1];
+    var _d = __read(splitTwo(line, " -- "), 2), wordPart = _d[0], innerHtml = _d[1];
     wordPart = wordPart.trim();
-    var _b = wordPart.match(/(?=\S)[^"\s]*(?:"[^\\"]*(?:\\[\s\S][^\\"]*)*"[^"\s]*)*/g) || [''], tagPart = _b[0], words = _b.slice(1); // Not 100% sufficient. From https://stackoverflow.com/questions/4031900/split-a-string-by-whitespace-keeping-quoted-segments-allowing-escaped-quotes
-    var _c = tagPart.split("."), __tag = _c[0], classesAttachedToTag = _c.slice(1);
-    var _d = splitTwo(__tag, "#"), _tag = _d[0], id = _d[1];
+    var _e = __read(wordPart.match(/(?=\S)[^"\s]*(?:"[^\\"]*(?:\\[\s\S][^\\"]*)*"[^"\s]*)*/g) || ['']), tagPart = _e[0], words = _e.slice(1); // Not 100% sufficient. From https://stackoverflow.com/questions/4031900/split-a-string-by-whitespace-keeping-quoted-segments-allowing-escaped-quotes
+    var _f = __read(tagPart.split(".")), __tag = _f[0], classesAttachedToTag = _f.slice(1);
+    var _g = __read(splitTwo(__tag, "#"), 2), _tag = _g[0], id = _g[1];
     var tag = _tag || ((classesAttachedToTag.length || wordPart.length) ? 'div' : 'html'); // html for lines with no tag only innerHtml
-    for (var _i = 0, classesAttachedToTag_1 = classesAttachedToTag; _i < classesAttachedToTag_1.length; _i++) {
-        var x = classesAttachedToTag_1[_i];
-        words.push("." + x);
+    try {
+        for (var classesAttachedToTag_1 = __values(classesAttachedToTag), classesAttachedToTag_1_1 = classesAttachedToTag_1.next(); !classesAttachedToTag_1_1.done; classesAttachedToTag_1_1 = classesAttachedToTag_1.next()) {
+            var x = classesAttachedToTag_1_1.value;
+            words.push("." + x);
+        }
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (classesAttachedToTag_1_1 && !classesAttachedToTag_1_1.done && (_a = classesAttachedToTag_1["return"])) _a.call(classesAttachedToTag_1);
+        }
+        finally { if (e_1) throw e_1.error; }
     }
     if (id)
         words.push("id=" + id);
@@ -19770,47 +20118,65 @@ function processLine(line) {
         words.push("display=inline-block");
     } // experimental
     var attrs = [];
-    for (var _e = 0, words_1 = words; _e < words_1.length; _e++) {
-        var x = words_1[_e];
-        var _f = splitTwo(x, "="), _key = _f[0], _value = _f[1];
-        var isExpr = false, kind = "attr";
-        if ((_value === null || _value === void 0 ? void 0 : _value[0]) === '"')
-            _value = _value.slice(1, _value.length - 1); // Remove quotes
-        else if ((_value === null || _value === void 0 ? void 0 : _value[0]) === '{') {
-            _value = _value.slice(1, _value.length - 1);
-            isExpr = true;
-        }
-        if (_key[0] === ":") {
-            isExpr = true;
-            _key = _key.slice(1);
-        } // Vue-style :attr
-        if (_key[0] === ".") {
-            kind = "class";
-            _key = _key.slice(1);
-        }
-        if (_key[0] === "*") {
-            kind = "style";
-            _key = _key.slice(1);
-        }
-        if (kind === "class" && _value)
-            isExpr = true; // Classes with values are always boolean expressions
-        // _key = ourCssShorthand(_key) // Disabled in favour of Imba's
-        _key = imbaCssShorthand(_key);
-        // Expand macros
-        var afterMacros = macros(_key, _value);
-        for (var _g = 0, _h = Object.keys(afterMacros); _g < _h.length; _g++) {
-            var key = _h[_g];
-            var value = afterMacros[key];
-            if (cssProperties.includes(key) && kind === "attr")
-                kind = "style";
-            if (_key.startsWith("attr-")) {
-                kind = "attr";
-                _key = _key.slice(5);
+    try {
+        for (var words_1 = __values(words), words_1_1 = words_1.next(); !words_1_1.done; words_1_1 = words_1.next()) {
+            var x = words_1_1.value;
+            var _h = __read(splitTwo(x, "="), 2), _key = _h[0], _value = _h[1];
+            var isExpr = false, kind = "attr";
+            if ((_value === null || _value === void 0 ? void 0 : _value[0]) === '"')
+                _value = _value.slice(1, _value.length - 1); // Remove quotes
+            else if ((_value === null || _value === void 0 ? void 0 : _value[0]) === '{') {
+                _value = _value.slice(1, _value.length - 1);
+                isExpr = true;
             }
-            if (kind === "style" && !isExpr && value)
-                value = value.split(" ").map(function (x) { return /^-?([0-9]*\.)?[0-9]+q$/.test(x) ? "".concat(parseFloat(x) * 0.25, "rem") : x; }).join(" "); // add support for the "q" unit which is 0.25rem
-            attrs.push({ key: key, value: value || undefined, isExpr: isExpr, kind: kind });
+            if (_key[0] === ":") {
+                isExpr = true;
+                _key = _key.slice(1);
+            } // Vue-style :attr
+            if (_key[0] === ".") {
+                kind = "class";
+                _key = _key.slice(1);
+            }
+            if (_key[0] === "*") {
+                kind = "style";
+                _key = _key.slice(1);
+            }
+            if (kind === "class" && _value)
+                isExpr = true; // Classes with values are always boolean expressions
+            // _key = ourCssShorthand(_key) // Disabled in favour of Imba's
+            _key = imbaCssShorthand(_key);
+            // Expand macros
+            var afterMacros = macros(_key, _value);
+            try {
+                for (var _j = (e_3 = void 0, __values(Object.keys(afterMacros))), _k = _j.next(); !_k.done; _k = _j.next()) {
+                    var key = _k.value;
+                    var value = afterMacros[key];
+                    if (cssProperties.includes(key) && kind === "attr")
+                        kind = "style";
+                    if (_key.startsWith("attr-")) {
+                        kind = "attr";
+                        _key = _key.slice(5);
+                    }
+                    if (kind === "style" && !isExpr && value)
+                        value = value.split(" ").map(function (x) { return /^-?([0-9]*\.)?[0-9]+q$/.test(x) ? "".concat(parseFloat(x) * 0.25, "rem") : x; }).join(" "); // add support for the "q" unit which is 0.25rem
+                    attrs.push({ key: key, value: value || undefined, isExpr: isExpr, kind: kind });
+                }
+            }
+            catch (e_3_1) { e_3 = { error: e_3_1 }; }
+            finally {
+                try {
+                    if (_k && !_k.done && (_c = _j["return"])) _c.call(_j);
+                }
+                finally { if (e_3) throw e_3.error; }
+            }
         }
+    }
+    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+    finally {
+        try {
+            if (words_1_1 && !words_1_1.done && (_b = words_1["return"])) _b.call(words_1);
+        }
+        finally { if (e_2) throw e_2.error; }
     }
     return { tag: tag, attrs: attrs, innerHtml: innerHtml || undefined, children: [] };
 }
@@ -19823,6 +20189,7 @@ function v1Load(text) {
     return { ast: nodes, toVueTemplate: toVueTemplate, toRenderFunc: function () { return toRenderFunc(nodes[0]); } };
 }
 function toRenderFunc(node, opts) {
+    var e_4, _a, e_5, _b;
     if (opts === void 0) { opts = { ce: "/*#__PURE__*/React.createElement", className: "className" }; }
     if (node.tag === "html")
         return JSON.stringify(node.innerHtml || "");
@@ -19830,23 +20197,32 @@ function toRenderFunc(node, opts) {
     var styleExprText = new Map();
     var classExprText = new Map();
     var mapToObj = function (m) { return ' { ' + Array.from(m.entries()).map(function (_a) {
-        var k = _a[0], v = _a[1];
+        var _b = __read(_a, 2), k = _b[0], v = _b[1];
         return "".concat(JSON.stringify(k), ": ").concat(v);
     }).join(", ") + '} '; };
-    for (var _i = 0, _a = node.attrs; _i < _a.length; _i++) {
-        var x = _a[_i];
-        var exprText = x.value === undefined ? 'true' : x.isExpr ? x.value : JSON.stringify(x.value);
-        if (x.kind === "style") {
-            styleExprText.set(caseChange(x.key).toCamel(), exprText);
-            attrExprText.set('style', mapToObj(styleExprText));
+    try {
+        for (var _c = __values(node.attrs), _d = _c.next(); !_d.done; _d = _c.next()) {
+            var x = _d.value;
+            var exprText = x.value === undefined ? 'true' : x.isExpr ? x.value : JSON.stringify(x.value);
+            if (x.kind === "style") {
+                styleExprText.set(caseChange(x.key).toCamel(), exprText);
+                attrExprText.set('style', mapToObj(styleExprText));
+            }
+            else if (x.kind === "class") {
+                classExprText.set(x.key, exprText);
+                attrExprText.set(opts.className, "classNames(".concat(mapToObj(classExprText), ")"));
+            }
+            else {
+                attrExprText.set(x.key, exprText);
+            }
         }
-        else if (x.kind === "class") {
-            classExprText.set(x.key, exprText);
-            attrExprText.set(opts.className, "classNames(".concat(mapToObj(classExprText), ")"));
+    }
+    catch (e_4_1) { e_4 = { error: e_4_1 }; }
+    finally {
+        try {
+            if (_d && !_d.done && (_a = _c["return"])) _a.call(_c);
         }
-        else {
-            attrExprText.set(x.key, exprText);
-        }
+        finally { if (e_4) throw e_4.error; }
     }
     var out = [];
     out.push("".concat(opts.ce, "(").concat(JSON.stringify(node.tag), ", "));
@@ -19857,14 +20233,24 @@ function toRenderFunc(node, opts) {
     // Children
     if (node.innerHtml)
         out.push(", " + JSON.stringify(node.innerHtml)); // TODO support interpolation?
-    for (var _b = 0, _c = node.children; _b < _c.length; _b++) {
-        var x = _c[_b];
-        out.push(", " + toRenderFunc(x, opts));
+    try {
+        for (var _e = __values(node.children), _f = _e.next(); !_f.done; _f = _e.next()) {
+            var x = _f.value;
+            out.push(", " + toRenderFunc(x, opts));
+        }
+    }
+    catch (e_5_1) { e_5 = { error: e_5_1 }; }
+    finally {
+        try {
+            if (_f && !_f.done && (_b = _e["return"])) _b.call(_e);
+        }
+        finally { if (e_5) throw e_5.error; }
     }
     out.push(")");
     return out.join("");
 }
 function nodeToVue(node, whitespace) {
+    var e_6, _a;
     if (whitespace === void 0) { whitespace = false; }
     var out = [];
     if (node.tag === 'html') {
@@ -19879,8 +20265,8 @@ function nodeToVue(node, whitespace) {
         var block = function (items, funcs) { var _a, _b; if (!items.length)
             return; (_a = funcs.start) === null || _a === void 0 ? void 0 : _a.call(funcs); items.forEach(function (x, i) { var _a; if (i)
             (_a = funcs.between) === null || _a === void 0 ? void 0 : _a.call(funcs); funcs.each(x, i); }); (_b = funcs.end) === null || _b === void 0 ? void 0 : _b.call(funcs); };
-        var _a = ['class', 'style', 'attr'].map(function (x) { return node.attrs.filter(function (y) { return y.kind === x; }); }), klass = _a[0], style = _a[1], attr = _a[2];
-        var _b = partition(klass, function (x) { return x.isExpr; }), classExpr = _b[0], classStatic = _b[1];
+        var _b = __read(['class', 'style', 'attr'].map(function (x) { return node.attrs.filter(function (y) { return y.kind === x; }); }), 3), klass = _b[0], style = _b[1], attr = _b[2];
+        var _c = __read(partition(klass, function (x) { return x.isExpr; }), 2), classExpr = _c[0], classStatic = _c[1];
         block(classStatic, {
             start: function () { return out.push(' class="'); },
             each: function (x) { out.push(x.key); if (x.value !== undefined)
@@ -19897,7 +20283,7 @@ function nodeToVue(node, whitespace) {
             between: function () { return out.push(", "); },
             end: function () { return out.push("}'"); }
         });
-        var _c = partition(style, function (x) { return x.isExpr; }), styleExpr = _c[0], styleStatic = _c[1];
+        var _d = __read(partition(style, function (x) { return x.isExpr; }), 2), styleExpr = _d[0], styleStatic = _d[1];
         block(styleStatic, {
             start: function () { return out.push(' style="'); },
             each: function (x) { return out.push(x.key, ": ", x.value); },
@@ -19930,12 +20316,21 @@ function nodeToVue(node, whitespace) {
         if (node.innerHtml)
             out.push(node.innerHtml);
     }
-    for (var _i = 0, _d = node.children; _i < _d.length; _i++) {
-        var c = _d[_i];
-        var txt = nodeToVue(c, whitespace);
-        if (whitespace)
-            txt = txt.split("\n").map(function (l) { return "\n  ".concat(l); }).join("\n"); // Indent
-        out.push(txt);
+    try {
+        for (var _e = __values(node.children), _f = _e.next(); !_f.done; _f = _e.next()) {
+            var c = _f.value;
+            var txt = nodeToVue(c, whitespace);
+            if (whitespace)
+                txt = txt.split("\n").map(function (l) { return "\n  ".concat(l); }).join("\n"); // Indent
+            out.push(txt);
+        }
+    }
+    catch (e_6_1) { e_6 = { error: e_6_1 }; }
+    finally {
+        try {
+            if (_f && !_f.done && (_a = _e["return"])) _a.call(_e);
+        }
+        finally { if (e_6) throw e_6.error; }
     }
     if (whitespace)
         out.push("\n");
@@ -19945,6 +20340,7 @@ function nodeToVue(node, whitespace) {
     return out.join("");
 }
 function childize(items, getIndent) {
+    var e_7, _a;
     var out = [];
     var stack = [];
     var _loop_1 = function (i) {
@@ -19960,9 +20356,18 @@ function childize(items, getIndent) {
         // Push ourselves onto the stack, in case we have children
         stack.push(ch);
     };
-    for (var _i = 0, items_1 = items; _i < items_1.length; _i++) {
-        var i = items_1[_i];
-        _loop_1(i);
+    try {
+        for (var items_1 = __values(items), items_1_1 = items_1.next(); !items_1_1.done; items_1_1 = items_1.next()) {
+            var i = items_1_1.value;
+            _loop_1(i);
+        }
+    }
+    catch (e_7_1) { e_7 = { error: e_7_1 }; }
+    finally {
+        try {
+            if (items_1_1 && !items_1_1.done && (_a = items_1["return"])) _a.call(items_1);
+        }
+        finally { if (e_7) throw e_7.error; }
     }
     return out;
 }
@@ -19973,6 +20378,11 @@ function ViteTransformPlugin(opts) {
         name: 'vite-plugin-vue-vug',
         enforce: "pre",
         transform: function (code, id) {
+            var isVueFile = id.endsWith('.vue');
+            if (!isVueFile && !/\.m?(j|t)sx?$/.test(id))
+                return;
+            var compile = function (what) { return (opts._tempLangVersion || 1.2) >= 2 ? compile$1(what) : v1Load(what); };
+            code = transformVugTemplateStrings(code);
             if (!id.endsWith(".vue"))
                 return;
             var origCode = code;
@@ -19983,7 +20393,7 @@ function ViteTransformPlugin(opts) {
             var startOfCode = code.indexOf(">", startOfTemplateTag) + 1;
             var endOfCode = code.lastIndexOf("</template>");
             var vugCode = code.substring(startOfCode, endOfCode);
-            var output = (opts._tempLangVersion || 1.2) >= 2 ? compile$1(vugCode).toVueTemplate() : v1Load(vugCode).toVueTemplate();
+            var output = compile(vugCode).toVueTemplate();
             code = code.substring(0, startOfTemplateTag) + "<template>" + output + code.substring(endOfCode); // We have to replace the template tag so the SFC compiler doesn't error because it doesn't know how to process Vue
             // require('fs').writeFileSync(`${require('os').tmpdir()}/vugtmp_` + id.split("/").slice(-1)[0], code) // For easy debugging output uncomment
             // Inject some code (experimental)
@@ -20010,32 +20420,36 @@ function load(vugCode, opts) {
         return v1Load(vugCode);
     return compile$1(vugCode);
 }
-function transformVugReact(code) {
+function vug(vugCode) {
+    var args = [];
+    for (var _i = 1; _i < arguments.length; _i++) {
+        args[_i - 1] = arguments[_i];
+    }
+    throw "Vug.vug() template-tag function was called at runtime -- this means that you haven't properly set up a compile-time plugin to replace calls to it. If you meant to convert Vug code at runtime, use one of the provided methods for doing so.";
+}
+function transformVugTemplateStrings(code, opts) {
+    if (opts === void 0) { opts = {}; }
+    var weFoundOne = false;
+    var templateTag = opts.templateTag || 'vug';
+    var hFuncAlias = "_vugHFunc";
     while (true) {
-        var ind = code.indexOf("vugReact`");
+        var ind = code.indexOf(templateTag + "`");
         if (ind < 0)
             break;
-        var end = code.indexOf("`", ind + 10);
-        var contents = code.substring(ind + 9, end);
+        weFoundOne = true;
+        var end = code.indexOf("`", ind + templateTag.length + 1);
+        var contents = code.substring(ind + templateTag.length + 1, end);
         contents = contents.replace(/@click/g, ':onClick'); // temp to support Vue syntax
-        var converted = v1Load(contents).toRenderFunc();
+        var converted = compile$1(contents).toRenderFunc({ h: hFuncAlias }); // callback(contents)
         converted = converted.replace(/\{\{/g, '" + '); // temp to support Vue syntax
         converted = converted.replace(/\}\}/g, ' + "'); // temp to support Vue syntax
         code = code.slice(0, ind) + converted + code.slice(end + 1);
-        console.log(code);
+    }
+    if (weFoundOne) {
+        // replace imports
+        code = code.replace(/import \{ vug \} from ['"][^'"\n]*vug[^'"\n]*['"]/g, "import { h as ".concat(hFuncAlias, " } from 'vue'"));
     }
     return code;
-}
-function ViteReactPlugin() {
-    return {
-        name: 'vite-plugin-react-vug',
-        enforce: "pre",
-        transform: function (code, id) {
-            if (!/\.m?(j|t)sx?$/.test(id))
-                return;
-            return transformVugReact(code);
-        }
-    };
 }
 var VueConsolidatePlugin = function () { return ({
     // Implements Vite's `consolidate` interface: https://github.com/vuejs/core/blob/471f66a1f6cd182f3e106184b2e06f7753382996/packages/compiler-sfc/src/compileTemplate.ts#L89  
@@ -20053,8 +20467,8 @@ var Vug = /*#__PURE__*/Object.freeze({
   __proto__: null,
   ViteTransformPlugin: ViteTransformPlugin,
   load: load,
-  transformVugReact: transformVugReact,
-  ViteReactPlugin: ViteReactPlugin,
+  vug: vug,
+  transformVugTemplateStrings: transformVugTemplateStrings,
   VueConsolidatePlugin: VueConsolidatePlugin
 });
 
@@ -20138,7 +20552,7 @@ function initApp(Vue) {
         for (var _i = 2; _i < arguments.length; _i++) {
             args[_i - 2] = arguments[_i];
         }
-        return old.apply(void 0, __spreadArray([name, classComponent(value)], args, false));
+        return old.apply(void 0, __spreadArray([name, classComponent(value)], __read(args), false));
     }; });
     // Support vug
     hook(w.app, 'component', function (old) { return function (name, value) {
@@ -20150,7 +20564,7 @@ function initApp(Vue) {
             value.template = load(value.vug).toVueTemplate();
             delete value.vug;
         }
-        old.apply(void 0, __spreadArray([name, value], args, false));
+        old.apply(void 0, __spreadArray([name, value], __read(args), false));
     }; });
     // Include some components
     w.app.component("async-value", AsyncValue);

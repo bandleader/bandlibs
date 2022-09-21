@@ -22,7 +22,7 @@ async function build(mainFile: string, outFilePrefix: string, iifeName?: string)
   // Create bundle
   console.log("-------------------\nBUILDING", outFilePrefix)
   const bundle = await rollup({
-    plugins: [typescript()],
+    plugins: [typescript({ tsconfigOverride: { compilerOptions: { declaration: true, downlevelIteration: true }}})],
     input: mainFile
   })
   const outputOptions: OutputOptions[] = [
@@ -46,7 +46,12 @@ async function build(mainFile: string, outFilePrefix: string, iifeName?: string)
 
     for (const chunkOrAsset of output) {
       if (chunkOrAsset.type === 'asset') {
-        throw "No assets supposed to be here"
+        console.info("Writing asset", chunkOrAsset.name || '?', "to", chunkOrAsset.fileName)        
+        const path = `./dist/${chunkOrAsset.fileName}`
+        const pathParts = path.split('/')
+        const dir = pathParts.slice(0, pathParts.length - 1).join('/')
+        fs.mkdirSync(dir, { recursive: true })
+        fs.writeFileSync(path, chunkOrAsset.source)
       } else {
         // Remove the TSLib 'important' comment
         const toRemove = "/*! *****************************************************************************\n  Copyright (c) Microsoft Corporation.\n\n  Permission to use, copy, modify, and/or distribute this software for any\n  purpose with or without fee is hereby granted.\n\n  THE SOFTWARE IS PROVIDED \"AS IS\" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH\n  REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY\n  AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,\n  INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM\n  LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR\n  OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR\n  PERFORMANCE OF THIS SOFTWARE.\n  ***************************************************************************** */"

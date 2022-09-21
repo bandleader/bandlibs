@@ -24,6 +24,18 @@ var __assign = function() {
     return __assign.apply(this, arguments);
 };
 
+function __values(o) {
+    var s = typeof Symbol === "function" && Symbol.iterator, m = s && o[s], i = 0;
+    if (m) return m.call(o);
+    if (o && typeof o.length === "number") return {
+        next: function () {
+            if (o && i >= o.length) o = void 0;
+            return { value: o && o[i++], done: !o };
+        }
+    };
+    throw new TypeError(s ? "Object is not iterable." : "Symbol.iterator is not defined.");
+}
+
 function prop(def, moreOpts) {
     if (moreOpts === void 0) { moreOpts = {}; }
     // Typescript-wise it returns a T, so you can use it from elsewhere within the component,
@@ -42,16 +54,27 @@ function propRequired(moreOpts) {
     return o;
 }
 function classComponent(cl, opts) {
+    var e_1, _a, e_2, _b, e_3, _c;
     if (typeof cl === 'object')
         return cl; // This is a regular Vue component, just return
     if (typeof cl !== 'function')
         throw "VueClassPlus: Expected a class, not " + typeof cl;
     var propsToIgnore = ['prototype', 'length', 'name', 'caller', 'callee'];
     var copyData = function (source, target) {
+        var e_4, _a;
         var insPropsOnly = Object.getOwnPropertyNames(source).filter(function (x) { return !propsToIgnore.includes(x); });
-        for (var _i = 0, insPropsOnly_1 = insPropsOnly; _i < insPropsOnly_1.length; _i++) {
-            var prop_1 = insPropsOnly_1[_i];
-            target[prop_1] = source[prop_1];
+        try {
+            for (var insPropsOnly_1 = __values(insPropsOnly), insPropsOnly_1_1 = insPropsOnly_1.next(); !insPropsOnly_1_1.done; insPropsOnly_1_1 = insPropsOnly_1.next()) {
+                var prop_1 = insPropsOnly_1_1.value;
+                target[prop_1] = source[prop_1];
+            }
+        }
+        catch (e_4_1) { e_4 = { error: e_4_1 }; }
+        finally {
+            try {
+                if (insPropsOnly_1_1 && !insPropsOnly_1_1.done && (_a = insPropsOnly_1["return"])) _a.call(insPropsOnly_1);
+            }
+            finally { if (e_4) throw e_4.error; }
         }
     };
     // Allow `opts` to be specified as a method on the class, or as a static object
@@ -109,21 +132,48 @@ function classComponent(cl, opts) {
         // If we were successful, ignore the prop in subsequent checks
         propsToIgnore.push(prop);
     };
-    // Populate methods/computeds/props from the class's prototype
-    for (var _i = 0, _a = Object.getOwnPropertyNames(cl.prototype); _i < _a.length; _i++) {
-        var prop_2 = _a[_i];
-        consumeProp(cl.prototype, prop_2);
+    try {
+        // Populate methods/computeds/props from the class's prototype
+        for (var _d = __values(Object.getOwnPropertyNames(cl.prototype)), _e = _d.next(); !_e.done; _e = _d.next()) {
+            var prop_2 = _e.value;
+            consumeProp(cl.prototype, prop_2);
+        }
     }
-    // Experimental: check static properties
-    for (var _b = 0, _c = Object.getOwnPropertyNames(cl); _b < _c.length; _b++) {
-        var prop_3 = _c[_b];
-        consumeProp(cl, prop_3);
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (_e && !_e.done && (_a = _d["return"])) _a.call(_d);
+        }
+        finally { if (e_1) throw e_1.error; }
+    }
+    try {
+        // Experimental: check static properties
+        for (var _f = __values(Object.getOwnPropertyNames(cl)), _g = _f.next(); !_g.done; _g = _f.next()) {
+            var prop_3 = _g.value;
+            consumeProp(cl, prop_3);
+        }
+    }
+    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+    finally {
+        try {
+            if (_g && !_g.done && (_b = _f["return"])) _b.call(_f);
+        }
+        finally { if (e_2) throw e_2.error; }
     }
     // Experimental: check instance properties
     var dummyInstance = new cl();
-    for (var _d = 0, _e = Object.getOwnPropertyNames(dummyInstance); _d < _e.length; _d++) {
-        var prop_4 = _e[_d];
-        consumeProp(dummyInstance, prop_4, true);
+    try {
+        for (var _h = __values(Object.getOwnPropertyNames(dummyInstance)), _j = _h.next(); !_j.done; _j = _h.next()) {
+            var prop_4 = _j.value;
+            consumeProp(dummyInstance, prop_4, true);
+        }
+    }
+    catch (e_3_1) { e_3 = { error: e_3_1 }; }
+    finally {
+        try {
+            if (_j && !_j.done && (_c = _h["return"])) _c.call(_h);
+        }
+        finally { if (e_3) throw e_3.error; }
     }
     // Done!
     return ret;
