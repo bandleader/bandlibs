@@ -54,6 +54,7 @@ const allowReferencesToGlobals = wordTransformer(w => w.value.includes("$win") ?
 export function runAll(node: VugNode): VugNode {
     node = MarkdownSupport.fixMarkdownMacro(node)
     node = directChild(node)
+    node = doAwaitAttribute(node)
     node = tagNameParser(node)
     node = splitDoubleClasses(node)
     node = customTagTypes(node)
@@ -69,6 +70,18 @@ export function runAll(node: VugNode): VugNode {
     node = vgEach(node)
     node = allowReferencesToGlobals(node)
     return new VugNode(node.tag, node.words, node.children.map(c => runAll(c)))
+}
+
+function doAwaitAttribute(n: VugNode): VugNode {
+    // const awaitWords = n.words.filter(x => x.key.startsWith("await-"))
+    // if (!awaitWords.length) return n
+    // return new VugNode(n.tag, n.words.map(w => awaitWords.includes(w) ? new VugWord(w.key.slice(6),)))
+    const word = n.words.find(w => w.key === 'await' || w.key.startsWith('await:'))
+    if (!word) return n
+    const varName = word.value.split(":")[1] || 'value'
+    const thisWithAwaitRemoved = clone(n, { await: null })
+    const tmplt = new VugNode("template", [new VugWord('v-slot',`{value: ${varName}}`,true)], [thisWithAwaitRemoved])
+    return new VugNode("async-value", [new VugWord('promise', n.getWord('await') || '', true)], [tmplt])
 }
 
 function customTagTypes(n: VugNode): VugNode {
