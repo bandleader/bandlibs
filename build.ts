@@ -60,6 +60,10 @@ async function build(mainFile: string, outFilePrefix: string, iifeName?: string)
         // Write file
         console.info("Writing", chunkOrAsset.name, "to", chunkOrAsset.fileName)        
         fs.writeFileSync(`./dist/${chunkOrAsset.fileName}`, chunkOrAsset.code)
+
+        // Write root declaration file. Note: IIFE way is untested
+        const declFileContents = outputOption.format === 'iife' ? `import * as __imported from './${outFilePrefix}/index'\ndeclare const ${outputOption.name} = __imported` : `export * from './${outFilePrefix}/index'`
+        fs.writeFileSync(`./dist/${chunkOrAsset.fileName.slice(0, chunkOrAsset.fileName.length-3)}.d.ts`, declFileContents)
       }
     }
   }
