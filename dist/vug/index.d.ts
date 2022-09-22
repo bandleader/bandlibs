@@ -1,3 +1,6 @@
+import * as V1 from './v1';
+import * as V2 from './v2';
+export { V1, V2 };
 interface VugOptions {
     _tempLangVersion?: number;
 }
@@ -18,4 +21,3 @@ export declare function transformVugTemplateStrings(code: string, opts?: {
 export declare const VueConsolidatePlugin: () => {
     render(code: string, data: object, callback: (err: any, result?: string) => void): void;
 };
-export {};

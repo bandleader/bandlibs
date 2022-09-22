@@ -2099,7 +2099,7 @@ function tryWrap(fn) {
 let devtools;
 let buffer = [];
 let devtoolsNotInstalled = false;
-function emit(event, ...args) {
+function emit$1(event, ...args) {
     if (devtools) {
         devtools.emit(event, ...args);
     }
@@ -2147,7 +2147,7 @@ function setDevtoolsHook(hook, target) {
     }
 }
 function devtoolsInitApp(app, version) {
-    emit("app:init" /* APP_INIT */, app, version, {
+    emit$1("app:init" /* APP_INIT */, app, version, {
         Fragment,
         Text,
         Comment,
@@ -2155,7 +2155,7 @@ function devtoolsInitApp(app, version) {
     });
 }
 function devtoolsUnmountApp(app) {
-    emit("app:unmount" /* APP_UNMOUNT */, app);
+    emit$1("app:unmount" /* APP_UNMOUNT */, app);
 }
 const devtoolsComponentAdded = /*#__PURE__*/ createDevtoolsComponentHook("component:added" /* COMPONENT_ADDED */);
 const devtoolsComponentUpdated = 
@@ -2164,21 +2164,21 @@ const devtoolsComponentRemoved =
 /*#__PURE__*/ createDevtoolsComponentHook("component:removed" /* COMPONENT_REMOVED */);
 function createDevtoolsComponentHook(hook) {
     return (component) => {
-        emit(hook, component.appContext.app, component.uid, component.parent ? component.parent.uid : undefined, component);
+        emit$1(hook, component.appContext.app, component.uid, component.parent ? component.parent.uid : undefined, component);
     };
 }
 const devtoolsPerfStart = /*#__PURE__*/ createDevtoolsPerformanceHook("perf:start" /* PERFORMANCE_START */);
 const devtoolsPerfEnd = /*#__PURE__*/ createDevtoolsPerformanceHook("perf:end" /* PERFORMANCE_END */);
 function createDevtoolsPerformanceHook(hook) {
     return (component, type, time) => {
-        emit(hook, component.appContext.app, component.uid, component, type, time);
+        emit$1(hook, component.appContext.app, component.uid, component, type, time);
     };
 }
 function devtoolsComponentEmit(component, event, params) {
-    emit("component:emit" /* COMPONENT_EMIT */, component.appContext.app, component, event, params);
+    emit$1("component:emit" /* COMPONENT_EMIT */, component.appContext.app, component, event, params);
 }
 
-function emit$1(instance, event, ...rawArgs) {
+function emit$1$1(instance, event, ...rawArgs) {
     const props = instance.vnode.props || EMPTY_OBJ;
     {
         const { emitsOptions, propsOptions: [propsOptions] } = instance;
@@ -8396,7 +8396,7 @@ function createComponentInstance(vnode, parent, suspense) {
         instance.ctx = createDevRenderContext(instance);
     }
     instance.root = parent ? parent.root : instance;
-    instance.emit = emit$1.bind(null, instance);
+    instance.emit = emit$1$1.bind(null, instance);
     // apply custom element special handling
     if (vnode.ce) {
         vnode.ce(instance);
@@ -16160,285 +16160,153 @@ var VCP = /*#__PURE__*/Object.freeze({
   classComponent: classComponent
 });
 
-/*
-TODO
-- See if we can move macros (incl flex) into processCssProp
-- Maybe make it in multiple steps, or recursive, so that py=0.5q will work
-- Un-export the others, and just use processCssProp
-- See if we can un-export clone/wordTransformer in macros.ts
-*/
-function processCssProp(key, value) {
-    var _a, _b;
-    /*
-    Supports shorthands, units, and soon macros. Meant for running from anywhere, not necessarily a lowering pass.
-    Returns null if the key is not recognized.
-    */
-    if (cssProperties.includes(key))
-        return _a = {}, _a[key] = allowQUnits(value), _a;
-    if (imbaDict[key])
-        return _b = {}, _b[imbaDict[key]] = allowQUnits(value), _b;
-    // Macros
-    if (key === "sz")
-        return { "width": allowQUnits(value), "height": allowQUnits(value) };
-    if (key === "px")
-        return { "padding-left": allowQUnits(value), "padding-right": allowQUnits(value) };
-    if (key === "py")
-        return { "padding-top": allowQUnits(value), "padding-bottom": allowQUnits(value) };
-    if (key === "mx")
-        return { "margin-left": allowQUnits(value), "margin-right": allowQUnits(value) };
-    if (key === "my")
-        return { "margin-top": allowQUnits(value), "margin-bottom": allowQUnits(value) };
-    if (key === "circ" && !value)
-        return { "border-radius": "100%" };
-    if (key === "d")
-        return { "display": cssDisplayShorthand[value] }; // TODO not sure I want this, perhaps just use tag types, except b/i/if conflict, but can use full form for those. Or can use the arg
-    return null;
+function addEl(where, tagName, attrs) {
+    // Returns newly created element, plus a method 'loadPromise' that returns a Promise for the onLoad event.
+    // Not doing the promise automatically, because most elements never fire onLoad, and that will cause an [unhandled] rejected Promise.
+    var el = document.createElement(tagName);
+    var where2 = typeof where === 'string' ? document.querySelector(where) : where;
+    where2.appendChild(el);
+    return Object.assign(el, { loadPromise: function () { return waitForLoad(el); } });
 }
-function mainTransform(n) {
-    var words = n.words.flatMap(function (w) {
-        var processed = processCssProp(w.key, w.value);
-        if (!processed)
-            return w; // Not CSS
-        return Object.keys(processed).map(function (k) { return new VugWord("style_".concat(k), processed[k], w.isExpr); });
-    });
-    return new VugNode(n.tag, words, n.children);
-}
-function allowQUnits(value) {
-    if (/^-?([0-9]*\.)?[0-9]+q$/.test(value))
-        return parseFloat(value) * 0.25 + 'rem';
-    return value;
-}
-var cssDisplayShorthand = { b: "block", i: "inline", f: "flex", g: "grid", ib: "inline-block", "if": "inline-flex", ig: "inline-grid" };
-function flexArg(n) {
-    var value = n.getWordErrIfCalc("fx"); // we've moved it there
-    if (!value)
-        return n;
-    // Direction
-    var reverse = false, row = false, column = false;
-    if (value[0] === "!") {
-        reverse = true;
-        value = value.slice(1);
-    }
-    if (value[0] === "|") {
-        column = true;
-        value = value.slice(1);
-    }
-    if (value[0] === "v") {
-        column = true;
-        value = value.slice(1);
-    }
-    if (value[0] === "-") {
-        row = true;
-        value = value.slice(1);
-    }
-    if (value[0] === "h") {
-        row = true;
-        value = value.slice(1);
-    }
-    if (value[0] === "!") {
-        reverse = true;
-        value = value.slice(1);
-    }
-    var direction = column ? 'column' : (reverse || row) ? 'row' : ''; // If reverse was specified, we have to specify row (which is the default)
-    if (reverse)
-        direction += "-reverse";
-    var obj = { fx: null, style_display: 'flex' };
-    if (direction)
-        obj['style_flex-direction'] = direction;
-    // Alignment etc
-    var flexAlignmentShorthands = {
-        c: "center",
-        s: "flex-start",
-        e: "flex-end",
-        // s: "start",
-        // e: "end",
-        l: "left",
-        r: "right",
-        x: "stretch"
-    };
-    var _a = __read(value.replace(/[.,]/g, '').split('').map(function (x) { return flexAlignmentShorthands[x] || x; }), 3), jc = _a[0], ai = _a[1], ac = _a[2];
-    if (jc)
-        obj['style_justify-content'] = jc;
-    if (ai)
-        obj['style_align-items'] = ai;
-    if (ac)
-        obj['style_align-content'] = ac;
-    return clone(n, obj);
-}
-var imbaDict = { ac: "align-content", ai: "align-items", as: "align-self", b: "bottom", bc: "border-color", bcb: "border-bottom-color", bcl: "border-left-color", bcr: "border-right-color", bct: "border-top-color", bd: "border", bdb: "border-bottom", bdl: "border-left", bdr: "border-right", bdt: "border-top", bg: "background", bga: "background-attachment", bgc: "background-color", bgclip: "background-clip", bcgi: "background-image", bgo: "background-origin", bgp: "background-position", bgr: "background-repeat", bgs: "background-size", bs: "border-style", bsb: "border-bottom-style", bsl: "border-left-style", bsr: "border-right-style", bst: "border-top-style", bw: "border-width", bwb: "border-bottom-width", bwl: "border-left-width", bwr: "border-right-width", bwt: "border-top-width", c: "color", cg: "column-gap", d: "display", e: "ease", ec: "ease-colors", eo: "ease-opacity", et: "ease-transform", ff: "font-family", fl: "flex", flb: "flex-basis", fld: "flex-direction", flf: "flex-flow", flg: "flex-grow", fls: "flex-shrink", flw: "flex-wrap", fs: "font-size", fw: "font-weight", g: "gap", ga: "grid-area", gac: "grid-auto-columns", gaf: "grid-auto-flow", gar: "grid-auto-rows", gc: "grid-column", gce: "grid-column-end", gcg: "grid-column-gap", gcs: "grid-column-start", gr: "grid-row", gre: "grid-row-end", grg: "grid-row-gap", grs: "grid-row-start", gt: "grid-template", gta: "grid-template-areas", gtc: "grid-template-columns", gtr: "grid-template-rows", h: "height", jac: "place-content", jai: "place-items", jas: "place-self", jc: "justify-content", ji: "justify-items", js: "justify-self", l: "left", lh: "line-height", ls: "letter-spacing", m: "margin", mb: "margin-bottom", ml: "margin-left", mr: "margin-right", mt: "margin-top", o: "opacity", of: "overflow", ofa: "overflow-anchor", ofx: "overflow-x", ofy: "overflow-y", origin: "transform-origin", p: "padding", pb: "padding-bottom", pe: "pointer-events", pl: "padding-left", pos: "position", pr: "padding-right", pt: "padding-top", r: "right", rd: "border-radius", rdbl: "border-bottom-left-radius", rdbr: "border-bottom-right-radius", rdtl: "border-top-left-radius", rdtr: "border-top-right-radius", rg: "row-gap", shadow: "box-shadow", t: "top", ta: "text-align", td: "text-decoration", tdc: "text-decoration-color", tdl: "text-decoration-line", tds: "text-decoration-style", tdsi: "text-decoration-skip-ink", tdt: "text-decoration-thickness", te: "text-emphasis", tec: "text-emphasis-color", tep: "text-emphasis-position", tes: "text-emphasis-style", ts: "text-shadow", tt: "text-transform", tween: "transition", us: "user-select", va: "vertical-align", w: "width", ws: "white-space", zi: "z-index" };
-var cssProperties = "--*|-webkit-line-clamp|accent-color|align-content|align-items|align-self|alignment-baseline|all|animation|animation-delay|animation-direction|animation-duration|animation-fill-mode|animation-iteration-count|animation-name|animation-play-state|animation-timing-function|appearance|aspect-ratio|azimuth|backface-visibility|background|background-attachment|background-blend-mode|background-clip|background-color|background-image|background-origin|background-position|background-repeat|background-size|baseline-shift|baseline-source|block-ellipsis|block-size|block-step|block-step-align|block-step-insert|block-step-round|block-step-size|bookmark-label|bookmark-level|bookmark-state|border|border-block|border-block-color|border-block-end|border-block-end-color|border-block-end-style|border-block-end-width|border-block-start|border-block-start-color|border-block-start-style|border-block-start-width|border-block-style|border-block-width|border-bottom|border-bottom-color|border-bottom-left-radius|border-bottom-right-radius|border-bottom-style|border-bottom-width|border-boundary|border-collapse|border-color|border-end-end-radius|border-end-start-radius|border-image|border-image-outset|border-image-repeat|border-image-slice|border-image-source|border-image-width|border-inline|border-inline-color|border-inline-end|border-inline-end-color|border-inline-end-style|border-inline-end-width|border-inline-start|border-inline-start-color|border-inline-start-style|border-inline-start-width|border-inline-style|border-inline-width|border-left|border-left-color|border-left-style|border-left-width|border-radius|border-right|border-right-color|border-right-style|border-right-width|border-spacing|border-start-end-radius|border-start-start-radius|border-style|border-top|border-top-color|border-top-left-radius|border-top-right-radius|border-top-style|border-top-width|border-width|bottom|box-decoration-break|box-shadow|box-sizing|box-snap|break-after|break-before|break-inside|caption-side|caret|caret-color|caret-shape|chains|clear|clip|clip-path|clip-rule|color|color-adjust|color-interpolation-filters|color-scheme|column-count|column-fill|column-gap|column-rule|column-rule-color|column-rule-style|column-rule-width|column-span|column-width|columns|contain|contain-intrinsic-block-size|contain-intrinsic-height|contain-intrinsic-inline-size|contain-intrinsic-size|contain-intrinsic-width|container|container-name|container-type|content|content-visibility|continue|counter-increment|counter-reset|counter-set|cue|cue-after|cue-before|cursor|direction|display|dominant-baseline|elevation|empty-cells|fill|fill-break|fill-color|fill-image|fill-opacity|fill-origin|fill-position|fill-repeat|fill-rule|fill-size|filter|flex|flex-basis|flex-direction|flex-flow|flex-grow|flex-shrink|flex-wrap|float|float-defer|float-offset|float-reference|flood-color|flood-opacity|flow|flow-from|flow-into|font|font-family|font-feature-settings|font-kerning|font-language-override|font-optical-sizing|font-palette|font-size|font-size-adjust|font-stretch|font-style|font-synthesis|font-synthesis-small-caps|font-synthesis-style|font-synthesis-weight|font-variant|font-variant-alternates|font-variant-caps|font-variant-east-asian|font-variant-emoji|font-variant-ligatures|font-variant-numeric|font-variant-position|font-variation-settings|font-weight|footnote-display|footnote-policy|forced-color-adjust|gap|glyph-orientation-vertical|grid|grid-area|grid-auto-columns|grid-auto-flow|grid-auto-rows|grid-column|grid-column-end|grid-column-start|grid-row|grid-row-end|grid-row-start|grid-template|grid-template-areas|grid-template-columns|grid-template-rows|hanging-punctuation|height|hyphenate-character|hyphenate-limit-chars|hyphenate-limit-last|hyphenate-limit-lines|hyphenate-limit-zone|hyphens|image-orientation|image-rendering|image-resolution|initial-letter|initial-letter-align|initial-letter-wrap|inline-size|inline-sizing|input-security|inset|inset-block|inset-block-end|inset-block-start|inset-inline|inset-inline-end|inset-inline-start|isolation|justify-content|justify-items|justify-self|leading-trim|left|letter-spacing|lighting-color|line-break|line-clamp|line-grid|line-height|line-height-step|line-padding|line-snap|list-style|list-style-image|list-style-position|list-style-type|margin|margin-block|margin-block-end|margin-block-start|margin-bottom|margin-break|margin-inline|margin-inline-end|margin-inline-start|margin-left|margin-right|margin-top|margin-trim|marker|marker-end|marker-knockout-left|marker-knockout-right|marker-mid|marker-pattern|marker-segment|marker-side|marker-start|mask|mask-border|mask-border-mode|mask-border-outset|mask-border-repeat|mask-border-slice|mask-border-source|mask-border-width|mask-clip|mask-composite|mask-image|mask-mode|mask-origin|mask-position|mask-repeat|mask-size|mask-type|max-block-size|max-height|max-inline-size|max-lines|max-width|min-block-size|min-height|min-inline-size|min-intrinsic-sizing|min-width|mix-blend-mode|nav-down|nav-left|nav-right|nav-up|object-fit|object-position|offset|offset-anchor|offset-distance|offset-path|offset-position|offset-rotate|opacity|order|orphans|outline|outline-color|outline-offset|outline-style|outline-width|overflow|overflow-anchor|overflow-block|overflow-clip-margin|overflow-inline|overflow-wrap|overflow-x|overflow-y|overscroll-behavior|overscroll-behavior-block|overscroll-behavior-inline|overscroll-behavior-x|overscroll-behavior-y|padding|padding-block|padding-block-end|padding-block-start|padding-bottom|padding-inline|padding-inline-end|padding-inline-start|padding-left|padding-right|padding-top|page|page-break-after|page-break-before|page-break-inside|pause|pause-after|pause-before|perspective|perspective-origin|pitch|pitch-range|place-content|place-items|place-self|play-during|pointer-events|position|print-color-adjust|property-name|quotes|region-fragment|resize|rest|rest-after|rest-before|richness|right|rotate|row-gap|ruby-align|ruby-merge|ruby-overhang|ruby-position|running|scale|scroll-behavior|scroll-margin|scroll-margin-block|scroll-margin-block-end|scroll-margin-block-start|scroll-margin-bottom|scroll-margin-inline|scroll-margin-inline-end|scroll-margin-inline-start|scroll-margin-left|scroll-margin-right|scroll-margin-top|scroll-padding|scroll-padding-block|scroll-padding-block-end|scroll-padding-block-start|scroll-padding-bottom|scroll-padding-inline|scroll-padding-inline-end|scroll-padding-inline-start|scroll-padding-left|scroll-padding-right|scroll-padding-top|scroll-snap-align|scroll-snap-stop|scroll-snap-type|scrollbar-color|scrollbar-gutter|scrollbar-width|shape-image-threshold|shape-inside|shape-margin|shape-outside|spatial-navigation-action|spatial-navigation-contain|spatial-navigation-function|speak|speak-as|speak-header|speak-numeral|speak-punctuation|speech-rate|stress|string-set|stroke|stroke-align|stroke-alignment|stroke-break|stroke-color|stroke-dash-corner|stroke-dash-justify|stroke-dashadjust|stroke-dasharray|stroke-dashcorner|stroke-dashoffset|stroke-image|stroke-linecap|stroke-linejoin|stroke-miterlimit|stroke-opacity|stroke-origin|stroke-position|stroke-repeat|stroke-size|stroke-width|tab-size|table-layout|text-align|text-align-all|text-align-last|text-combine-upright|text-decoration|text-decoration-color|text-decoration-line|text-decoration-skip|text-decoration-skip-box|text-decoration-skip-ink|text-decoration-skip-inset|text-decoration-skip-self|text-decoration-skip-spaces|text-decoration-style|text-decoration-thickness|text-edge|text-emphasis|text-emphasis-color|text-emphasis-position|text-emphasis-skip|text-emphasis-style|text-group-align|text-indent|text-justify|text-orientation|text-overflow|text-shadow|text-space-collapse|text-space-trim|text-spacing|text-transform|text-underline-offset|text-underline-position|text-wrap|top|transform|transform-box|transform-origin|transform-style|transition|transition-delay|transition-duration|transition-property|transition-timing-function|translate|unicode-bidi|user-select|vertical-align|visibility|voice-balance|voice-duration|voice-family|voice-pitch|voice-range|voice-rate|voice-stress|voice-volume|volume|white-space|widows|width|will-change|word-boundary-detection|word-boundary-expansion|word-break|word-spacing|word-wrap|wrap-after|wrap-before|wrap-flow|wrap-inside|wrap-through|writing-mode|z-index".split("|"); // TODO can optimize into a map
-
-function sheetStyles(n) {
-    /*
-    Handles css attributes that are to be converted into stylesheet rules
-    (i.e. `css` custom tag, handled later in the pipeline).
-        div *bg=green *bg:hover=green
-    - TODO maybe don't require the star, do it wherever it has a colon, and for things without colons, do bg:all, bg:css, bg:*, etc.
-        - OR if there is anything conditional, put styles on that element in a stylesheet by default, UNLESS overridden by a star, or style-, etc.
-        - OR maybe ALWAYS put things in a stylesheet by default, why not?
-    */
-    var newCssTags = [];
-    var ourWords = n.words.flatMap(function (w) {
-        if (w.key[0] !== '*')
-            return [w];
-        if (w.isExpr)
-            throw "Stylesheet CSS attribute '".concat(w.key, "' must be a literal, not an expression like '").concat(w.value, "'");
-        var newTagKey = "css";
-        if (w.key.includes(":"))
-            newTagKey += ":" + w.key.split(":").slice(1).join(":");
-        newCssTags.push(new VugNode(newTagKey, [new VugWord(w.key.slice(1).split(":")[0], w.value, false)]));
-        return []; // skip the word, we've added it to newCssTags
-    });
-    if (!newCssTags.length)
-        return n;
-    return new VugNode(n.tag, ourWords, __spreadArray(__spreadArray([], __read(newCssTags), false), __read(n.children), false));
-}
-function cssCustomTag(n) {
-    /* Handles lines like:
-    div
-      css -- h1 { background: red }
-      css -- background: red // applies to current element using vg-css's &
-      css bg=red // same
-      css selector="&:hover" bg=red
-      css s="&:hover" bg=red // same
-      css:hover bg=red // same
-    
-    TODO
-    - won't work for top-level CSS tags; we can make that work later once we have a way to put things in the <style> tag, see comment on vg-css. Or we can replace with a <noscript> tag with v-css...
-    - consolidate css tags that have the same selector and args
-    - I don't know how this is catching args, tagNameParser was supposed to take it out and put it under 'type'
-    - "opacity=0.5" errors with "Props of a CSS tag can't be expressions, since they're inserted as a stylesheet" since numbers are parsed as expressions
-    */
-    function cssStringForCssCustomTag(cssTag) {
-        var e_1, _a;
-        var selector = cssTag.getWordErrIfCalc("selector") || cssTag.getWordErrIfCalc("s") || '&';
-        var rule = cssTag.children.map(function (x) { return x.getWord("_contents"); }).join(" ");
-        var attrs = cssTag.words.filter(function (x) { return x.key !== "selector" && x.key !== "s"; });
-        if (rule.includes("{")) {
-            if (selector !== "&")
-                throw "Can't have a rule with braces when a selector is specified. '" + selector;
-            if (attrs.length)
-                throw "Can't have attributes when a selector is specified."; // TODO maybe allow as long as there's %%% etc
+function waitForLoad(el) {
+    return new Promise(function (res, rej) {
+        var oldOnload = el.onload;
+        el.onload = function (e) { try {
+            res();
         }
-        else { // no braces. Parse words
-            try {
-                for (var attrs_1 = __values(attrs), attrs_1_1 = attrs_1.next(); !attrs_1_1.done; attrs_1_1 = attrs_1.next()) {
-                    var prop_1 = attrs_1_1.value;
-                    if (prop_1.isExpr)
-                        throw "Props of a CSS tag can't be expressions, since they're inserted as a stylesheet";
-                    var x = processCssProp(prop_1.key, prop_1.value);
-                    if (!x)
-                        throw "Unrecognized CSS property (of a CSS tag): " + prop_1.key;
-                    for (var k in x)
-                        rule = "".concat(k, ": ").concat(x[k], "; ").concat(rule); // TODO reverse really
-                }
-            }
-            catch (e_1_1) { e_1 = { error: e_1_1 }; }
-            finally {
-                try {
-                    if (attrs_1_1 && !attrs_1_1.done && (_a = attrs_1["return"])) _a.call(attrs_1);
-                }
-                finally { if (e_1) throw e_1.error; }
-            }
-            rule = parseStyleVariants(cssTag.tag, selector, rule); // parse arg
-        }
-        return rule;
-    }
-    var isCssChild = function (x) { return x.tag === "css" || x.tag.startsWith("css:"); }; // TODO use parseArgs
-    var cssChildren = n.children.filter(isCssChild);
-    if (!cssChildren.length)
-        return n;
-    var text = cssChildren.map(cssStringForCssCustomTag).join(" ");
-    return new VugNode(n.tag, __spreadArray(__spreadArray([], __read(n.words), false), [new VugWord("vg-css", text, false)], false), n.children.filter(function (x) { return !isCssChild(x); }));
+        finally {
+            oldOnload === null || oldOnload === void 0 ? void 0 : oldOnload.call(el, e);
+        } };
+        setTimeout(function () { return rej('The added element timed out while waiting to load: ' + el.src); }, 10000);
+    });
 }
-function compileVgCss(n) {
-    /* Allows directive on any element: vg-css="& { background: green } &:hover { background: red }"
-    TODO:
-    - Later can put this directly in the <style> tag or a new one
-    - We don't need the ad-hoc class if the selector doesn't contain &...
-    - Right now this is only used through CSS custom tags which compiles to this, and *stylesheet attrs which compile to custom tags. But if we want to use this directly, we will probably want:
-        - Support multiple words
-        - Support not using braces, and taking an optional arg for the selector here? So far we're not really using this directly, rather CSS custom tags or stylesheet rules
-    - The encoding should be done by the emitter, not here
-    - Replacing on every render might be wasteful; should we check if it was modified before replacing innerText? Not sure what is better
-    
-    NOTE
-    - We're not using vg-do because it only runs once, whereas here we want HMR. However vg-do can maybe have a .everyrender modifier
-    - The $el.el line is because the ref can resolve to a component. (Might want to handle this in vg-do)
-    */
-    var contents = n.getWord("vg-css");
-    if (!contents)
-        return n;
-    var script = "\n        if (!$el) return;\n        if ($el.$el) $el = $el.$el;\n        const d = $el.ownerDocument; \n        let st = null;\n        if (!$el.vgcssKey) {\n            $el.vgcssKey = 'vg_' + String((Math.random()+1).toString(36).slice(7));\n            st = d.head.appendChild(d.createElement('style'));\n            st.dataset[$el.vgcssKey] = '';\n            $el.dataset.vgcss = $el.vgcssKey;\n        } else {\n            st = d.querySelector('*[data-' + $el.vgcssKey + ']');\n        }\n        st.innerText = ".concat(JSON.stringify(contents), ".replace(/&/g, '*[data-vgcss=' + $el.vgcssKey + ']');\n    ").replace(/\n/g, '').replace(/[ \t]+/g, ' ').replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-    // return clone(n, { "vg-css": null, "vg-do": script })
-    return clone(n, { "vg-css": null, ":ref": "$el => { ".concat(script, " }") });
-}
-function parseStyleVariants(key, start, attrs) {
-    var e_2, _a, e_3, _b;
-    if (start === void 0) { start = ".foo"; }
-    if (attrs === void 0) { attrs = "%%%"; }
-    // Returns ".foo:extraThings { %%% }"
-    // `key` is in the format `ignored:someVariant:otherVariant:!negatedVariant:@variant:[& .customTarget]`
-    var parts = splitThree(key, ":").slice(1);
-    var respBrkpts = { sm: 640, md: 768, lg: 1024, xl: 1280, "2xl": 1536 };
-    var sel = start, blocks = [];
+function partition(arr, fn, minGroups) {
+    var e_1, _a;
+    if (minGroups === void 0) { minGroups = 2; }
+    // Usage: const [trueOnes, falseOnes] = partition(arr, x => trueOrFalse)
+    // Or:    const [one, two, three] = partition(arr, x => num, 3) // use the last argument to create a min number of groups
+    var ret = Array.from(Array(minGroups)).map(function () { return []; });
     try {
-        for (var parts_1 = __values(parts), parts_1_1 = parts_1.next(); !parts_1_1.done; parts_1_1 = parts_1.next()) {
-            var x = parts_1_1.value;
-            if (["hover", "focus", "active", "focus-within", "focus-visible", "disabled", "visited", "checked"].includes(x))
-                sel = "".concat(sel, ":").concat(x);
-            else if (x === "last" || x === "first")
-                sel = "".concat(sel, ":").concat(x, "-child");
-            else if (x === "odd" || x === "even")
-                sel = "".concat(sel, ":nth-child(").concat(x, ")");
-            else if (x[0] === '.')
-                sel = "".concat(sel).concat(x);
-            else if (x[0] === '!') { // negation -- experimental and hacky
-                var plchldr = '.dummySelectorHREKJSBLLI';
-                var done = parseStyleVariants("thisPartIsIgnored:" + x.slice(1), plchldr, '%%%').split('{')[0].trim();
-                var whatAdded = done.slice(done.indexOf(plchldr) + plchldr.length);
-                sel = "".concat(sel, ":not(").concat(whatAdded, ")");
-            }
-            else if (x[0] === '[' && x[x.length - 1] === ']')
-                sel = x.slice(1, x.length - 1).replace(/\&/g, sel);
-            else if (x[0] === '@')
-                blocks.unshift(x);
-            else if (x[0] === "<" && respBrkpts[x.slice(1)])
-                blocks.unshift("@media (max-width: ".concat(respBrkpts[x.slice(1)] - 1, "px)"));
-            else if (respBrkpts[x])
-                blocks.unshift("@media (min-width: ".concat(respBrkpts[x], "px)"));
-            else if (x === "motion-safe")
-                blocks.unshift("@media (prefers-reduced-motion: no-preference)");
-            else if (x === "motion-reduce")
-                blocks.unshift("@media (prefers-reduced-motion: reduce)");
-            else if (!x) { } // nothing after the colon; perhaps it was there just to ensure it's a rule (though currently we any use * at the beginning)
-            else
-                throw "Unknown style variant: '".concat(x, "'");
+        for (var arr_1 = __values(arr), arr_1_1 = arr_1.next(); !arr_1_1.done; arr_1_1 = arr_1.next()) {
+            var i = arr_1_1.value;
+            var k = fn(i);
+            var ind = typeof k === 'number' ? k : !!k ? 0 : 1;
+            while (ret.length < (ind + 1))
+                ret.push([]);
+            ret[ind].push(i);
         }
     }
-    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
     finally {
         try {
-            if (parts_1_1 && !parts_1_1.done && (_a = parts_1["return"])) _a.call(parts_1);
+            if (arr_1_1 && !arr_1_1.done && (_a = arr_1["return"])) _a.call(arr_1);
         }
-        finally { if (e_2) throw e_2.error; }
-    }
-    var ret = "".concat(sel, " { ").concat(attrs, " }");
-    try {
-        for (var blocks_1 = __values(blocks), blocks_1_1 = blocks_1.next(); !blocks_1_1.done; blocks_1_1 = blocks_1.next()) {
-            var b = blocks_1_1.value;
-            ret = "".concat(b, " {\n") + ret.split("\n").map(function (x) { return "  ".concat(x); }).join("\n") + "\n}";
-        }
-    }
-    catch (e_3_1) { e_3 = { error: e_3_1 }; }
-    finally {
-        try {
-            if (blocks_1_1 && !blocks_1_1.done && (_b = blocks_1["return"])) _b.call(blocks_1);
-        }
-        finally { if (e_3) throw e_3.error; }
+        finally { if (e_1) throw e_1.error; }
     }
     return ret;
 }
+
+function emitVueTemplate(node, whitespace) {
+    var e_1, _a;
+    if (whitespace === void 0) { whitespace = false; }
+    var out = [];
+    if (node.tag === '_html') {
+        out.push(node.getWord("_contents") || "");
+    }
+    else {
+        out.push('<', node.tag);
+        var htmlAttrEnc_1 = function (x, usingApos) {
+            if (usingApos === void 0) { usingApos = false; }
+            return x.replace(usingApos ? /'/g : /"/g, usingApos ? '&#x27;' : '&quot;');
+        }; //.replace(/&/g, '&amp;').replace(/>/g, '&gt;')
+        var block = function (items, funcs) { var _a, _b; if (!items.length)
+            return; (_a = funcs.start) === null || _a === void 0 ? void 0 : _a.call(funcs); items.forEach(function (x, i) { var _a; if (i)
+            (_a = funcs.between) === null || _a === void 0 ? void 0 : _a.call(funcs); funcs.each(x, i); }); (_b = funcs.end) === null || _b === void 0 ? void 0 : _b.call(funcs); };
+        var _b = __read(partition(node.words, function (x) { return x.key.startsWith("style_") ? 0 : x.key.startsWith(".") ? 1 : 2; }, 3), 3), style = _b[0], klass = _b[1], attr = _b[2];
+        var _c = __read(partition(klass, function (x) { return x.isExpr; }), 2), classExpr = _c[0], classStatic = _c[1];
+        block(classStatic, {
+            start: function () { return out.push(' class="'); },
+            each: function (x) { out.push(x.key.slice(1)); if (x.value)
+                throw "CSS-Class attributes cannot have a static value. For a condition, use curly braces or simply no quotes. -- : " + x.key; },
+            between: function () { return out.push(" "); },
+            end: function () { return out.push('"'); }
+        });
+        block(classExpr, {
+            start: function () { return out.push(" :class='{"); },
+            each: function (x) {
+                var expr = x.value === undefined ? 'true' : !x.isExpr ? JSON.stringify(x.value) : x.value;
+                out.push(JSON.stringify(x.key.slice(1)), ': ', htmlAttrEnc_1(expr, true));
+            },
+            between: function () { return out.push(", "); },
+            end: function () { return out.push("}'"); }
+        });
+        var _d = __read(partition(style, function (x) { return x.isExpr; }), 2), styleExpr = _d[0], styleStatic = _d[1];
+        block(styleStatic, {
+            start: function () { return out.push(' style="'); },
+            each: function (x) { return out.push(x.key.slice(6), ": ", x.value); },
+            between: function () { return out.push("; "); },
+            end: function () { return out.push('"'); }
+        });
+        block(styleExpr, {
+            start: function () { return out.push(" :style='{"); },
+            each: function (x) {
+                if (x.value === undefined)
+                    throw "Style keys must have a value: " + x.key.slice(6);
+                var expr = !x.isExpr ? JSON.stringify(x.value) : x.value;
+                out.push(JSON.stringify(x.key.slice(6)), ': ', htmlAttrEnc_1(expr, true));
+            },
+            between: function () { return out.push(", "); },
+            end: function () { return out.push("}'"); }
+        });
+        block(attr, {
+            each: function (x) {
+                if (x.value === undefined) {
+                    out.push(" ", x.key);
+                }
+                else {
+                    var needsColon = x.isExpr && !x.key.startsWith("v-") && !x.key.startsWith("x-");
+                    out.push(" ", needsColon ? ":" : "", x.key);
+                    out.push('="', htmlAttrEnc_1(x.value), '"');
+                }
+            }
+        });
+        out.push(">");
+    }
+    if (node.children.length) {
+        var needsIndent = whitespace && (node.children.length > 1 || (node.children[0] && (node.children[0].tag !== "_html" || (node.children[0].getWord("_contents") || '').includes('\n'))));
+        if (needsIndent)
+            out.push("\n");
+        try {
+            for (var _e = __values(node.children), _f = _e.next(); !_f.done; _f = _e.next()) {
+                var c = _f.value;
+                if (needsIndent && c !== node.children[0])
+                    out.push("\n");
+                var txt = emitVueTemplate(c, whitespace);
+                if (needsIndent)
+                    txt = txt.split("\n").map(function (l) { return "  ".concat(l); }).join('\n'); // Indent
+                out.push(txt);
+            }
+        }
+        catch (e_1_1) { e_1 = { error: e_1_1 }; }
+        finally {
+            try {
+                if (_f && !_f.done && (_a = _e["return"])) _a.call(_e);
+            }
+            finally { if (e_1) throw e_1.error; }
+        }
+        if (needsIndent)
+            out.push("\n");
+    }
+    // Close tags except for 'void tags'. That includes '_html' because that's my element for raw HTML
+    if (!["_html", "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"].includes(node.tag.toLowerCase()))
+        out.push("</".concat(node.tag, ">"));
+    return out.join("");
+}
+
+var emit = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  emitVueTemplate: emitVueTemplate
+});
 
 // Adding this file into here because there are issues importing it in GitHub's build only. So silly.
 
@@ -19306,11 +19174,527 @@ function fixMarkdownMacro(n) {
     return new VugNode(n.tag, n.words, children);
 }
 
+var markdownSupport = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  lineTransformBasedOnPrefixes: lineTransformBasedOnPrefixes,
+  convertSingleLineOfText: convertSingleLineOfText,
+  aggressiveMarkdownParagraphDetection: aggressiveMarkdownParagraphDetection,
+  fixMarkdownMacro: fixMarkdownMacro
+});
+
+var vueDefaultOpts = { Fragment: "Vue.Fragment", className: "className", h: "h" };
+function renderAst(nodes, opts) {
+    if (opts === void 0) { opts = vueDefaultOpts; }
+    return nodes.length === 1 ? renderNode(nodes[0], opts) : renderNode(new VugNode(opts.Fragment || vueDefaultOpts.Fragment, undefined, nodes), opts); // for React, should be React.Fragment I think
+}
+function basicVueDirectivesToJsx(v) {
+    /*
+    Based on: https://vuejs.org/guide/extras/render-function.html#render-function-recipes
+    TODO:
+    - if any elements have v-if, v-else-if, v-else, convert them to a ternary expression. Has to be done at parent level
+    - v-for -> map
+    - seems v-html has to be done too, using innerHTML -- I think for React dangerouslySetInnerHTML to {html: contents}
+    - and v-text, maybe innerText, or just add a text node: String(expr)
+    - and v-show, using display: none/null I guess
+    - v-model
+      - .number etc -- how?
+  
+    - @click to onClick, but convert to a function if it has anything but alphanumeric and dots.
+      - modifiers -- concat any modifiers in Title case for passive, etc, for others, use Vue.withModifiers
+    - does :is tag have to be converted?
+    - Built-in components
+    - custom directives
+    // - slots incl passing data
+    - calling slots incl passing children to slots
+    */
+    return new VugNode(v.tag, v.words, v.children);
+}
+// TODO: non-HTML tags should be done as Expr i.e. it's a component in scope
+function renderNode(node, opts) {
+    var e_1, _a, e_2, _b;
+    node = basicVueDirectivesToJsx(node);
+    if (node.tag === "_html")
+        return JSON.stringify(node.getWordErrIfCalc("_contents") || ""); // TODO not really, as this will be a text node in a render function, whereas this can contain HTML tags (and was converted from Markdown). We have to really parse it in the parser... or maybe it's legit to say you can't do this if you're gonna use the render func maker
+    var attrExprText = new Map();
+    var styleExprText = new Map();
+    var classExprText = new Map();
+    var mapToObj = function (m) { return '{ ' + Array.from(m.entries()).map(function (_a) {
+        var _b = __read(_a, 2), k = _b[0], v = _b[1];
+        return "".concat(JSON.stringify(k), ": ").concat(v);
+    }).join(", ") + ' }'; };
+    var _loop_1 = function (x) {
+        var exprText = !x.value ? 'true' : x.isExpr ? x.value : JSON.stringify(x.value);
+        if (x.key.startsWith("style_")) {
+            styleExprText.set(caseChange$1(x.key.slice(6)).toCamel(), exprText);
+            attrExprText.set('style', mapToObj(styleExprText));
+        }
+        else if (x.key.startsWith(".")) {
+            classExprText.set(x.key.slice(1), exprText);
+            var _g = __read(partition(__spreadArray([], __read(classExprText.entries()), false), function (_a) {
+                var _b = __read(_a, 2), k = _b[0], v = _b[1];
+                return v === 'true';
+            }), 2), sStatic = _g[0], sCalc = _g[1];
+            var stringExprs_1 = [];
+            if (sStatic.length)
+                stringExprs_1.push(JSON.stringify(sStatic.map(function (x) { return x[0]; }).join(" ")));
+            sCalc.forEach(function (_a) {
+                var _b = __read(_a, 2), k = _b[0], v = _b[1];
+                return stringExprs_1.push("((".concat(v, ") ? ").concat(JSON.stringify(' ' + k), " : \"\")"));
+            });
+            attrExprText.set(opts.className || vueDefaultOpts.className, stringExprs_1.join(" + "));
+            // attrExprText.set(opts.className || vueDefaultOpts.className, sStatic.join(" ") + sCalc.length  [...classExprText.entries()].map(([k,v],i) => exprText === 'true' ? JSON.stringify(' ' + k) : `((${v}) ? ${JSON.stringify(' ' + k)} : "")`).join(" + "))
+            // attrExprText.set(opts.className || vueDefaultOpts.className, `classNames(${mapToObj(classExprText)})`)
+        }
+        else {
+            attrExprText.set(x.key, exprText);
+        }
+    };
+    try {
+        for (var _c = __values(node.words), _d = _c.next(); !_d.done; _d = _c.next()) {
+            var x = _d.value;
+            _loop_1(x);
+        }
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (_d && !_d.done && (_a = _c["return"])) _a.call(_c);
+        }
+        finally { if (e_1) throw e_1.error; }
+    }
+    var out = [];
+    if (node.tag === "slot") {
+        var identifier = "slots.".concat(node.getWordErrIfCalc("name")); // TODO support calculated name
+        var children = node.children.length ? "\n".concat(indent(renderAst(node.children, opts)), "\n") : 'null';
+        out.push("".concat(identifier, " ? ").concat(identifier, "(").concat(mapToObj(attrExprText), ") : ").concat(children)); // TODO remove "name"
+    }
+    else {
+        out.push("".concat(opts.h || vueDefaultOpts.h, "(").concat(JSON.stringify(node.tag), ", "));
+        if (attrExprText.size)
+            out.push(mapToObj(attrExprText));
+        else
+            out.push("null");
+        try {
+            // Children
+            for (var _e = __values(node.children), _f = _e.next(); !_f.done; _f = _e.next()) {
+                var x = _f.value;
+                out.push(",\n" + indent(renderNode(x, opts)));
+            }
+        }
+        catch (e_2_1) { e_2 = { error: e_2_1 }; }
+        finally {
+            try {
+                if (_f && !_f.done && (_b = _e["return"])) _b.call(_e);
+            }
+            finally { if (e_2) throw e_2.error; }
+        }
+        out.push(")");
+    }
+    return out.join("");
+}
+function caseChange$1(txt) {
+    var words = [];
+    var isCapital = function (ch) { return ch === ch.toUpperCase(); };
+    txt.split('').forEach(function (x, i) {
+        var xLower = x.toLowerCase(), prevWord = words[words.length - 1], prevLetter = txt[i - 1];
+        if (x === "-")
+            return;
+        // We add a word if there's no previous word, or if we're after a hyphen, or if we're a first capital (before us was not a capital)
+        if (!prevWord || prevLetter === "-" || (isCapital(x) && !isCapital(prevLetter)))
+            return words.push(xLower);
+        // Otherwise add to previous word
+        words[words.length - 1] += xLower;
+    });
+    var PascalWord = function (x) { return x[0].toUpperCase() + x.slice(1); };
+    return {
+        toPascal: function () { return words.map(PascalWord).join(""); },
+        toCamel: function () { return words.map(function (x, i) { return i ? PascalWord(x) : x; }).join(""); },
+        toSnake: function () { return words.join("-"); }
+    };
+}
+function indent(text) { return text.split("\n").map(function (x) { return "  ".concat(x); }).join("\n"); }
+
+var emitRenderFunc = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  renderAst: renderAst
+});
+
+var VugNode = /** @class */ (function () {
+    function VugNode(tag, words, children) {
+        if (words === void 0) { words = []; }
+        if (children === void 0) { children = []; }
+        this.tag = tag;
+        this.words = words;
+        this.children = children;
+    }
+    VugNode.prototype.getWord = function (key) { var _a; return (_a = this.words.find(function (x) { return x.key === key; })) === null || _a === void 0 ? void 0 : _a.value; };
+    VugNode.prototype.getWordErrIfCalc = function (key) {
+        var find = this.words.find(function (x) { return x.key === key; });
+        if (!find)
+            return "";
+        if (find.isExpr)
+            throw "Attribute '".concat(find.key, "' cannot be an expression.");
+        return find.value;
+    };
+    return VugNode;
+}());
+var VugWord = /** @class */ (function () {
+    function VugWord(key, value, isExpr) {
+        this.key = key;
+        this.value = value;
+        this.isExpr = isExpr;
+    }
+    return VugWord;
+}());
+function compile$1(text) {
+    var ast = parseDoc(text);
+    return {
+        ast: ast,
+        toAstJson: function () { return JSON.stringify(ast, undefined, 2); },
+        toVueTemplate: function () { return ast.map(function (x) { return emitVueTemplate(x, true); }).join("\n"); },
+        toRenderFunc: function (renderFuncOpts) { return renderAst(ast, renderFuncOpts); }
+    };
+}
+function splitThree(what, sepChar) {
+    var e_1, _a;
+    if (sepChar === void 0) { sepChar = " "; }
+    // Splits on a char EXCEPT when that char occurs within quotes, parens, braces, curlies
+    // MAYBE allow sepChar to be >1 char long?
+    // MAYBE allow for multiple possibilities of sepChar, and tack it on? Can use this for parsing classes&ids&args... nah won't help, we don't want quotes in there anyway
+    // MAYBE customize the list of things that can quote? and the escape char?
+    var ret = [''];
+    var stack = [];
+    var escaping = false;
+    try {
+        for (var _b = __values(what.split('')), _c = _b.next(); !_c.done; _c = _b.next()) {
+            var ch = _c.value;
+            var starter = "'\"({[`".indexOf(ch);
+            if (escaping) {
+                ret[ret.length - 1] += ch;
+                escaping = false;
+                continue;
+            }
+            else if (ch === '\\') {
+                escaping = true;
+                continue;
+            }
+            if (ch === stack.slice(-1)[0]) {
+                stack.pop();
+            }
+            else if (starter >= 0) {
+                stack.push("'\")}]`"[starter]); // Add the expected closing char to the stack
+            }
+            if (ch === sepChar && !stack.length) {
+                ret.push(''); // Start a new item
+            }
+            else {
+                ret[ret.length - 1] += ch; // Add to current item
+            }
+        }
+    }
+    catch (e_1_1) { e_1 = { error: e_1_1 }; }
+    finally {
+        try {
+            if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
+        }
+        finally { if (e_1) throw e_1.error; }
+    }
+    // if (stack.length) throw "Unterminated " + stack.slice(-1)[0]
+    return ret;
+}
+function parseValue(value) {
+    /* Supports:
+        foo             (literal)
+        "foo"           (literal)
+        'foo'           (literal)
+        `foo ${}`       (expr)
+        (1 + 2)         (expr)
+        {obj: 'foo'}    (expr)
+        345.2           (expr)
+    */
+    if (!value.length)
+        return [false, '']; // If there is no value, it's not an expr.
+    var first = value[0], last = value[value.length - 1], same = first === last && value.length > 1;
+    if (same && (first === '"' || first === "'"))
+        return [false, value.slice(1, value.length - 1)]; // Quoted values
+    var opener = "({`".indexOf(first), closer = ")}`".indexOf(last);
+    if (opener >= 0 && opener === closer && value.length > 1)
+        return [true, (first === '(') ? value.slice(1, value.length - 1) : value]; // parens, objects, template strings. Cut off parens
+    if (!isNaN(Number(value)))
+        return [true, value]; // numbers
+    // Removed because it throws for things like `vg-let:foo="a b".split(' ')` which is perfectly legal. // if ("\"'`".indexOf(first) >= 0) throw `Unterminated string quote in value: ${value}`
+    return [false, value];
+}
+function splitTwo$1(text, sep) {
+    var pos = text.indexOf(sep);
+    if (pos < 0)
+        return [text, ''];
+    return [text.substr(0, pos), text.substr(pos + sep.length)];
+}
+var htmlNode = function (html, raw) {
+    if (raw === void 0) { raw = false; }
+    return new VugNode("_html", [new VugWord("_contents", raw ? html : convertSingleLineOfText(html), false)]);
+};
+function splitByContentSeparator(line) {
+    // Returns the elementPart trimmed, BTW. And the contentPart not, because that's not desired sometimes.
+    var findContentSep = line.match(/(?<![^ ])--(raw--)? /); // That's negative lookbehind, to not match the `--` if it's preceded by anything but a space.
+    if (!findContentSep)
+        return { elementPart: line.trim(), contentPart: "", contentIsRaw: false };
+    var optionalRaw = findContentSep[1];
+    return { elementPart: line.slice(0, findContentSep.index).trim(), contentPart: line.slice(findContentSep.index + 2 /*--*/ + ((optionalRaw === null || optionalRaw === void 0 ? void 0 : optionalRaw.length) || 0) + 1 /*space*/), contentIsRaw: !!optionalRaw };
+}
+function parseLine(line) {
+    line = splitTwo$1(line, "// ")[0]; // ignore comments
+    if (line.startsWith("<"))
+        line = "--raw-- ".concat(line); // allow HTML tags
+    line = lineTransformBasedOnPrefixes(line);
+    var splitC = splitByContentSeparator(line);
+    if (!splitC.elementPart)
+        return htmlNode(splitC.contentPart, splitC.contentIsRaw);
+    var _a = __read(splitThree(splitC.elementPart, " ")), tag = _a[0], words = _a.slice(1);
+    if (aggressiveMarkdownParagraphDetection(tag, words))
+        return parseLine("| " + line);
+    var words2 = words.map(function (w) {
+        var _a = __read(splitTwo$1(w, "="), 2), key = _a[0], value = _a[1];
+        var _b = __read(parseValue(value), 2), isExpr = _b[0], parsedValue = _b[1];
+        if (key[0] === ':') {
+            key = key.slice(1);
+            isExpr = true;
+        } // allow Vue-style :attr=expr
+        if ((key[0] === '.' || key.startsWith("v-") || key.startsWith("x-")) && value)
+            isExpr = true; // .foo, v- and x- are always expressions (as long as they have a value)
+        return new VugWord(key, parsedValue, isExpr);
+    });
+    var children = splitC.contentPart ? [htmlNode(splitC.contentPart, splitC.contentIsRaw)] : [];
+    return new VugNode(tag, words2, children);
+}
+function parseDoc(html) {
+    var e_2, _a;
+    var lines = html.replace(/\t/g, "        ") // Convert tabs to 8 spaces, like Python 2. People shouldn't mix tabs and spaces anyway
+        .split("\n").map(function (ln) {
+        var trimmed = ln.trimStart();
+        var indent = ln.length - trimmed.length;
+        var node = parseLine(trimmed);
+        return { node: node, indent: indent };
+    }).filter(function (x) { return x.node.tag !== "_html" || (x.node.getWord("_contents") || '').trim(); }); // Remove empty or comment-only lines. They would be _html elements with blank _contents. (We could remove them before parsing, but the comment logic is in the parser)
+    // Now make a tree
+    var stack = [];
+    var out = [];
+    var _loop_1 = function (ln) {
+        stack = stack.filter(function (x) { return x.indent < ln.indent; }); // Remove items from the stack unless they're LESS indented than me
+        if (stack.length)
+            stack.slice(-1)[0].node.children.push(ln.node); // Add us into the last stack item
+        else
+            out.push(ln.node); // Or as a top-level node, if the stack is empty
+        stack.push(ln); // Push ourselves onto the stack, in case we have children
+    };
+    try {
+        for (var lines_1 = __values(lines), lines_1_1 = lines_1.next(); !lines_1_1.done; lines_1_1 = lines_1.next()) {
+            var ln = lines_1_1.value;
+            _loop_1(ln);
+        }
+    }
+    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+    finally {
+        try {
+            if (lines_1_1 && !lines_1_1.done && (_a = lines_1["return"])) _a.call(lines_1);
+        }
+        finally { if (e_2) throw e_2.error; }
+    }
+    // Run macros. Let's run it on a fake top-level element, so that macros can access the children of it
+    // Formerly simply: return out.map(x => Macros.runAll(x))
+    var doc = new VugNode("_doc", undefined, out);
+    var nodes = runAll(doc).children;
+    return nodes;
+}
+
+var parsing = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  VugNode: VugNode,
+  VugWord: VugWord,
+  compile: compile$1,
+  splitThree: splitThree,
+  parseDoc: parseDoc
+});
+
+function sheetStyles(n) {
+    /*
+    Handles css attributes that are to be converted into stylesheet rules
+    (i.e. `css` custom tag, handled later in the pipeline).
+        div *bg=green *bg:hover=green
+    - TODO maybe don't require the star, do it wherever it has a colon, and for things without colons, do bg:all, bg:css, bg:*, etc.
+        - OR if there is anything conditional, put styles on that element in a stylesheet by default, UNLESS overridden by a star, or style-, etc.
+        - OR maybe ALWAYS put things in a stylesheet by default, why not?
+    */
+    var newCssTags = [];
+    var ourWords = n.words.flatMap(function (w) {
+        if (w.key[0] !== '*')
+            return [w];
+        if (w.isExpr)
+            throw "Stylesheet CSS attribute '".concat(w.key, "' must be a literal, not an expression like '").concat(w.value, "'");
+        var newTagKey = "css";
+        if (w.key.includes(":"))
+            newTagKey += ":" + w.key.split(":").slice(1).join(":");
+        newCssTags.push(new VugNode(newTagKey, [new VugWord(w.key.slice(1).split(":")[0], w.value, false)]));
+        return []; // skip the word, we've added it to newCssTags
+    });
+    if (!newCssTags.length)
+        return n;
+    return new VugNode(n.tag, ourWords, __spreadArray(__spreadArray([], __read(newCssTags), false), __read(n.children), false));
+}
+function cssCustomTag(n) {
+    /* Handles lines like:
+    div
+      css -- h1 { background: red }
+      css -- background: red // applies to current element using vg-css's &
+      css bg=red // same
+      css selector="&:hover" bg=red
+      css s="&:hover" bg=red // same
+      css:hover bg=red // same
+    
+    TODO
+    - won't work for top-level CSS tags; we can make that work later once we have a way to put things in the <style> tag, see comment on vg-css. Or we can replace with a <noscript> tag with v-css...
+    - consolidate css tags that have the same selector and args
+    - I don't know how this is catching args, tagNameParser was supposed to take it out and put it under 'type'
+    - "opacity=0.5" errors with "Props of a CSS tag can't be expressions, since they're inserted as a stylesheet" since numbers are parsed as expressions
+    */
+    function cssStringForCssCustomTag(cssTag) {
+        var e_1, _a;
+        var selector = cssTag.getWordErrIfCalc("selector") || cssTag.getWordErrIfCalc("s") || '&';
+        var rule = cssTag.children.map(function (x) { return x.getWord("_contents"); }).join(" ");
+        var attrs = cssTag.words.filter(function (x) { return x.key !== "selector" && x.key !== "s"; });
+        if (rule.includes("{")) {
+            if (selector !== "&")
+                throw "Can't have a rule with braces when a selector is specified. '" + selector;
+            if (attrs.length)
+                throw "Can't have attributes when a selector is specified."; // TODO maybe allow as long as there's %%% etc
+        }
+        else { // no braces. Parse words
+            try {
+                for (var attrs_1 = __values(attrs), attrs_1_1 = attrs_1.next(); !attrs_1_1.done; attrs_1_1 = attrs_1.next()) {
+                    var prop_1 = attrs_1_1.value;
+                    if (prop_1.isExpr)
+                        throw "Props of a CSS tag can't be expressions, since they're inserted as a stylesheet";
+                    var x = processCssProp(prop_1.key, prop_1.value);
+                    if (!x)
+                        throw "Unrecognized CSS property (of a CSS tag): " + prop_1.key;
+                    for (var k in x)
+                        rule = "".concat(k, ": ").concat(x[k], "; ").concat(rule); // TODO reverse really
+                }
+            }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (attrs_1_1 && !attrs_1_1.done && (_a = attrs_1["return"])) _a.call(attrs_1);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+            rule = parseStyleVariants(cssTag.tag, selector, rule); // parse arg
+        }
+        return rule;
+    }
+    var isCssChild = function (x) { return x.tag === "css" || x.tag.startsWith("css:"); }; // TODO use parseArgs
+    var cssChildren = n.children.filter(isCssChild);
+    if (!cssChildren.length)
+        return n;
+    var text = cssChildren.map(cssStringForCssCustomTag).join(" ");
+    return new VugNode(n.tag, __spreadArray(__spreadArray([], __read(n.words), false), [new VugWord("vg-css", text, false)], false), n.children.filter(function (x) { return !isCssChild(x); }));
+}
+function compileVgCss(n) {
+    /* Allows directive on any element: vg-css="& { background: green } &:hover { background: red }"
+    TODO:
+    - Later can put this directly in the <style> tag or a new one
+    - We don't need the ad-hoc class if the selector doesn't contain &...
+    - Right now this is only used through CSS custom tags which compiles to this, and *stylesheet attrs which compile to custom tags. But if we want to use this directly, we will probably want:
+        - Support multiple words
+        - Support not using braces, and taking an optional arg for the selector here? So far we're not really using this directly, rather CSS custom tags or stylesheet rules
+    - The encoding should be done by the emitter, not here
+    - Replacing on every render might be wasteful; should we check if it was modified before replacing innerText? Not sure what is better
+    
+    NOTE
+    - We're not using vg-do because it only runs once, whereas here we want HMR. However vg-do can maybe have a .everyrender modifier
+    - The $el.el line is because the ref can resolve to a component. (Might want to handle this in vg-do)
+    */
+    var contents = n.getWord("vg-css");
+    if (!contents)
+        return n;
+    var script = "\n        if (!$el) return;\n        if ($el.$el) $el = $el.$el;\n        const d = $el.ownerDocument; \n        let st = null;\n        if (!$el.vgcssKey) {\n            $el.vgcssKey = 'vg_' + String((Math.random()+1).toString(36).slice(7));\n            st = d.head.appendChild(d.createElement('style'));\n            st.dataset[$el.vgcssKey] = '';\n            $el.dataset.vgcss = $el.vgcssKey;\n        } else {\n            st = d.querySelector('*[data-' + $el.vgcssKey + ']');\n        }\n        st.innerText = ".concat(JSON.stringify(contents), ".replace(/&/g, '*[data-vgcss=' + $el.vgcssKey + ']');\n    ").replace(/\n/g, '').replace(/[ \t]+/g, ' ').replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+    // return clone(n, { "vg-css": null, "vg-do": script })
+    return clone(n, { "vg-css": null, ":ref": "$el => { ".concat(script, " }") });
+}
+function parseStyleVariants(key, start, attrs) {
+    var e_2, _a, e_3, _b;
+    if (start === void 0) { start = ".foo"; }
+    if (attrs === void 0) { attrs = "%%%"; }
+    // Returns ".foo:extraThings { %%% }"
+    // `key` is in the format `ignored:someVariant:otherVariant:!negatedVariant:@variant:[& .customTarget]`
+    var parts = splitThree(key, ":").slice(1);
+    var respBrkpts = { sm: 640, md: 768, lg: 1024, xl: 1280, "2xl": 1536 };
+    var sel = start, blocks = [];
+    try {
+        for (var parts_1 = __values(parts), parts_1_1 = parts_1.next(); !parts_1_1.done; parts_1_1 = parts_1.next()) {
+            var x = parts_1_1.value;
+            if (["hover", "focus", "active", "focus-within", "focus-visible", "disabled", "visited", "checked"].includes(x))
+                sel = "".concat(sel, ":").concat(x);
+            else if (x === "last" || x === "first")
+                sel = "".concat(sel, ":").concat(x, "-child");
+            else if (x === "odd" || x === "even")
+                sel = "".concat(sel, ":nth-child(").concat(x, ")");
+            else if (x[0] === '.')
+                sel = "".concat(sel).concat(x);
+            else if (x[0] === '!') { // negation -- experimental and hacky
+                var plchldr = '.dummySelectorHREKJSBLLI';
+                var done = parseStyleVariants("thisPartIsIgnored:" + x.slice(1), plchldr, '%%%').split('{')[0].trim();
+                var whatAdded = done.slice(done.indexOf(plchldr) + plchldr.length);
+                sel = "".concat(sel, ":not(").concat(whatAdded, ")");
+            }
+            else if (x[0] === '[' && x[x.length - 1] === ']')
+                sel = x.slice(1, x.length - 1).replace(/\&/g, sel);
+            else if (x[0] === '@')
+                blocks.unshift(x);
+            else if (x[0] === "<" && respBrkpts[x.slice(1)])
+                blocks.unshift("@media (max-width: ".concat(respBrkpts[x.slice(1)] - 1, "px)"));
+            else if (respBrkpts[x])
+                blocks.unshift("@media (min-width: ".concat(respBrkpts[x], "px)"));
+            else if (x === "motion-safe")
+                blocks.unshift("@media (prefers-reduced-motion: no-preference)");
+            else if (x === "motion-reduce")
+                blocks.unshift("@media (prefers-reduced-motion: reduce)");
+            else if (!x) { } // nothing after the colon; perhaps it was there just to ensure it's a rule (though currently we any use * at the beginning)
+            else
+                throw "Unknown style variant: '".concat(x, "'");
+        }
+    }
+    catch (e_2_1) { e_2 = { error: e_2_1 }; }
+    finally {
+        try {
+            if (parts_1_1 && !parts_1_1.done && (_a = parts_1["return"])) _a.call(parts_1);
+        }
+        finally { if (e_2) throw e_2.error; }
+    }
+    var ret = "".concat(sel, " { ").concat(attrs, " }");
+    try {
+        for (var blocks_1 = __values(blocks), blocks_1_1 = blocks_1.next(); !blocks_1_1.done; blocks_1_1 = blocks_1.next()) {
+            var b = blocks_1_1.value;
+            ret = "".concat(b, " {\n") + ret.split("\n").map(function (x) { return "  ".concat(x); }).join("\n") + "\n}";
+        }
+    }
+    catch (e_3_1) { e_3 = { error: e_3_1 }; }
+    finally {
+        try {
+            if (blocks_1_1 && !blocks_1_1.done && (_b = blocks_1["return"])) _b.call(blocks_1);
+        }
+        finally { if (e_3) throw e_3.error; }
+    }
+    return ret;
+}
+
 /* TODO
 - Debug things that aren't working properly:
     f:c.c.class1.class2 (class1 is taken as align-content, and class2 is discarded) (either use hyphens [but that conflicts with row], or go back to "al" or "fx" props)
     `d vg-let:foo="a b".split(' ')` throws `Unterminated string quote in value`
 */
+var v1compat = true;
 function clone(node, changes) {
     var e_1, _a;
     var ret = new VugNode(changes.tag || node.tag, node.words, node.children);
@@ -19519,469 +19903,121 @@ function directChild(n) {
     return new VugNode(n.tag, firstTagWords, [new VugNode(secondTag.key, secondTagWords, n.children.slice())]);
 }
 
-function addEl(where, tagName, attrs) {
-    // Returns newly created element, plus a method 'loadPromise' that returns a Promise for the onLoad event.
-    // Not doing the promise automatically, because most elements never fire onLoad, and that will cause an [unhandled] rejected Promise.
-    var el = document.createElement(tagName);
-    var where2 = typeof where === 'string' ? document.querySelector(where) : where;
-    where2.appendChild(el);
-    return Object.assign(el, { loadPromise: function () { return waitForLoad(el); } });
-}
-function waitForLoad(el) {
-    return new Promise(function (res, rej) {
-        var oldOnload = el.onload;
-        el.onload = function (e) { try {
-            res();
-        }
-        finally {
-            oldOnload === null || oldOnload === void 0 ? void 0 : oldOnload.call(el, e);
-        } };
-        setTimeout(function () { return rej('The added element timed out while waiting to load: ' + el.src); }, 10000);
-    });
-}
-function partition(arr, fn, minGroups) {
-    var e_1, _a;
-    if (minGroups === void 0) { minGroups = 2; }
-    // Usage: const [trueOnes, falseOnes] = partition(arr, x => trueOrFalse)
-    // Or:    const [one, two, three] = partition(arr, x => num, 3) // use the last argument to create a min number of groups
-    var ret = Array.from(Array(minGroups)).map(function () { return []; });
-    try {
-        for (var arr_1 = __values(arr), arr_1_1 = arr_1.next(); !arr_1_1.done; arr_1_1 = arr_1.next()) {
-            var i = arr_1_1.value;
-            var k = fn(i);
-            var ind = typeof k === 'number' ? k : !!k ? 0 : 1;
-            while (ret.length < (ind + 1))
-                ret.push([]);
-            ret[ind].push(i);
-        }
-    }
-    catch (e_1_1) { e_1 = { error: e_1_1 }; }
-    finally {
-        try {
-            if (arr_1_1 && !arr_1_1.done && (_a = arr_1["return"])) _a.call(arr_1);
-        }
-        finally { if (e_1) throw e_1.error; }
-    }
-    return ret;
-}
+var macros$1 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  v1compat: v1compat,
+  clone: clone,
+  wordTransformer: wordTransformer,
+  runAll: runAll
+});
 
-function emitVueTemplate(node, whitespace) {
-    var e_1, _a;
-    if (whitespace === void 0) { whitespace = false; }
-    var out = [];
-    if (node.tag === '_html') {
-        out.push(node.getWord("_contents") || "");
-    }
-    else {
-        out.push('<', node.tag);
-        var htmlAttrEnc_1 = function (x, usingApos) {
-            if (usingApos === void 0) { usingApos = false; }
-            return x.replace(usingApos ? /'/g : /"/g, usingApos ? '&#x27;' : '&quot;');
-        }; //.replace(/&/g, '&amp;').replace(/>/g, '&gt;')
-        var block = function (items, funcs) { var _a, _b; if (!items.length)
-            return; (_a = funcs.start) === null || _a === void 0 ? void 0 : _a.call(funcs); items.forEach(function (x, i) { var _a; if (i)
-            (_a = funcs.between) === null || _a === void 0 ? void 0 : _a.call(funcs); funcs.each(x, i); }); (_b = funcs.end) === null || _b === void 0 ? void 0 : _b.call(funcs); };
-        var _b = __read(partition(node.words, function (x) { return x.key.startsWith("style_") ? 0 : x.key.startsWith(".") ? 1 : 2; }, 3), 3), style = _b[0], klass = _b[1], attr = _b[2];
-        var _c = __read(partition(klass, function (x) { return x.isExpr; }), 2), classExpr = _c[0], classStatic = _c[1];
-        block(classStatic, {
-            start: function () { return out.push(' class="'); },
-            each: function (x) { out.push(x.key.slice(1)); if (x.value)
-                throw "CSS-Class attributes cannot have a static value. For a condition, use curly braces or simply no quotes. -- : " + x.key; },
-            between: function () { return out.push(" "); },
-            end: function () { return out.push('"'); }
-        });
-        block(classExpr, {
-            start: function () { return out.push(" :class='{"); },
-            each: function (x) {
-                var expr = x.value === undefined ? 'true' : !x.isExpr ? JSON.stringify(x.value) : x.value;
-                out.push(JSON.stringify(x.key.slice(1)), ': ', htmlAttrEnc_1(expr, true));
-            },
-            between: function () { return out.push(", "); },
-            end: function () { return out.push("}'"); }
-        });
-        var _d = __read(partition(style, function (x) { return x.isExpr; }), 2), styleExpr = _d[0], styleStatic = _d[1];
-        block(styleStatic, {
-            start: function () { return out.push(' style="'); },
-            each: function (x) { return out.push(x.key.slice(6), ": ", x.value); },
-            between: function () { return out.push("; "); },
-            end: function () { return out.push('"'); }
-        });
-        block(styleExpr, {
-            start: function () { return out.push(" :style='{"); },
-            each: function (x) {
-                if (x.value === undefined)
-                    throw "Style keys must have a value: " + x.key.slice(6);
-                var expr = !x.isExpr ? JSON.stringify(x.value) : x.value;
-                out.push(JSON.stringify(x.key.slice(6)), ': ', htmlAttrEnc_1(expr, true));
-            },
-            between: function () { return out.push(", "); },
-            end: function () { return out.push("}'"); }
-        });
-        block(attr, {
-            each: function (x) {
-                if (x.value === undefined) {
-                    out.push(" ", x.key);
-                }
-                else {
-                    var needsColon = x.isExpr && !x.key.startsWith("v-") && !x.key.startsWith("x-");
-                    out.push(" ", needsColon ? ":" : "", x.key);
-                    out.push('="', htmlAttrEnc_1(x.value), '"');
-                }
-            }
-        });
-        out.push(">");
-    }
-    if (node.children.length) {
-        var needsIndent = whitespace && (node.children.length > 1 || (node.children[0] && (node.children[0].tag !== "_html" || (node.children[0].getWord("_contents") || '').includes('\n'))));
-        if (needsIndent)
-            out.push("\n");
-        try {
-            for (var _e = __values(node.children), _f = _e.next(); !_f.done; _f = _e.next()) {
-                var c = _f.value;
-                if (needsIndent && c !== node.children[0])
-                    out.push("\n");
-                var txt = emitVueTemplate(c, whitespace);
-                if (needsIndent)
-                    txt = txt.split("\n").map(function (l) { return "  ".concat(l); }).join('\n'); // Indent
-                out.push(txt);
-            }
-        }
-        catch (e_1_1) { e_1 = { error: e_1_1 }; }
-        finally {
-            try {
-                if (_f && !_f.done && (_a = _e["return"])) _a.call(_e);
-            }
-            finally { if (e_1) throw e_1.error; }
-        }
-        if (needsIndent)
-            out.push("\n");
-    }
-    // Close tags except for 'void tags'. That includes '_html' because that's my element for raw HTML
-    if (!["_html", "area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"].includes(node.tag.toLowerCase()))
-        out.push("</".concat(node.tag, ">"));
-    return out.join("");
-}
-
-var vueDefaultOpts = { Fragment: "Vue.Fragment", className: "className", h: "h" };
-function renderAst(nodes, opts) {
-    if (opts === void 0) { opts = vueDefaultOpts; }
-    return nodes.length === 1 ? renderNode(nodes[0], opts) : renderNode(new VugNode(opts.Fragment || vueDefaultOpts.Fragment, undefined, nodes), opts); // for React, should be React.Fragment I think
-}
-function basicVueDirectivesToJsx(v) {
+/*
+TODO
+- See if we can move macros (incl flex) into processCssProp
+- Maybe make it in multiple steps, or recursive, so that py=0.5q will work
+- Un-export the others, and just use processCssProp
+- See if we can un-export clone/wordTransformer in macros.ts
+*/
+function processCssProp(key, value) {
+    var _a, _b;
     /*
-    Based on: https://vuejs.org/guide/extras/render-function.html#render-function-recipes
-    TODO:
-    - if any elements have v-if, v-else-if, v-else, convert them to a ternary expression. Has to be done at parent level
-    - v-for -> map
-    - seems v-html has to be done too, using innerHTML -- I think for React dangerouslySetInnerHTML to {html: contents}
-    - and v-text, maybe innerText, or just add a text node: String(expr)
-    - and v-show, using display: none/null I guess
-    - v-model
-      - .number etc -- how?
-  
-    - @click to onClick, but convert to a function if it has anything but alphanumeric and dots.
-      - modifiers -- concat any modifiers in Title case for passive, etc, for others, use Vue.withModifiers
-    - does :is tag have to be converted?
-    - Built-in components
-    - custom directives
-    // - slots incl passing data
-    - calling slots incl passing children to slots
+    Supports shorthands, units, and soon macros. Meant for running from anywhere, not necessarily a lowering pass.
+    Returns null if the key is not recognized.
     */
-    return new VugNode(v.tag, v.words, v.children);
+    if (cssProperties.includes(key))
+        return _a = {}, _a[key] = allowQUnits(value), _a;
+    if (imbaDict[key])
+        return _b = {}, _b[imbaDict[key]] = allowQUnits(value), _b;
+    // Macros
+    if (key === "sz")
+        return { "width": allowQUnits(value), "height": allowQUnits(value) };
+    if (key === "px")
+        return { "padding-left": allowQUnits(value), "padding-right": allowQUnits(value) };
+    if (key === "py")
+        return { "padding-top": allowQUnits(value), "padding-bottom": allowQUnits(value) };
+    if (key === "mx")
+        return { "margin-left": allowQUnits(value), "margin-right": allowQUnits(value) };
+    if (key === "my")
+        return { "margin-top": allowQUnits(value), "margin-bottom": allowQUnits(value) };
+    if (key === "circ" && !value)
+        return { "border-radius": "100%" };
+    if (key === "d")
+        return { "display": cssDisplayShorthand[value] }; // TODO not sure I want this, perhaps just use tag types, except b/i/if conflict, but can use full form for those. Or can use the arg
+    return null;
 }
-// TODO: non-HTML tags should be done as Expr i.e. it's a component in scope
-function renderNode(node, opts) {
-    var e_1, _a, e_2, _b;
-    node = basicVueDirectivesToJsx(node);
-    if (node.tag === "_html")
-        return JSON.stringify(node.getWordErrIfCalc("_contents") || ""); // TODO not really, as this will be a text node in a render function, whereas this can contain HTML tags (and was converted from Markdown). We have to really parse it in the parser... or maybe it's legit to say you can't do this if you're gonna use the render func maker
-    var attrExprText = new Map();
-    var styleExprText = new Map();
-    var classExprText = new Map();
-    var mapToObj = function (m) { return '{ ' + Array.from(m.entries()).map(function (_a) {
-        var _b = __read(_a, 2), k = _b[0], v = _b[1];
-        return "".concat(JSON.stringify(k), ": ").concat(v);
-    }).join(", ") + ' }'; };
-    var _loop_1 = function (x) {
-        var exprText = !x.value ? 'true' : x.isExpr ? x.value : JSON.stringify(x.value);
-        if (x.key.startsWith("style_")) {
-            styleExprText.set(caseChange$1(x.key.slice(6)).toCamel(), exprText);
-            attrExprText.set('style', mapToObj(styleExprText));
-        }
-        else if (x.key.startsWith(".")) {
-            classExprText.set(x.key.slice(1), exprText);
-            var _g = __read(partition(__spreadArray([], __read(classExprText.entries()), false), function (_a) {
-                var _b = __read(_a, 2), k = _b[0], v = _b[1];
-                return v === 'true';
-            }), 2), sStatic = _g[0], sCalc = _g[1];
-            var stringExprs_1 = [];
-            if (sStatic.length)
-                stringExprs_1.push(JSON.stringify(sStatic.map(function (x) { return x[0]; }).join(" ")));
-            sCalc.forEach(function (_a) {
-                var _b = __read(_a, 2), k = _b[0], v = _b[1];
-                return stringExprs_1.push("((".concat(v, ") ? ").concat(JSON.stringify(' ' + k), " : \"\")"));
-            });
-            attrExprText.set(opts.className || vueDefaultOpts.className, stringExprs_1.join(" + "));
-            // attrExprText.set(opts.className || vueDefaultOpts.className, sStatic.join(" ") + sCalc.length  [...classExprText.entries()].map(([k,v],i) => exprText === 'true' ? JSON.stringify(' ' + k) : `((${v}) ? ${JSON.stringify(' ' + k)} : "")`).join(" + "))
-            // attrExprText.set(opts.className || vueDefaultOpts.className, `classNames(${mapToObj(classExprText)})`)
-        }
-        else {
-            attrExprText.set(x.key, exprText);
-        }
-    };
-    try {
-        for (var _c = __values(node.words), _d = _c.next(); !_d.done; _d = _c.next()) {
-            var x = _d.value;
-            _loop_1(x);
-        }
-    }
-    catch (e_1_1) { e_1 = { error: e_1_1 }; }
-    finally {
-        try {
-            if (_d && !_d.done && (_a = _c["return"])) _a.call(_c);
-        }
-        finally { if (e_1) throw e_1.error; }
-    }
-    var out = [];
-    if (node.tag === "slot") {
-        var identifier = "slots.".concat(node.getWordErrIfCalc("name")); // TODO support calculated name
-        var children = node.children.length ? "\n".concat(indent(renderAst(node.children, opts)), "\n") : 'null';
-        out.push("".concat(identifier, " ? ").concat(identifier, "(").concat(mapToObj(attrExprText), ") : ").concat(children)); // TODO remove "name"
-    }
-    else {
-        out.push("".concat(opts.h || vueDefaultOpts.h, "(").concat(JSON.stringify(node.tag), ", "));
-        if (attrExprText.size)
-            out.push(mapToObj(attrExprText));
-        else
-            out.push("null");
-        try {
-            // Children
-            for (var _e = __values(node.children), _f = _e.next(); !_f.done; _f = _e.next()) {
-                var x = _f.value;
-                out.push(",\n" + indent(renderNode(x, opts)));
-            }
-        }
-        catch (e_2_1) { e_2 = { error: e_2_1 }; }
-        finally {
-            try {
-                if (_f && !_f.done && (_b = _e["return"])) _b.call(_e);
-            }
-            finally { if (e_2) throw e_2.error; }
-        }
-        out.push(")");
-    }
-    return out.join("");
-}
-function caseChange$1(txt) {
-    var words = [];
-    var isCapital = function (ch) { return ch === ch.toUpperCase(); };
-    txt.split('').forEach(function (x, i) {
-        var xLower = x.toLowerCase(), prevWord = words[words.length - 1], prevLetter = txt[i - 1];
-        if (x === "-")
-            return;
-        // We add a word if there's no previous word, or if we're after a hyphen, or if we're a first capital (before us was not a capital)
-        if (!prevWord || prevLetter === "-" || (isCapital(x) && !isCapital(prevLetter)))
-            return words.push(xLower);
-        // Otherwise add to previous word
-        words[words.length - 1] += xLower;
+function mainTransform(n) {
+    var words = n.words.flatMap(function (w) {
+        var processed = processCssProp(w.key, w.value);
+        if (!processed)
+            return w; // Not CSS
+        return Object.keys(processed).map(function (k) { return new VugWord("style_".concat(k), processed[k], w.isExpr); });
     });
-    var PascalWord = function (x) { return x[0].toUpperCase() + x.slice(1); };
-    return {
-        toPascal: function () { return words.map(PascalWord).join(""); },
-        toCamel: function () { return words.map(function (x, i) { return i ? PascalWord(x) : x; }).join(""); },
-        toSnake: function () { return words.join("-"); }
+    return new VugNode(n.tag, words, n.children);
+}
+function allowQUnits(value) {
+    if (/^-?([0-9]*\.)?[0-9]+q$/.test(value))
+        return parseFloat(value) * 0.25 + 'rem';
+    return value;
+}
+var cssDisplayShorthand = { b: "block", i: "inline", f: "flex", g: "grid", ib: "inline-block", "if": "inline-flex", ig: "inline-grid" };
+function flexArg(n) {
+    var value = n.getWordErrIfCalc("fx"); // we've moved it there
+    if (!value)
+        return n;
+    // Direction
+    var reverse = false, row = false, column = false;
+    if (value[0] === "!") {
+        reverse = true;
+        value = value.slice(1);
+    }
+    if (value[0] === "|") {
+        column = true;
+        value = value.slice(1);
+    }
+    if (value[0] === "v") {
+        column = true;
+        value = value.slice(1);
+    }
+    if (value[0] === "-") {
+        row = true;
+        value = value.slice(1);
+    }
+    if (value[0] === "h") {
+        row = true;
+        value = value.slice(1);
+    }
+    if (value[0] === "!") {
+        reverse = true;
+        value = value.slice(1);
+    }
+    var direction = column ? 'column' : (reverse || row) ? 'row' : ''; // If reverse was specified, we have to specify row (which is the default)
+    if (reverse)
+        direction += "-reverse";
+    var obj = { fx: null, style_display: 'flex' };
+    if (direction)
+        obj['style_flex-direction'] = direction;
+    // Alignment etc
+    var flexAlignmentShorthands = {
+        c: "center",
+        s: "flex-start",
+        e: "flex-end",
+        // s: "start",
+        // e: "end",
+        l: "left",
+        r: "right",
+        x: "stretch"
     };
+    var _a = __read(value.replace(/[.,]/g, '').split('').map(function (x) { return flexAlignmentShorthands[x] || x; }), 3), jc = _a[0], ai = _a[1], ac = _a[2];
+    if (jc)
+        obj['style_justify-content'] = jc;
+    if (ai)
+        obj['style_align-items'] = ai;
+    if (ac)
+        obj['style_align-content'] = ac;
+    return clone(n, obj);
 }
-function indent(text) { return text.split("\n").map(function (x) { return "  ".concat(x); }).join("\n"); }
-
-var VugNode = /** @class */ (function () {
-    function VugNode(tag, words, children) {
-        if (words === void 0) { words = []; }
-        if (children === void 0) { children = []; }
-        this.tag = tag;
-        this.words = words;
-        this.children = children;
-    }
-    VugNode.prototype.getWord = function (key) { var _a; return (_a = this.words.find(function (x) { return x.key === key; })) === null || _a === void 0 ? void 0 : _a.value; };
-    VugNode.prototype.getWordErrIfCalc = function (key) {
-        var find = this.words.find(function (x) { return x.key === key; });
-        if (!find)
-            return "";
-        if (find.isExpr)
-            throw "Attribute '".concat(find.key, "' cannot be an expression.");
-        return find.value;
-    };
-    return VugNode;
-}());
-var VugWord = /** @class */ (function () {
-    function VugWord(key, value, isExpr) {
-        this.key = key;
-        this.value = value;
-        this.isExpr = isExpr;
-    }
-    return VugWord;
-}());
-function compile$1(text) {
-    var ast = parseDoc(text);
-    return {
-        ast: ast,
-        toAstJson: function () { return JSON.stringify(ast, undefined, 2); },
-        toVueTemplate: function () { return ast.map(function (x) { return emitVueTemplate(x, true); }).join("\n"); },
-        toRenderFunc: function (renderFuncOpts) { return renderAst(ast, renderFuncOpts); }
-    };
-}
-function splitThree(what, sepChar) {
-    var e_1, _a;
-    if (sepChar === void 0) { sepChar = " "; }
-    // Splits on a char EXCEPT when that char occurs within quotes, parens, braces, curlies
-    // MAYBE allow sepChar to be >1 char long?
-    // MAYBE allow for multiple possibilities of sepChar, and tack it on? Can use this for parsing classes&ids&args... nah won't help, we don't want quotes in there anyway
-    // MAYBE customize the list of things that can quote? and the escape char?
-    var ret = [''];
-    var stack = [];
-    var escaping = false;
-    try {
-        for (var _b = __values(what.split('')), _c = _b.next(); !_c.done; _c = _b.next()) {
-            var ch = _c.value;
-            var starter = "'\"({[`".indexOf(ch);
-            if (escaping) {
-                ret[ret.length - 1] += ch;
-                escaping = false;
-                continue;
-            }
-            else if (ch === '\\') {
-                escaping = true;
-                continue;
-            }
-            if (ch === stack.slice(-1)[0]) {
-                stack.pop();
-            }
-            else if (starter >= 0) {
-                stack.push("'\")}]`"[starter]); // Add the expected closing char to the stack
-            }
-            if (ch === sepChar && !stack.length) {
-                ret.push(''); // Start a new item
-            }
-            else {
-                ret[ret.length - 1] += ch; // Add to current item
-            }
-        }
-    }
-    catch (e_1_1) { e_1 = { error: e_1_1 }; }
-    finally {
-        try {
-            if (_c && !_c.done && (_a = _b["return"])) _a.call(_b);
-        }
-        finally { if (e_1) throw e_1.error; }
-    }
-    // if (stack.length) throw "Unterminated " + stack.slice(-1)[0]
-    return ret;
-}
-function parseValue(value) {
-    /* Supports:
-        foo             (literal)
-        "foo"           (literal)
-        'foo'           (literal)
-        `foo ${}`       (expr)
-        (1 + 2)         (expr)
-        {obj: 'foo'}    (expr)
-        345.2           (expr)
-    */
-    if (!value.length)
-        return [false, '']; // If there is no value, it's not an expr.
-    var first = value[0], last = value[value.length - 1], same = first === last && value.length > 1;
-    if (same && (first === '"' || first === "'"))
-        return [false, value.slice(1, value.length - 1)]; // Quoted values
-    var opener = "({`".indexOf(first), closer = ")}`".indexOf(last);
-    if (opener >= 0 && opener === closer && value.length > 1)
-        return [true, (first === '(') ? value.slice(1, value.length - 1) : value]; // parens, objects, template strings. Cut off parens
-    if (!isNaN(Number(value)))
-        return [true, value]; // numbers
-    // Removed because it throws for things like `vg-let:foo="a b".split(' ')` which is perfectly legal. // if ("\"'`".indexOf(first) >= 0) throw `Unterminated string quote in value: ${value}`
-    return [false, value];
-}
-function splitTwo$1(text, sep) {
-    var pos = text.indexOf(sep);
-    if (pos < 0)
-        return [text, ''];
-    return [text.substr(0, pos), text.substr(pos + sep.length)];
-}
-var htmlNode = function (html, raw) {
-    if (raw === void 0) { raw = false; }
-    return new VugNode("_html", [new VugWord("_contents", raw ? html : convertSingleLineOfText(html), false)]);
-};
-function splitByContentSeparator(line) {
-    // Returns the elementPart trimmed, BTW. And the contentPart not, because that's not desired sometimes.
-    var findContentSep = line.match(/(?<![^ ])--(raw--)? /); // That's negative lookbehind, to not match the `--` if it's preceded by anything but a space.
-    if (!findContentSep)
-        return { elementPart: line.trim(), contentPart: "", contentIsRaw: false };
-    var optionalRaw = findContentSep[1];
-    return { elementPart: line.slice(0, findContentSep.index).trim(), contentPart: line.slice(findContentSep.index + 2 /*--*/ + ((optionalRaw === null || optionalRaw === void 0 ? void 0 : optionalRaw.length) || 0) + 1 /*space*/), contentIsRaw: !!optionalRaw };
-}
-function parseLine(line) {
-    line = splitTwo$1(line, "// ")[0]; // ignore comments
-    if (line.startsWith("<"))
-        line = "--raw-- ".concat(line); // allow HTML tags
-    line = lineTransformBasedOnPrefixes(line);
-    var splitC = splitByContentSeparator(line);
-    if (!splitC.elementPart)
-        return htmlNode(splitC.contentPart, splitC.contentIsRaw);
-    var _a = __read(splitThree(splitC.elementPart, " ")), tag = _a[0], words = _a.slice(1);
-    if (aggressiveMarkdownParagraphDetection(tag, words))
-        return parseLine("| " + line);
-    var words2 = words.map(function (w) {
-        var _a = __read(splitTwo$1(w, "="), 2), key = _a[0], value = _a[1];
-        var _b = __read(parseValue(value), 2), isExpr = _b[0], parsedValue = _b[1];
-        if (key[0] === ':') {
-            key = key.slice(1);
-            isExpr = true;
-        } // allow Vue-style :attr=expr
-        if ((key[0] === '.' || key.startsWith("v-") || key.startsWith("x-")) && value)
-            isExpr = true; // .foo, v- and x- are always expressions (as long as they have a value)
-        return new VugWord(key, parsedValue, isExpr);
-    });
-    var children = splitC.contentPart ? [htmlNode(splitC.contentPart, splitC.contentIsRaw)] : [];
-    return new VugNode(tag, words2, children);
-}
-function parseDoc(html) {
-    var e_2, _a;
-    var lines = html.replace(/\t/g, "        ") // Convert tabs to 8 spaces, like Python 2. People shouldn't mix tabs and spaces anyway
-        .split("\n").map(function (ln) {
-        var trimmed = ln.trimStart();
-        var indent = ln.length - trimmed.length;
-        var node = parseLine(trimmed);
-        return { node: node, indent: indent };
-    }).filter(function (x) { return x.node.tag !== "_html" || (x.node.getWord("_contents") || '').trim(); }); // Remove empty or comment-only lines. They would be _html elements with blank _contents. (We could remove them before parsing, but the comment logic is in the parser)
-    // Now make a tree
-    var stack = [];
-    var out = [];
-    var _loop_1 = function (ln) {
-        stack = stack.filter(function (x) { return x.indent < ln.indent; }); // Remove items from the stack unless they're LESS indented than me
-        if (stack.length)
-            stack.slice(-1)[0].node.children.push(ln.node); // Add us into the last stack item
-        else
-            out.push(ln.node); // Or as a top-level node, if the stack is empty
-        stack.push(ln); // Push ourselves onto the stack, in case we have children
-    };
-    try {
-        for (var lines_1 = __values(lines), lines_1_1 = lines_1.next(); !lines_1_1.done; lines_1_1 = lines_1.next()) {
-            var ln = lines_1_1.value;
-            _loop_1(ln);
-        }
-    }
-    catch (e_2_1) { e_2 = { error: e_2_1 }; }
-    finally {
-        try {
-            if (lines_1_1 && !lines_1_1.done && (_a = lines_1["return"])) _a.call(lines_1);
-        }
-        finally { if (e_2) throw e_2.error; }
-    }
-    // Run macros. Let's run it on a fake top-level element, so that macros can access the children of it
-    // Formerly simply: return out.map(x => Macros.runAll(x))
-    var doc = new VugNode("_doc", undefined, out);
-    var nodes = runAll(doc).children;
-    return nodes;
-}
+var imbaDict = { ac: "align-content", ai: "align-items", as: "align-self", b: "bottom", bc: "border-color", bcb: "border-bottom-color", bcl: "border-left-color", bcr: "border-right-color", bct: "border-top-color", bd: "border", bdb: "border-bottom", bdl: "border-left", bdr: "border-right", bdt: "border-top", bg: "background", bga: "background-attachment", bgc: "background-color", bgclip: "background-clip", bcgi: "background-image", bgo: "background-origin", bgp: "background-position", bgr: "background-repeat", bgs: "background-size", bs: "border-style", bsb: "border-bottom-style", bsl: "border-left-style", bsr: "border-right-style", bst: "border-top-style", bw: "border-width", bwb: "border-bottom-width", bwl: "border-left-width", bwr: "border-right-width", bwt: "border-top-width", c: "color", cg: "column-gap", d: "display", e: "ease", ec: "ease-colors", eo: "ease-opacity", et: "ease-transform", ff: "font-family", fl: "flex", flb: "flex-basis", fld: "flex-direction", flf: "flex-flow", flg: "flex-grow", fls: "flex-shrink", flw: "flex-wrap", fs: "font-size", fw: "font-weight", g: "gap", ga: "grid-area", gac: "grid-auto-columns", gaf: "grid-auto-flow", gar: "grid-auto-rows", gc: "grid-column", gce: "grid-column-end", gcg: "grid-column-gap", gcs: "grid-column-start", gr: "grid-row", gre: "grid-row-end", grg: "grid-row-gap", grs: "grid-row-start", gt: "grid-template", gta: "grid-template-areas", gtc: "grid-template-columns", gtr: "grid-template-rows", h: "height", jac: "place-content", jai: "place-items", jas: "place-self", jc: "justify-content", ji: "justify-items", js: "justify-self", l: "left", lh: "line-height", ls: "letter-spacing", m: "margin", mb: "margin-bottom", ml: "margin-left", mr: "margin-right", mt: "margin-top", o: "opacity", of: "overflow", ofa: "overflow-anchor", ofx: "overflow-x", ofy: "overflow-y", origin: "transform-origin", p: "padding", pb: "padding-bottom", pe: "pointer-events", pl: "padding-left", pos: "position", pr: "padding-right", pt: "padding-top", r: "right", rd: "border-radius", rdbl: "border-bottom-left-radius", rdbr: "border-bottom-right-radius", rdtl: "border-top-left-radius", rdtr: "border-top-right-radius", rg: "row-gap", shadow: "box-shadow", t: "top", ta: "text-align", td: "text-decoration", tdc: "text-decoration-color", tdl: "text-decoration-line", tds: "text-decoration-style", tdsi: "text-decoration-skip-ink", tdt: "text-decoration-thickness", te: "text-emphasis", tec: "text-emphasis-color", tep: "text-emphasis-position", tes: "text-emphasis-style", ts: "text-shadow", tt: "text-transform", tween: "transition", us: "user-select", va: "vertical-align", w: "width", ws: "white-space", zi: "z-index" };
+var cssProperties = "--*|-webkit-line-clamp|accent-color|align-content|align-items|align-self|alignment-baseline|all|animation|animation-delay|animation-direction|animation-duration|animation-fill-mode|animation-iteration-count|animation-name|animation-play-state|animation-timing-function|appearance|aspect-ratio|azimuth|backface-visibility|background|background-attachment|background-blend-mode|background-clip|background-color|background-image|background-origin|background-position|background-repeat|background-size|baseline-shift|baseline-source|block-ellipsis|block-size|block-step|block-step-align|block-step-insert|block-step-round|block-step-size|bookmark-label|bookmark-level|bookmark-state|border|border-block|border-block-color|border-block-end|border-block-end-color|border-block-end-style|border-block-end-width|border-block-start|border-block-start-color|border-block-start-style|border-block-start-width|border-block-style|border-block-width|border-bottom|border-bottom-color|border-bottom-left-radius|border-bottom-right-radius|border-bottom-style|border-bottom-width|border-boundary|border-collapse|border-color|border-end-end-radius|border-end-start-radius|border-image|border-image-outset|border-image-repeat|border-image-slice|border-image-source|border-image-width|border-inline|border-inline-color|border-inline-end|border-inline-end-color|border-inline-end-style|border-inline-end-width|border-inline-start|border-inline-start-color|border-inline-start-style|border-inline-start-width|border-inline-style|border-inline-width|border-left|border-left-color|border-left-style|border-left-width|border-radius|border-right|border-right-color|border-right-style|border-right-width|border-spacing|border-start-end-radius|border-start-start-radius|border-style|border-top|border-top-color|border-top-left-radius|border-top-right-radius|border-top-style|border-top-width|border-width|bottom|box-decoration-break|box-shadow|box-sizing|box-snap|break-after|break-before|break-inside|caption-side|caret|caret-color|caret-shape|chains|clear|clip|clip-path|clip-rule|color|color-adjust|color-interpolation-filters|color-scheme|column-count|column-fill|column-gap|column-rule|column-rule-color|column-rule-style|column-rule-width|column-span|column-width|columns|contain|contain-intrinsic-block-size|contain-intrinsic-height|contain-intrinsic-inline-size|contain-intrinsic-size|contain-intrinsic-width|container|container-name|container-type|content|content-visibility|continue|counter-increment|counter-reset|counter-set|cue|cue-after|cue-before|cursor|direction|display|dominant-baseline|elevation|empty-cells|fill|fill-break|fill-color|fill-image|fill-opacity|fill-origin|fill-position|fill-repeat|fill-rule|fill-size|filter|flex|flex-basis|flex-direction|flex-flow|flex-grow|flex-shrink|flex-wrap|float|float-defer|float-offset|float-reference|flood-color|flood-opacity|flow|flow-from|flow-into|font|font-family|font-feature-settings|font-kerning|font-language-override|font-optical-sizing|font-palette|font-size|font-size-adjust|font-stretch|font-style|font-synthesis|font-synthesis-small-caps|font-synthesis-style|font-synthesis-weight|font-variant|font-variant-alternates|font-variant-caps|font-variant-east-asian|font-variant-emoji|font-variant-ligatures|font-variant-numeric|font-variant-position|font-variation-settings|font-weight|footnote-display|footnote-policy|forced-color-adjust|gap|glyph-orientation-vertical|grid|grid-area|grid-auto-columns|grid-auto-flow|grid-auto-rows|grid-column|grid-column-end|grid-column-start|grid-row|grid-row-end|grid-row-start|grid-template|grid-template-areas|grid-template-columns|grid-template-rows|hanging-punctuation|height|hyphenate-character|hyphenate-limit-chars|hyphenate-limit-last|hyphenate-limit-lines|hyphenate-limit-zone|hyphens|image-orientation|image-rendering|image-resolution|initial-letter|initial-letter-align|initial-letter-wrap|inline-size|inline-sizing|input-security|inset|inset-block|inset-block-end|inset-block-start|inset-inline|inset-inline-end|inset-inline-start|isolation|justify-content|justify-items|justify-self|leading-trim|left|letter-spacing|lighting-color|line-break|line-clamp|line-grid|line-height|line-height-step|line-padding|line-snap|list-style|list-style-image|list-style-position|list-style-type|margin|margin-block|margin-block-end|margin-block-start|margin-bottom|margin-break|margin-inline|margin-inline-end|margin-inline-start|margin-left|margin-right|margin-top|margin-trim|marker|marker-end|marker-knockout-left|marker-knockout-right|marker-mid|marker-pattern|marker-segment|marker-side|marker-start|mask|mask-border|mask-border-mode|mask-border-outset|mask-border-repeat|mask-border-slice|mask-border-source|mask-border-width|mask-clip|mask-composite|mask-image|mask-mode|mask-origin|mask-position|mask-repeat|mask-size|mask-type|max-block-size|max-height|max-inline-size|max-lines|max-width|min-block-size|min-height|min-inline-size|min-intrinsic-sizing|min-width|mix-blend-mode|nav-down|nav-left|nav-right|nav-up|object-fit|object-position|offset|offset-anchor|offset-distance|offset-path|offset-position|offset-rotate|opacity|order|orphans|outline|outline-color|outline-offset|outline-style|outline-width|overflow|overflow-anchor|overflow-block|overflow-clip-margin|overflow-inline|overflow-wrap|overflow-x|overflow-y|overscroll-behavior|overscroll-behavior-block|overscroll-behavior-inline|overscroll-behavior-x|overscroll-behavior-y|padding|padding-block|padding-block-end|padding-block-start|padding-bottom|padding-inline|padding-inline-end|padding-inline-start|padding-left|padding-right|padding-top|page|page-break-after|page-break-before|page-break-inside|pause|pause-after|pause-before|perspective|perspective-origin|pitch|pitch-range|place-content|place-items|place-self|play-during|pointer-events|position|print-color-adjust|property-name|quotes|region-fragment|resize|rest|rest-after|rest-before|richness|right|rotate|row-gap|ruby-align|ruby-merge|ruby-overhang|ruby-position|running|scale|scroll-behavior|scroll-margin|scroll-margin-block|scroll-margin-block-end|scroll-margin-block-start|scroll-margin-bottom|scroll-margin-inline|scroll-margin-inline-end|scroll-margin-inline-start|scroll-margin-left|scroll-margin-right|scroll-margin-top|scroll-padding|scroll-padding-block|scroll-padding-block-end|scroll-padding-block-start|scroll-padding-bottom|scroll-padding-inline|scroll-padding-inline-end|scroll-padding-inline-start|scroll-padding-left|scroll-padding-right|scroll-padding-top|scroll-snap-align|scroll-snap-stop|scroll-snap-type|scrollbar-color|scrollbar-gutter|scrollbar-width|shape-image-threshold|shape-inside|shape-margin|shape-outside|spatial-navigation-action|spatial-navigation-contain|spatial-navigation-function|speak|speak-as|speak-header|speak-numeral|speak-punctuation|speech-rate|stress|string-set|stroke|stroke-align|stroke-alignment|stroke-break|stroke-color|stroke-dash-corner|stroke-dash-justify|stroke-dashadjust|stroke-dasharray|stroke-dashcorner|stroke-dashoffset|stroke-image|stroke-linecap|stroke-linejoin|stroke-miterlimit|stroke-opacity|stroke-origin|stroke-position|stroke-repeat|stroke-size|stroke-width|tab-size|table-layout|text-align|text-align-all|text-align-last|text-combine-upright|text-decoration|text-decoration-color|text-decoration-line|text-decoration-skip|text-decoration-skip-box|text-decoration-skip-ink|text-decoration-skip-inset|text-decoration-skip-self|text-decoration-skip-spaces|text-decoration-style|text-decoration-thickness|text-edge|text-emphasis|text-emphasis-color|text-emphasis-position|text-emphasis-skip|text-emphasis-style|text-group-align|text-indent|text-justify|text-orientation|text-overflow|text-shadow|text-space-collapse|text-space-trim|text-spacing|text-transform|text-underline-offset|text-underline-position|text-wrap|top|transform|transform-box|transform-origin|transform-style|transition|transition-delay|transition-duration|transition-property|transition-timing-function|translate|unicode-bidi|user-select|vertical-align|visibility|voice-balance|voice-duration|voice-family|voice-pitch|voice-range|voice-rate|voice-stress|voice-volume|volume|white-space|widows|width|will-change|word-boundary-detection|word-boundary-expansion|word-break|word-spacing|word-wrap|wrap-after|wrap-before|wrap-flow|wrap-inside|wrap-through|writing-mode|z-index".split("|"); // TODO can optimize into a map
 
 function compile(text) {
     var nodes = text.replace(/\t/g, "        ") // Convert tabs to 8 spaces, like Python 2. People shouldn't mix tabs and spaces anyway
@@ -20370,6 +20406,21 @@ function childize(items, getIndent) {
     return out;
 }
 
+var v1 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  compile: compile,
+  v1Load: v1Load
+});
+
+var v2 = /*#__PURE__*/Object.freeze({
+  __proto__: null,
+  Parsing: parsing,
+  Macros: macros$1,
+  Emit: emit,
+  MarkdownSupport: markdownSupport,
+  EmitRenderFunc: emitRenderFunc
+});
+
 function ViteTransformPlugin(opts) {
     if (opts === void 0) { opts = {}; }
     return {
@@ -20463,6 +20514,8 @@ var VueConsolidatePlugin = function () { return ({
 
 var Vug = /*#__PURE__*/Object.freeze({
   __proto__: null,
+  V1: v1,
+  V2: v2,
   ViteTransformPlugin: ViteTransformPlugin,
   load: load,
   vug: vug,
