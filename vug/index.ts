@@ -1,5 +1,6 @@
-import * as V2 from './parsing'
 import * as V1 from './v1'
+import * as V2 from './v2'
+export { V1, V2 } // for advanced uses
 
 /*
 To get Vug support in Vue templates, there are a few options.
@@ -51,7 +52,7 @@ export function ViteTransformPlugin(opts: VugOptions = {}) {
     transform(code: string, id: string) {
       const isVueFile = id.endsWith('.vue')
       if (!isVueFile && !/\.m?(j|t)sx?$/.test(id)) return;
-      const compile = (what: string) => (opts._tempLangVersion||1.2) >= 2 ? V2.compile(what) : V1.v1Load(what)
+      const compile = (what: string) => (opts._tempLangVersion||1.2) >= 2 ? V2.Parsing.compile(what) : V1.v1Load(what)
       
       code = transformVugTemplateStrings(code)
 
@@ -92,7 +93,7 @@ export function ViteTransformPlugin(opts: VugOptions = {}) {
 export function load(vugCode: string, opts: VugOptions = {}): { ast: any, toVueTemplate: (whitespace?: boolean) => string, toRenderFunc: () => string } {
   const useV2 = (opts._tempLangVersion||1.2) >= 2
   if (!useV2) return V1.v1Load(vugCode)
-  return V2.compile(vugCode)  
+  return V2.Parsing.compile(vugCode)  
 }
 
 export function vug(vugCode: TemplateStringsArray, ...args: unknown[]) { throw "Vug.vug() template-tag function was called at runtime -- this means that you haven't properly set up a compile-time plugin to replace calls to it. If you meant to convert Vug code at runtime, use one of the provided methods for doing so." }
@@ -110,7 +111,7 @@ export function transformVugTemplateStrings(code: string, opts: {templateTag?: s
     let contents = code.substring(ind+templateTag.length+1, end)
     
     contents = contents.replace(/@click/g, ':onClick') // temp to support Vue syntax
-    let converted = V2.compile(contents).toRenderFunc({h: hFuncAlias}) // callback(contents)
+    let converted = V2.Parsing.compile(contents).toRenderFunc({h: hFuncAlias}) // callback(contents)
     converted = converted.replace(/\{\{/g, '" + ') // temp to support Vue syntax
     converted = converted.replace(/\}\}/g, ' + "') // temp to support Vue syntax
 
