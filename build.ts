@@ -8,6 +8,7 @@ async function go() {
     await build("./vue-fiddle-helper/for-script-tag.ts", "vue-fiddle-helper", "VueFiddle")
     await build("./vug/index.ts", "vug", "Vug")
     await build("./reveal/index.ts", "reveal", "Reveal")
+    await build("./grand/index.ts", "grand", "Grand")
     await build("./vue-class-plus/index.ts", "vue-class-plus", "VCP")
     await build("./tiny-vite-ssr/index.ts", "tiny-vite-ssr")
     await build("./flexible-rpc/index.ts", "flexible-rpc")

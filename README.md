@@ -8,7 +8,8 @@ A collection of small utilities, mostly for Javascript/Typescript/Vue, that I wo
 - **[vue-fiddle-helper](vue-fiddle-helper/)** -- reduced boilerplate for quick Vue fiddles. Includes navbar, routing, vue-promise-button, vue-async-value, vue-class-plus, Bootstrap, FontAwesome
 - **[vue-promise-button](vue-promise-button/)** -- button component for Vue that shows feedback while its action is pending
 - **[vue-async-value](vue-async-value/)** -- component for easy consumption of async data or async computed properties in Vue templates
-- **[reveal](reveal/)** -- animate HTML elements when they come into view (including easy Vue directive)
+- **[grand](grand/)** -- animate in HTML elements when they come into view (including easy Vue directive)
+- **[reveal](reveal/)** -- (predecessor of Grand above)
 - **[functional-parsing](functional-parsing/)** -- basic functional parsing library for TypeScript
 - **[utils](utils/)** -- miscallaneous helper functions; might not even be worth the dependency, but you can copy them into your projects
 
