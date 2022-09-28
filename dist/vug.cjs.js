@@ -3659,6 +3659,7 @@ function runAll(node) {
     return new VugNode(node.tag, node.words, node.children.map(function (c) { return runAll(c); }));
 }
 function doAwaitAttribute(n) {
+    var _a;
     // const awaitWords = n.words.filter(x => x.key.startsWith("await-"))
     // if (!awaitWords.length) return n
     // return new VugNode(n.tag, n.words.map(w => awaitWords.includes(w) ? new VugWord(w.key.slice(6),)))
@@ -3666,7 +3667,7 @@ function doAwaitAttribute(n) {
     if (!word)
         return n;
     var varName = word.value.split(":")[1] || 'value';
-    var thisWithAwaitRemoved = clone(n, { await: null });
+    var thisWithAwaitRemoved = clone(n, (_a = {}, _a[word.key] = null, _a));
     var tmplt = new VugNode("template", [new VugWord('v-slot', "{value: ".concat(varName, "}"), true)], [thisWithAwaitRemoved]);
     return new VugNode("async-value", [new VugWord('promise', n.getWord('await') || '', true)], [tmplt]);
 }

@@ -79,7 +79,7 @@ function doAwaitAttribute(n: VugNode): VugNode {
     const word = n.words.find(w => w.key === 'await' || w.key.startsWith('await:'))
     if (!word) return n
     const varName = word.value.split(":")[1] || 'value'
-    const thisWithAwaitRemoved = clone(n, { await: null })
+    const thisWithAwaitRemoved = clone(n, { [word.key]: null })
     const tmplt = new VugNode("template", [new VugWord('v-slot',`{value: ${varName}}`,true)], [thisWithAwaitRemoved])
     return new VugNode("async-value", [new VugWord('promise', n.getWord('await') || '', true)], [tmplt])
 }
