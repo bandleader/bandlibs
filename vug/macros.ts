@@ -59,7 +59,7 @@ export function runAll(node: VugNode): VugNode {
     node = splitDoubleClasses(node)
     node = customTagTypes(node)
     node = routing(node)
-    node = Styling.flexMacroFx(node)
+    node = Styling.flexArg(node)
     node = Styling.mainTransform(node)
     node = SheetStyles.sheetStyles(node)
     node = SheetStyles.cssCustomTag(node)
@@ -144,16 +144,17 @@ function splitDoubleClasses(n: VugNode) { // TODO optimize
 }
 
 function tagNameParser(n: VugNode): VugNode {
-    const [first, ...args] = n.tag.split(":")
-    const parts = first.split('').reduce((list,char) => {
-        if (/[A-Za-z0-9_|\-]/.test(char)) list.slice(-1)[0].text += char
+    const parts = n.tag.split('').reduce((list,char) => {
+        if (/[A-Za-z0-9_,|!\-]/.test(char)) list.slice(-1)[0].text += char
         else list.push({ prefix: char, text: "" }) //TODO allow prefixes consisting of double special characters, i.e. push onto previous
         return list
     }, [{ text: '', prefix: '' }]).filter(x => x.text)
     const tag = parts.filter(x => !x.prefix)[0]?.text || 'div'
     const classes = parts.filter(x => x.prefix === '.').map(x => x.text)
     const ids = parts.filter(x => x.prefix === '#').map(x => x.text)
+    const args = parts.filter(x => x.prefix === ':').map(x => x.text)
     if (ids.length > 1) throw `Can't have more than 1 ID in tag name: '${n.tag}'`
+    if (args.length > 1) throw `Can't have more than 1 arg in tag name: '${n.tag}'`
     // TODO ensure we recognize all parts
     const words = n.words.slice()
     for (const w of classes) words.push(new VugWord("." + w, '', false))

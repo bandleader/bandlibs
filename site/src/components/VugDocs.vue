@@ -141,14 +141,14 @@ section.py-4 bg=#AAA
     --raw-- s.badge.bg-primary -- This is a span
     --raw-- ib bg=yellow -- This is an inline-block
     --raw-- f -- This is a flexbox
-    --raw-- f:c.c h=5em bg=lightgreen -- Centered flexbox
+    --raw-- f:cc h=5em bg=lightgreen -- Centered flexbox
 
   ### Markdown
     s.badge.rounded-pill.bg-danger fs=0.4em -- EXPERIMENTAL
   
   Being that Vug is all about conciseness, it seems natural to support Markdown directly in Vue templates. This is useful for text-heavy pages.
   VugDocsExample.mb-4 > pre
-    --raw-- flex:c.c bg=#222 p=5em mb=1em
+    --raw-- flex:cc bg=#222 p=5em mb=1em
     --raw--   .card > .card-body
     --raw--     # Heading 1
     --raw--     ## Heading 2

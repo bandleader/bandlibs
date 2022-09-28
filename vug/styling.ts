@@ -43,8 +43,8 @@ function allowQUnits(value: string) {
 
 const cssDisplayShorthand = { b: "block",  i: "inline", f: "flex", g: "grid", ib: "inline-block", if: "inline-flex", ig: "inline-grid" }
 
-export function flexMacroFx(n: VugNode): VugNode {
-    let value = n.getWordErrIfCalc("fx")
+export function flexArg(n: VugNode): VugNode {
+    let value = n.getWordErrIfCalc("fx") // we've moved it there
     if (!value) return n
     
     // Direction

@@ -7,7 +7,7 @@ import VugDocs from './components/VugDocs.vue';
 route path=/vug/playground > MainPlayground
 route path=/vug > VugDocs
 route path=/
-  f:|c.c h=100vh
+  f:|cc h=100vh
     ### **Bandlibs**: a collection of libraries.
     | For more information, check the [README](//github.com/bandleader/bandlibs).
     | Some of the libraries have websites here:
