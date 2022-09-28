@@ -3666,7 +3666,7 @@ function doAwaitAttribute(n) {
     var word = n.words.find(function (w) { return w.key === 'await' || w.key.startsWith('await:'); });
     if (!word)
         return n;
-    var varName = word.value.split(":")[1] || 'value';
+    var varName = word.key.split(":")[1] || 'value';
     var thisWithAwaitRemoved = clone(n, (_a = {}, _a[word.key] = null, _a));
     var tmplt = new VugNode("template", [new VugWord('v-slot', "{value: ".concat(varName, "}"), true)], [thisWithAwaitRemoved]);
     return new VugNode("async-value", [new VugWord('promise', n.getWord('await') || '', true)], [tmplt]);
