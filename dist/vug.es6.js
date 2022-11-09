@@ -3808,6 +3808,8 @@ function processCssProp(key, value) {
     Supports shorthands, units, and soon macros. Meant for running from anywhere, not necessarily a lowering pass.
     Returns null if the key is not recognized.
     */
+    if (key === "d")
+        return { "display": cssDisplayShorthand[value] || value }; // Must be before imbaDict obviously. TODO not sure I want this, perhaps just use tag types, except b/i/if conflict, but can use full form for those. Or can use the arg
     if (cssProperties.includes(key))
         return _a = {}, _a[key] = allowQUnits(value), _a;
     if (imbaDict[key])
@@ -3825,8 +3827,6 @@ function processCssProp(key, value) {
         return { "margin-top": allowQUnits(value), "margin-bottom": allowQUnits(value) };
     if (key === "circ" && !value)
         return { "border-radius": "100%" };
-    if (key === "d")
-        return { "display": cssDisplayShorthand[value] }; // TODO not sure I want this, perhaps just use tag types, except b/i/if conflict, but can use full form for those. Or can use the arg
     return null;
 }
 function mainTransform(n) {
