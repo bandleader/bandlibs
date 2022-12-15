@@ -20613,7 +20613,7 @@ function initApp(Vue) {
             args[_i - 2] = arguments[_i];
         }
         if (value.vug) {
-            value.template = load(value.vug).toVueTemplate();
+            value.template = load(value.vug, { _tempLangVersion: 2 }).toVueTemplate();
             delete value.vug;
         }
         old.apply(void 0, __spreadArray([name, value], __read(args), false));

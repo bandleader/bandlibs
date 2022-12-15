@@ -26,7 +26,7 @@ export function initApp(Vue = (window as any).Vue) {
 
     // Support vug
     hook(w.app, 'component', (old: Function) => (name: string, value: any, ...args: any[]) => {
-        if (value.vug) { value.template = Vug.load(value.vug).toVueTemplate(); delete value.vug }
+        if (value.vug) { value.template = Vug.load(value.vug, {_tempLangVersion: 2}).toVueTemplate(); delete value.vug }
         old(name, value, ...args)
     })
     
