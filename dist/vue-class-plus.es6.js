@@ -53,6 +53,10 @@ function propRequired(moreOpts) {
     o._isProp = true;
     return o;
 }
+function computed(getter) {
+    getter._isComputed = true;
+    return getter;
+}
 function classComponent(cl, opts) {
     var e_1, _a, e_2, _b, e_3, _c;
     if (typeof cl === 'object')
@@ -118,7 +122,10 @@ function classComponent(cl, opts) {
             };
         }
         else if (typeof getValue() === 'function') {
-            ret.methods[prop] = getValue();
+            if (getValue()._isComputed)
+                ret.computed[prop] = getValue();
+            else
+                ret.methods[prop] = getValue();
         }
         else if (getValue() && getValue()._isProp) {
             ret.props[prop] = getValue();
@@ -179,4 +186,4 @@ function classComponent(cl, opts) {
     return ret;
 }
 
-export { classComponent, classComponent as default, prop, propRequired };
+export { classComponent, computed, classComponent as default, prop, propRequired };

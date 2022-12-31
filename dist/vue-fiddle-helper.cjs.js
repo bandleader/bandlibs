@@ -1512,7 +1512,7 @@ class ComputedRefImpl {
         this._setter(newValue);
     }
 }
-function computed(getterOrOptions, debugOptions, isSSR = false) {
+function computed$1(getterOrOptions, debugOptions, isSSR = false) {
     let getter;
     let setter;
     const onlyGetter = isFunction(getterOrOptions);
@@ -4335,7 +4335,7 @@ function applyOptions(instance) {
                         warn$1(`Write operation failed: computed property "${key}" is readonly.`);
                     }
                     ;
-            const c = computed$1({
+            const c = computed$1$1({
                 get,
                 set
             });
@@ -8698,9 +8698,9 @@ function isClassComponent(value) {
     return isFunction(value) && '__vccOpts' in value;
 }
 
-const computed$1 = ((getterOrOptions, debugOptions) => {
+const computed$1$1 = ((getterOrOptions, debugOptions) => {
     // @ts-ignore
-    return computed(getterOrOptions, debugOptions, isInSSRComponentSetup);
+    return computed$1(getterOrOptions, debugOptions, isInSSRComponentSetup);
 });
 
 // dev only
@@ -10806,7 +10806,7 @@ var runtimeDom = /*#__PURE__*/Object.freeze({
   EffectScope: EffectScope,
   getCurrentScope: getCurrentScope,
   onScopeDispose: onScopeDispose,
-  computed: computed$1,
+  computed: computed$1$1,
   watch: watch,
   watchEffect: watchEffect,
   watchPostEffect: watchPostEffect,
@@ -15781,7 +15781,7 @@ var Vue = /*#__PURE__*/Object.freeze({
   cloneVNode: cloneVNode,
   compatUtils: compatUtils,
   compile: compileToFunction,
-  computed: computed$1,
+  computed: computed$1$1,
   createApp: createApp,
   createBlock: createBlock,
   createCommentVNode: createCommentVNode,
@@ -16028,6 +16028,10 @@ function propRequired(moreOpts) {
     o._isProp = true;
     return o;
 }
+function computed(getter) {
+    getter._isComputed = true;
+    return getter;
+}
 function classComponent(cl, opts) {
     var e_1, _a, e_2, _b, e_3, _c;
     if (typeof cl === 'object')
@@ -16093,7 +16097,10 @@ function classComponent(cl, opts) {
             };
         }
         else if (typeof getValue() === 'function') {
-            ret.methods[prop] = getValue();
+            if (getValue()._isComputed)
+                ret.computed[prop] = getValue();
+            else
+                ret.methods[prop] = getValue();
         }
         else if (getValue() && getValue()._isProp) {
             ret.props[prop] = getValue();
@@ -16158,6 +16165,7 @@ var VCP = /*#__PURE__*/Object.freeze({
   __proto__: null,
   prop: prop,
   propRequired: propRequired,
+  computed: computed,
   'default': classComponent,
   classComponent: classComponent
 });

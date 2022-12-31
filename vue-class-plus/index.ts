@@ -15,6 +15,11 @@ export function propRequired<T>(moreOpts: { type?: any } = {}) {
     return o as T
 }
 
+export function computed<T>(getter: ()=>T) {
+    ;(getter as any)._isComputed = true
+    return getter
+}
+
 export default classComponent
 export function classComponent(cl: any, opts?: Record<string, any>) {
     if (typeof cl === 'object') return cl // This is a regular Vue component, just return
@@ -66,7 +71,8 @@ export function classComponent(cl: any, opts?: Record<string, any>) {
                 set: descriptor.set
             }
         } else if (typeof getValue() === 'function') {
-            ret.methods[prop] = getValue()
+            if (getValue()._isComputed) ret.computed[prop] = getValue()
+            else ret.methods[prop] = getValue()
         } else if (getValue() && getValue()._isProp) {
             ret.props[prop] = getValue()
         } else if (!ignoreOthers) {
