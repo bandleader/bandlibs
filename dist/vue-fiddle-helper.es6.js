@@ -20524,25 +20524,23 @@ var Vug = /*#__PURE__*/Object.freeze({
   VueConsolidatePlugin: VueConsolidatePlugin
 });
 
-var _a$1;
 // Should work with either Vue 2 or 3
-// TODO: remove dependency on VCP, and remove dependency on the template compiler (although that means we need separate functions for Vue 2 and 3, and also for Vue 3 render functions need to import Vue itself)
-var AsyncValue = classComponent((_a$1 = /** @class */ (function () {
-        function AsyncValue() {
-            this.promise = propRequired();
-            this.resolved = false;
-            this.value = null;
-            this.error = null;
-        }
-        AsyncValue.prototype.created = function () {
+// TODO: remove dependency on the template compiler? (although that means we need separate functions for Vue 2 and 3, and also for Vue 3 render functions need to import Vue itself)
+var AsyncValue = {
+    props: ['promise'],
+    data: function () { return ({ resolved: false, value: null, error: null }); },
+    watch: {
+        immediate: true,
+        handler: function () {
             var _this = this;
+            this.resolved = false;
+            this.error = null;
             this.promise.then(function (x) { _this.value = x; _this.resolved = true; }, function (err) { return _this.error = err; });
-        };
-        return AsyncValue;
-    }()),
+        }
+    },
     // TODO should make this use the included spinner (or rather include it here, so this doesn't need Bootstrap)
-    _a$1.template = "<slot v-if=\"resolved\" v-bind=\"{value}\" /><span v-else-if=\"error\" class=\"text-danger\"><i class=\"fa fa-exclamation-triangle\" /> {{String(error)}}</span><span v-else class=\"text-primary spinner-border spinner-border-sm\" role=\"status\"></span>",
-    _a$1));
+    template: "<slot v-if=\"resolved\" v-bind=\"{value}\" /><span v-else-if=\"error\" class=\"text-danger\"><i class=\"fa fa-exclamation-triangle\" /> {{String(error)}}</span><span v-else class=\"text-primary spinner-border spinner-border-sm\" role=\"status\"></span>"
+};
 
 var _a;
 // Should work with either Vue 2 or 3
