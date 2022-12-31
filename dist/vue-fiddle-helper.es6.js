@@ -20538,12 +20538,14 @@ var AsyncValue = {
     props: ['promise'],
     data: function () { return ({ resolved: false, value: null, error: null }); },
     watch: {
-        immediate: true,
-        handler: function () {
-            var _this = this;
-            this.resolved = false;
-            this.error = null;
-            this.promise.then(function (x) { _this.value = x; _this.resolved = true; }, function (err) { return _this.error = err; });
+        promise: {
+            immediate: true,
+            handler: function () {
+                var _this = this;
+                this.resolved = false;
+                this.error = null;
+                this.promise.then(function (x) { _this.value = x; _this.resolved = true; }, function (err) { return _this.error = err; });
+            }
         }
     },
     // TODO should make this use the included spinner (or rather include it here, so this doesn't need Bootstrap)

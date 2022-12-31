@@ -1,6 +1,6 @@
 {
   "name": "bandlibs",
-  "version": "0.1.35",
+  "version": "0.1.36",
   "description": "A collection of small utilities, mostly for Javascript/Typescript/Vue, that I would like to make available.",
   "dependencies": {
     "express": "^4.17.2",

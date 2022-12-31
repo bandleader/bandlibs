@@ -6,8 +6,10 @@ declare const _default: {
         error: any;
     };
     watch: {
-        immediate: boolean;
-        handler(): void;
+        promise: {
+            immediate: boolean;
+            handler(): void;
+        };
     };
     template: string;
 };
