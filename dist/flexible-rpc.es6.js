@@ -81,11 +81,12 @@ function __spreadArray(to, from, pack) {
 function middleware(callback) {
     var _this = this;
     return function (req, resp) { return __awaiter(_this, void 0, void 0, function () {
-        var method, context, backend, args, result, err_1;
+        var param, method, context, backend, args, result, err_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    method = req.query.method;
+                    param = function (key) { var _a, _b; return ((_a = req.query) === null || _a === void 0 ? void 0 : _a[key]) || ((_b = req.body) === null || _b === void 0 ? void 0 : _b[key]); };
+                    method = param('method');
                     _a.label = 1;
                 case 1:
                     _a.trys.push([1, 5, , 6]);
@@ -95,7 +96,7 @@ function middleware(callback) {
                     // throw `Method '${method}' does not exist. Methods are: ${Object.keys(backend)}`
                     throw "Method '".concat(method, "' does not exist");
                 case 2:
-                    args = JSON.parse(req.query.args);
+                    args = JSON.parse(param('args'));
                     return [4 /*yield*/, backend[method].apply(context, args)];
                 case 3:
                     result = _a.sent();
@@ -120,7 +121,7 @@ function client(endpoint) {
             args[_i - 1] = arguments[_i];
         }
         var questionOrAmp = endpoint.includes('?') ? '&' : '?';
-        var result = fetch(endpoint + questionOrAmp + "method=" + method + "&args=" + encodeURIComponent(JSON.stringify(args)), { method: "POST" });
+        var result = fetch(endpoint + questionOrAmp, { method: "POST", body: new URLSearchParams({ method: method, args: JSON.stringify(args) }) });
         var jsonResult = result.then(function (x) { return x.json(); });
         return jsonResult.then(function (json) {
             if (json.err) {

@@ -1,6 +1,7 @@
 export function middleware(callback: (context: {req: any}) => any) {
     return async (req: any, resp: any) => {
-        const method: string = req.query.method
+        const param = (key: string) => req.query?.[key] || req.body?.[key]
+        const method: string = param('method')
         try {
             const context = { req }
             const backend = callback(context)
@@ -8,7 +9,7 @@ export function middleware(callback: (context: {req: any}) => any) {
                 // throw `Method '${method}' does not exist. Methods are: ${Object.keys(backend)}`
                 throw `Method '${method}' does not exist`
             } else {
-                const args = JSON.parse(req.query.args)
+                const args = JSON.parse(param('args'))
                 const result = await backend[method].apply(context, args)
                 resp.json({result})
             }
@@ -22,9 +23,9 @@ export function middleware(callback: (context: {req: any}) => any) {
 type AnyFunc = (...args: any) => any
 type Promisify<T> = T extends Promise<any> ? T : Promise<T>
 export function client<T extends Record<string, AnyFunc>>(endpoint = "/api") {
-    const single = function<TMethod extends keyof T>(method: TMethod, ...args: Parameters<T[TMethod]>) {
+    const single = function<TMethod extends keyof T & string>(method: TMethod, ...args: Parameters<T[TMethod]>) {
         const questionOrAmp = endpoint.includes('?') ? '&' : '?'
-        const result = fetch(endpoint + questionOrAmp + "method=" + method + "&args=" + encodeURIComponent(JSON.stringify(args)), { method: "POST" })
+        const result = fetch(endpoint + questionOrAmp, { method: "POST", body: new URLSearchParams({ method, args: JSON.stringify(args)}) })
         const jsonResult = result.then(x => x.json())
         return jsonResult.then(json => {
             if (json.err) {
