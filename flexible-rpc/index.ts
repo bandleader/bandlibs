@@ -22,6 +22,13 @@ export function middleware(callback: (context: {req: any}) => any) {
 
 type AnyFunc = (...args: any) => any
 type Promisify<T> = T extends Promise<any> ? T : Promise<T>
+type UnpackedPromise<T> = T extends Promise<infer U> ? U : T
+type GenericFunction<TS extends any[], R> = (...args: TS) => R
+type PromisifyFunc<T> = {
+    [K in keyof T]: T[K] extends GenericFunction<infer TS, infer R>
+        ? (...args: TS) => Promise<UnpackedPromise<R>>
+        : never
+}
 export function client<T extends Record<string, AnyFunc>>(endpoint = "/api") {
     const single = function<TMethod extends keyof T & string>(method: TMethod, ...args: Parameters<T[TMethod]>) {
         const questionOrAmp = endpoint.includes('?') ? '&' : '?'
@@ -39,11 +46,15 @@ export function client<T extends Record<string, AnyFunc>>(endpoint = "/api") {
         get(targ, prop) {
             return (...args: any[]) => single(prop as string, ...args as any)
         }
-    })
+    }) as { [Prop in keyof T]: T[Prop] extends (...args: infer TArgs) => infer TReturn ? (...args: TArgs) => Promisify<TReturn> : never }
     return { single, proxy }
 }
 
 // const exampleBackend = {
-//     foo: async (b: string) => 12
+//     foo: async (b: string) => 12,
+//     bar: (a: number, b: string) => "hey",
 // }
-// const test = client<typeof exampleBackend>().single("foo",'1')
+// const cl = client<typeof exampleBackend>()
+// const test1 = cl.single("foo", 'str')
+// const test2 = cl.single("bar", 1, '1')
+// const test3 = cl.proxy().bar(2, '3') // For some reason it doesn't ALWAYS check the types of the second argument...

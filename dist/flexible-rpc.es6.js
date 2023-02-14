@@ -145,8 +145,12 @@ function client(endpoint) {
     return { single: single, proxy: proxy };
 }
 // const exampleBackend = {
-//     foo: async (b: string) => 12
+//     foo: async (b: string) => 12,
+//     bar: (a: number, b: string) => "hey",
 // }
-// const test = client<typeof exampleBackend>().single("foo",'1')
+// const cl = client<typeof exampleBackend>()
+// const test1 = cl.single("foo", 'str')
+// const test2 = cl.single("bar", 1, '1')
+// const test3 = cl.proxy().bar(2, '3') // For some reason it doesn't ALWAYS check the types of the second argument...
 
 export { client, middleware };
