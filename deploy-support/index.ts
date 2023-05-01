@@ -10,8 +10,8 @@ export function shell(cmd: string) {
     console.log("> " + cmd)
     child_process.execSync(cmd, { stdio: 'inherit' })
 }
-export function tarFiles(tarPath: string, filesSepSpace: string) {
-    return shell(`tar -cvf ${tarPath} ${filesSepSpace}`)
+export function tarFiles(filesSepSpace: string, outFilePath = `./tmp-${Math.random().toString(36).substring(7)}.tar`) {
+    return shell(`tar -cvf ${outFilePath} ${filesSepSpace}`)
 }
 export function createZip(fileList: string, outFilePath = `./tmp-${Math.random().toString(36).substring(7)}.zip`) {
     if (!fs.existsSync("/usr/bin/zip")) shell("apk add zip") // Install zip if not installed
@@ -78,4 +78,26 @@ export function downloadTo(url: string, localPath = randId()) {
 }
 export function randId() {
     return Math.random().toString(36).substring(7)
+}
+
+// ======== CAPROVER ========
+
+export function deployToCapRover(target: CapRoverTarget, filesSepSpace: string, captainDefinitionFileContents: string) {
+  writeCaptainDefinitionFile(basedOnDockerfileText(captainDefinitionFileContents))
+  const tarFile = "/var/tmp/deploy.tar"
+  console.info("***** Creating archive... *****")
+  tarFiles(filesSepSpace, tarFile)
+  console.info("***** Deploying... *****")
+  capDeployTarFile(tarFile, target)
+  console.info("***** Complete. *****")
+}
+type CapRoverTarget = { captainUrl: string, appName: string, appToken: string }
+function capDeployTarFile(tarFilePath: string, target: CapRoverTarget) {
+  shell(`npx caprover deploy --appToken ${target.appToken} --tarFile ${tarFilePath} --caproverUrl ${target.captainUrl} --appName ${target.appName}`)
+}
+function writeCaptainDefinitionFile(text: string) {
+  fs.writeFileSync("./captain-definition", text, { encoding: "utf8" })
+}
+function basedOnDockerfileText(text: string) {
+  return JSON.stringify({schemaVersion: 2, dockerfileLines: text.split("\n")})
 }
