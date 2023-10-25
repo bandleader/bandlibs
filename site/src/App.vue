@@ -1,11 +1,15 @@
 <script setup lang="ts">
 import MainPlayground from './components/MainPlayground.vue'
 import VugDocs from './components/VugDocs.vue';
+import { defineComponent } from 'vue';
+import _NofTest from '../../nof'
+const NofTest = defineComponent({ setup: () => (_NofTest(), () => null) })
 </script>
 
 <template lang="vug">
 route path=/vug/playground > MainPlayground
 route path=/vug > VugDocs
+route path=/nof > NofTest
 route path=/
   f:|cc h=100vh
     ### **Bandlibs**: a collection of libraries.
