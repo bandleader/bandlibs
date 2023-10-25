@@ -39,7 +39,7 @@ export function splitThree(what: string, sepChar = " ") {
     for (const ch of what.split('')) {
       const starter = `'"({[\``.indexOf(ch)
       if (escaping) {
-        ret[ret.length - 1] += ch
+        ret[ret.length - 1] += ch // Add to current item
         escaping = false
         continue
       } else if (ch === '\\') {
