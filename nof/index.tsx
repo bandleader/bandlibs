@@ -42,7 +42,7 @@ function set(el: HTMLElement, key: string, value: any) {
   else if (key[0] === '$' && key.endsWith("$")) sheetStyle(el, key.slice(1,-1), value)
   else if (key === 'css') adhocCss(el, value)
   else if (key[0] === '$') el.style[key.slice(1)] = value // supports both camelCase and kebab-case
-  else if (key[0] === '_') el.classList.toggle(key.slice(1).replace(/_/g, '-'), !!value)
+  else if (key[0] === '_') el.classList.toggle(key.slice(1), !!value)
   else if (key.startsWith("on")) el.addEventListener(key.slice(2), value)
   else el[key] = value
 }
