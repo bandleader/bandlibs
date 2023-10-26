@@ -1,6 +1,6 @@
 /*
 - [x] JSX support
-- [ ] For/If
+- [x] For/If
 - [x] Components that can be written for any app
 - [x] Support for multiple components
   - [ ] How to give them access to App (if they're outside of where the app was created), which is `React` but which is scoped to app creator? Can store it globally but what about when we add stuff later?
@@ -184,6 +184,7 @@ abstract class App {
     })
     return el
   }
+  if(cond: () => boolean, yes: () => any, no?: () => any) { return this.for(() => cond() ? [1] : no ? [0] : [], x => x ? yes() : no!(), x => String(x)) }
 }
 
 const docEl = (tag: string): Node => 
@@ -321,6 +322,9 @@ function testSpaApp() {
               <div css="& { background: purple; color: white } &:hover { background: green }">Ad-hoc CSS long form with hover</div>
               <div bg$="blue" c$="white" bg:hover$="green">Sheet styles</div>
               <div bg="purple | green" c="white">Combined form</div>
+              <h3 _mt-4>If Test</h3>
+              {React.if(() => ifTest, () => <div>Yes</div>, () => <div>No</div>)}
+              {React.if(() => ifTest, () => <div>Shown</div>)}
             </main>
   }
   // destroy existing
