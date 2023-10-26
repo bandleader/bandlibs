@@ -275,6 +275,5 @@ function testSpaApp() {
     document.body.appendChild(root)
   }
 }
-testSpaApp()
 
 export default testSpaApp
