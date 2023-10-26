@@ -147,14 +147,14 @@ function testSpaApp() {
     ]
     return  <main>
               <h1 $color="green">Todo list</h1>
-                <ul>
-                  {...todos.map(todo => 
-                    <li $opacity={() => todo.done ? 0.5 : 1}>
-                      <input type="checkbox" _me_1 checked={() => todo.done} onclick={() => todo.done = !todo.done} />
-                      <span innerText={todo.text} $textDecoration={() => todo.done ? "line-through" : "none"} />
-                    </li>
-                  )}
-                </ul>
+              <ul>
+                {...todos.map(todo =>
+                  <li $opacity={() => todo.done ? 0.5 : 1}>
+                    <input type="checkbox" _me_1 checked={() => todo.done} onclick={() => todo.done = !todo.done} />
+                    <span innerText={todo.text} $textDecoration={() => todo.done ? "line-through" : "none"} />
+                  </li>
+                )}
+              </ul>
             </main>
   }
   // destroy existing
