@@ -23,6 +23,10 @@
   - [x] Run arbitrary JS when element is inserted (removed?): c@click, c@inserted, c@removed
 */
 
+const randId = () => Math.random().toString(36).slice(2)
+const comparer = (fn: (x: Cmd) => string|number) => (a: Cmd, b: Cmd) => { const x = fn(a), y = fn(b); return x === y ? 0 : x < y ? -1 : 1 }
+
+
 function set(el: HTMLElement, key: string, value: any) {
   // Pure frontend side
   if (key.startsWith("$$")) alpine(el, key.slice(2), value)
@@ -112,9 +116,6 @@ class SpaApp extends App {
     this.fx.effect(el, () => set(el, key, value()))
   }
 }
-
-const randId = () => Math.random().toString(36).slice(2)
-const comparer = (fn: (x: Cmd) => string|number) => (a: Cmd, b: Cmd) => { const x = fn(a), y = fn(b); return x === y ? 0 : x < y ? -1 : 1 }
 
 class Cmd {
   constructor(public id: string, public key: string, public value: any) {}
