@@ -18,12 +18,6 @@ function set(el: HTMLElement, key: string, value: any) {
   else el[key] = value
 }
 
-function setEx(el: HTMLElement, key: string, value: any, fx: EffectsSystem) {
-  // Version that supports reactive values (effects)
-  if (typeof value !== 'function') return set(el, key, value)
-  if (key.startsWith("on")) return set(el, key, (e: any) => ((value as Function)(e), fx.rerun()))
-  fx.effect(el, () => set(el, key, value()))
-}
 
 class EffectsSystem {
   effects = new Map<HTMLElement, Function[]>()
@@ -62,9 +56,15 @@ class SpaApp extends App {
   fx = new EffectsSystem()
   h(tag: any, attrs: any, ...children: any[]) {
     const el = document.createElement(tag)
-    for (const key in attrs) setEx(el, key, attrs[key], this.fx)
+    for (const key in attrs) this.clientSetEx(el, key, attrs[key])
     for (const child of children) el.appendChild(child)
     return el
+  }
+  clientSetEx(el: HTMLElement, key: string, value: any) {
+    // Version that supports reactive values (effects)
+    if (typeof value !== 'function') return set(el, key, value)
+    if (key.startsWith("on")) return set(el, key, (e: any) => ((value as Function)(e), this.fx.rerun()))
+    this.fx.effect(el, () => set(el, key, value()))
   }
 }
 
