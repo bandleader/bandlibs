@@ -294,7 +294,7 @@ function comp<TProps>(fn: (i: TProps & { app: App }) => (app: App) => any) {
 type Todo = { text: string, done: boolean }
 const TodoItem = comp<{item: Todo}>(({item}) => React => 
   <li $opacity={() => item.done ? 0.5 : 1}>
-    <input type="checkbox" _me_1 checked={() => item.done} onclick={() => item.done = !item.done} />
+    <input type="checkbox" _me-1 checked={() => item.done} onclick={() => item.done = !item.done} />
     <span innerText={item.text} $textDecoration={() => item.done ? "line-through" : "none"} />
   </li>)
 const TodoApp = comp(({app}) => {

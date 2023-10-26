@@ -37,7 +37,7 @@ export class StyleProcessor {
     return ret
   }
   onePropWithPrefixes(key: string, value: any): ReturnType<typeof this.oneProp> {
-    const findAlphaChars = key.match(/[a-z]+/i) // Get first sequence of alphabetic characters from a string
+    const findAlphaChars = key.match(/[a-zA-Z0-9\-_]+/i) // Get first sequence of alphabetic characters from a string
     if (!findAlphaChars || !findAlphaChars[0]) return null // no alphabetical chars
     const mainKey = findAlphaChars[0], prefix = key.slice(0, findAlphaChars.index), suffix = key.slice(findAlphaChars.index + mainKey.length)
     const ret = this.oneProp(mainKey, value)
