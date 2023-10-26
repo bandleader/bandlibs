@@ -12,11 +12,21 @@
 - [ ] Actual text nodes. Or at least if single child string, don't wrap in span, do innerText
 - [ ] Transitions (for now can do in the For component)
 - [ ] Teleport?
+- "Alpine" -- client-side stuff for Blazor mode:
+  - [x] Run arbitrary JS when component (your element) is initialized. Return an object. Or make it a class?
+    - [ ] Shortcut for adding CSS to head ('style' element?)
+    - [ ] Do a 'script' element as an easier way to do it
+  - [x] Bind client-side events -- it should 'with' the object
+  - [x] But how should it know which object? Nearest component? But there might be slots etc.
+        Vug can do this because it knows about components, but otherwise...
+        OK, alpine doesn't have components at all. So it's OK
+  - [x] Run arbitrary JS when element is inserted (removed?): c@click, c@inserted, c@removed
 */
 
 function set(el: HTMLElement, key: string, value: any) {
   // Pure frontend side
-  if (key[0] === '$') el.style[key.slice(1)] = value // supports both camelCase and kebab-case
+  if (key.startsWith("$$")) alpine(el, key.slice(2), value)
+  else if (key[0] === '$') el.style[key.slice(1)] = value // supports both camelCase and kebab-case
   else if (key[0] === '_') el.classList.toggle(key.slice(1).replace(/_/g, '-'), !!value)
   else if (key.startsWith("on")) el.addEventListener(key.slice(2), value)
   else el[key] = value
@@ -26,7 +36,7 @@ function set(el: HTMLElement, key: string, value: any) {
 class EffectsSystem {
   effects = new Map<HTMLElement, Function[]>()
   rerun() {
-    console.log("REREUNNING", Array.from(this.effects.values()).length)
+    console.log("RERUNNING", Array.from(this.effects.values()).length)
     for (const [el, fns] of this.effects) {
       if (!el.isConnected) this.effects.delete(el)
       else for (const fn of fns) {
@@ -45,6 +55,37 @@ class EffectsSystem {
     fn() // TODO error handle. Actually: schedule a rerun if there isn't one
   }
 }
+
+
+function alpine(el: HTMLElement, key: string, value: string) {
+  // Client-side alpine stuff
+  const run = (code: string, scope: any = {}) => Function(...Object.keys(scope), code)(...Object.values(scope))
+  const runEx = (code: string, scope: any = {}) => { if (!code.includes('return')) code = `return (\n${code}\n)`; if (scope.wif) { console.log("WIF:", scope.wif); code = `with (wif) {\n${code}\n} ` }; return run(code, scope) }
+  const nearestScope = (): any => { // Find nearest parent with a scope
+    let ret = el.nofClientSideScope, __el = el
+    while (ret === undefined && __el.parentElement) { 
+      __el = __el.parentElement
+      ret = __el.nofClientSideScope
+    }
+    return ret || {}
+  }
+  if (key === "") { // just plain prefix
+    const scope: any = runEx(value, { $el: el })
+    el.nofClientSideScope = scope || undefined
+    console.log("SCOPE", scope, el)
+  } else if (key.startsWith("on")) {
+    setTimeout(() => {
+      console.log(key,"!!",value, nearestScope())
+      if (key === "oninsert") runEx(value, { $el: el, wif: nearestScope() })
+      else el.addEventListener(key.slice(2), (e: any) => (runEx(value, { $event: e, $el: el, wif: nearestScope() }), alpine.fx.rerun()))
+    })
+  } else if (key.startsWith(":")) {
+    setTimeout(() => alpine.fx.effect(el, () => set(el, key.slice(1), runEx(value, { $el: el, wif: nearestScope() }))))
+  } else {
+    throw `Invalid alpine key: '${key}'`
+  }
+}
+alpine.fx = new EffectsSystem()
 
 abstract class App {
   abstract h(tag: any, attrs: any, ...children: any[]): any
@@ -155,6 +196,12 @@ function testSpaApp() {
                   </li>
                 )}
               </ul>
+              {/* demo of 'alpine' feature */}
+              <div $$="{shown: false}" $padding="0.5em">
+                <h4 $$onclick="shown=!shown">Click for detail</h4>
+                <p $$:$display="shown ? '' : 'none'">This is detail</p>
+              </div>
+              <input $$="$el.focus()" value="Should be focused"></input>
             </main>
   }
   // destroy existing
