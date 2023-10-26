@@ -222,7 +222,7 @@ class ServerClient {
     const el = this.els.get(cmd.id)
     if (!el) throw console.error("Element not found", cmd)
     if (cmd.key === "!APPENDCHILD") {
-      const [tag, id] = cmd.value.split('|')
+      const [tag, id] = String(cmd.value).split('|')
       const child = document.createElement(tag)
       this.els.set(id, child)
       el.appendChild(child)
