@@ -145,16 +145,20 @@ abstract class App {
       tag({...attrs, children })
   }
   private transformChild(x: any) { 
-    return typeof x === 'string' ? this.h('span', { innerText: x }) : 
+    return typeof x === 'string' ? this.h('text', { textContent: x }) : 
       Array.isArray(x) ? this.h('div', { $display: "contents" }, ...x.map(y => this.transformChild(y))) :
       x 
   }
 }
 
+const docEl = (tag: string): Node => 
+  tag === "text" ? document.createTextNode("") :
+  document.createElement(tag)
+
 class SpaApp extends App {
   fx = new EffectsSystem()
   h(tag: any, attrs: any, ...children: any[]) {
-    const el = document.createElement(tag)
+    const el = docEl(tag)
     for (const key in attrs) this.clientSetEx(el, key, attrs[key])
     for (const child of children) el.appendChild(child)
     return el
@@ -223,7 +227,7 @@ class ServerClient {
     if (!el) throw console.error("Element not found", cmd)
     if (cmd.key === "!APPENDCHILD") {
       const [tag, id] = String(cmd.value).split('|')
-      const child = document.createElement(tag)
+      const child = docEl(tag)
       this.els.set(id, child)
       el.appendChild(child)
     } else set(el, cmd.key, cmd.value)
