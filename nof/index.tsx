@@ -167,7 +167,7 @@ function createFragment() {
   const oldRemoveUs = el.remove.bind(el)
   const children: Element[] = []
   const el2 = Object.assign(el, {
-    appendChild(x: any) { window.last = x ; console.log("ADDING",el,x); children.push(x); setTimeout(() => el.before(x)); return x },
+    appendChild(x: any) { children.push(x); setTimeout(() => el.before(x)); return x },
     remove() { for (const x of children) x.remove(); oldRemoveUs() }
   })
   return el2
