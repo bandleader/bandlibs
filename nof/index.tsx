@@ -11,7 +11,7 @@
   - [ ] And emit client stub
 - [ ] Vug
 - [x] CSS via stylesheet (ad-hoc CSS)
-- [ ] Fragments
+- [x] Fragments
 - [x] Actual text nodes. Or at least if single child string, don't wrap in span, do innerText
 - [ ] Transitions (for now can do in the For component)
 - [ ] Teleport?
@@ -149,6 +149,8 @@ abstract class App {
       Array.isArray(x) ? this.h('div', { $display: "contents" }, ...x.map(y => this.transformChild(y))) :
       x 
   }
+  // To support React interface
+  Fragment = (attrs: any) => this.createElement('fragment', {}, ...attrs.children)
 }
 
 const docEl = (tag: string): Node => 
@@ -276,11 +278,11 @@ function testSpaApp() {
               </div>
               <input $$="$el.focus()" value="Should be focused"></input>
               <h3 _mt-4>Fragment test: make sure the following divs are parallel to me</h3>
-              <fragment>
+              <>
                 <div>1</div>
                 <div>2</div>
                 <div>3</div>
-              </fragment>
+              </>
             </main>
   }
   // destroy existing
