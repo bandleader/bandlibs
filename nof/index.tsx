@@ -8,6 +8,7 @@
   - [ ] Emit element IDs only if there are effects
   - [ ] Server app manager that prunes copies that are not in touch
   - [ ] And emit client stub
+- [x] CSS via stylesheet (ad-hoc CSS)
 - [ ] Fragments
 - [ ] Actual text nodes. Or at least if single child string, don't wrap in span, do innerText
 - [ ] Transitions (for now can do in the For component)
@@ -25,16 +26,59 @@
 
 const randId = () => Math.random().toString(36).slice(2)
 const comparer = (fn: (x: Cmd) => string|number) => (a: Cmd, b: Cmd) => { const x = fn(a), y = fn(b); return x === y ? 0 : x < y ? -1 : 1 }
+const seqIder = () => { let id = 0; return () => String(id++) }
 
 
 function set(el: HTMLElement, key: string, value: any) {
   // Pure frontend side
   if (key.startsWith("$$")) alpine(el, key.slice(2), value)
+  else if (key.split(':')[0] === "css") adhocCss(el, key.split(":")[1] || '', value)
   else if (key[0] === '$') el.style[key.slice(1)] = value // supports both camelCase and kebab-case
   else if (key[0] === '_') el.classList.toggle(key.slice(1).replace(/_/g, '-'), !!value)
   else if (key.startsWith("on")) el.addEventListener(key.slice(2), value)
   else el[key] = value
 }
+
+function adhocCss(el: HTMLElement, args: string, css: string) {
+  /* Supports: 
+        css="body { color: blue }" (global)
+        css="& { color: blue }" (anonymous selector)
+        css="color: blue" (shorthand for above)
+        css="color: blue; margin: 1em" (multiple is OK of course)
+        css="&:hover { color: blue }" (of course modify the & as you wish)
+        css:hover="color: red" (adds to the &. Supports active & focus too)
+        css:hover="color: red" (adds to the &. Supports active & focus too)
+        css:color="red" (cleaner)
+        css:color_hover="red" (combination)
+        css:color="red | green" (set regular/hover at once)
+        css:color="red | green | blue" (set regular/hover/focus at once)
+  - TODO can use a single stylesheet and just append to it? Or is that slower?
+  - TODO more modifiers like from Vug and Tailwind
+  - TODO remove when the element gets removed?
+  */
+  const modifiers = args.split("_").filter(x => x), selectors = modifiers.filter(x => ['hover', 'focus', 'active'].includes(x)), others = modifiers.filter(x => !selectors.includes(x))
+  if (others.length) {
+    if (css.includes(":")) throw `Can't use CSS property ${others[0]} because your CSS already includes a colon`
+    if (others.length > 1) throw `Can't use multiple CSS properties: ${others.join(':')}`
+    const prop = others[0].replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase() // convert camelCase to kebab-case
+    css = css.split("|").map((x,i) => `&${['',':hover',':focus'][i]} { ${prop}: ${x} }`).join("\n")
+  }
+  if (!css.includes('{')) css = `& { ${css} }` // allow shorthand of just the attributes, using the default selector
+  if (css.includes('&')) { // TODO this should go by absolute note, not element inserted. i.e. if a component is inserted X times... but we can't do that without Vug
+    const symb = "_a"
+    let id = el.getAttribute(symb)
+    if (!id) { id = adhocCss.ider(); el.setAttribute(symb, id) }
+    
+    let selector = `[${symb}="${id}"]`
+    for (const s of selectors) selector += `:${s}`
+    css = css.replace(/&/g, selector)
+  }
+  if (adhocCss.cssAdded.includes(css)) return;
+  adhocCss.cssAdded.push(css)
+  document.head.appendChild(Object.assign(document.createElement('style'), { type: 'text/css', textContent: css })) // innerText was putting <br>s for linebreaks
+}
+adhocCss.cssAdded = [] as string[]
+adhocCss.ider = seqIder()
 
 
 class EffectsSystem {
@@ -188,7 +232,9 @@ function testSpaApp() {
       { text: "Buy bread", done: false },
     ]
     return  <main>
-              <h1 $color="green">Todo list</h1>
+              <h1 $color="green" css="& { background: lightblue }" css:hover="background: red" >Todo list</h1>
+              <h1 $color="green" css:background_hover="yellow" css:hover="background: purple" >Todo list</h1>
+              <h1 $color="green" css:background="pink | orange">Todo list</h1>
               <ul>
                 {...todos.map(todo =>
                   <li $opacity={() => todo.done ? 0.5 : 1}>
