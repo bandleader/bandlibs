@@ -3,7 +3,7 @@
 - [x] For/If
 - [x] Components that can be written for any app
 - [x] Support for multiple components
-  - [ ] How to give them access to App (if they're outside of where the app was created), which is `React` but which is scoped to app creator? Can store it globally but what about when we add stuff later?
+  - [x] How to give them access to App (if they're outside of where the app was created), which is `React` but which is scoped to app creator? Can store it globally but what about when we add stuff later?
 - [ ] Server/Blazor apps:
   - [ ] SSR support (renderToString and remove commands).
   - [ ] Emit element IDs only if there are effects
@@ -152,7 +152,7 @@ abstract class App {
     children = children.map(x => this.transformChild(x))
     attrs = App.sp.wholeObject(attrs)
     return typeof tag === 'string' ? this.h(tag, attrs, ...children) :
-      tag({...attrs, children })
+      tag({...attrs, children, app: this })
   }
   private transformChild(x: any) { 
     return typeof x === 'string' ? this.h('text', { textContent: x }) : 
@@ -286,51 +286,60 @@ class ServerClient {
   }
 }
 
+function comp<TProps>(fn: (i: TProps & { app: App }) => (app: App) => any) {
+  // Optional is to avoid TS error on the JSX element
+  return (x: TProps & { app?: App }) => fn(x as typeof x & { app: App })(x.app!)
+}
+
+type Todo = { text: string, done: boolean }
+const TodoItem = comp<{item: Todo}>(({item}) => React => 
+  <li $opacity={() => item.done ? 0.5 : 1}>
+    <input type="checkbox" _me_1 checked={() => item.done} onclick={() => item.done = !item.done} />
+    <span innerText={item.text} $textDecoration={() => item.done ? "line-through" : "none"} />
+  </li>)
+const TodoApp = comp(({app}) => {
+  const todos = [
+    { text: "Buy milk", done: false },
+    { text: "Buy eggs", done: true },
+    { text: "Buy bread", done: false },
+  ]
+  let ifTest = true; setInterval(() => { ifTest = !ifTest; app.fx.rerun() }, 500)
+  return React => 
+    <main>
+      <h1>Todo list</h1>
+      <ul>
+        {React.for(() => todos, todo => <TodoItem item={todo} />)}
+      </ul>
+      {/* demo of 'alpine' feature */}
+      <div $$="{shown: false}" $padding="0.5em">
+        <h4 $$onclick="shown=!shown">Click for detail</h4>
+        <p $$:$display="shown ? '' : 'none'">This is detail</p>
+      </div>
+      <input $$="$el.focus()" value="Should be focused"></input>
+      <h3 _mt-4>Fragment test: make sure the following divs are parallel to me</h3>
+      <>
+        <div>1</div>
+        <div>2</div>
+        <div>3</div>
+      </>
+      <h3>CSS Test</h3>
+      <div bg="purple" c="white">Shorthand Inline</div>
+      <div css="background: blue; color: white">Ad-hoc CSS shorthand</div>
+      <div css="& { background: purple; color: white } &:hover { background: green }">Ad-hoc CSS long form with hover</div>
+      <div bg$="blue" c$="white" bg:hover$="green">Sheet styles</div>
+      <div bg="purple | green" c="white">Combined form</div>
+      <h3 _mt-4>If Test</h3>
+      {React.if(() => ifTest, () => <div>Yes</div>, () => <div>No</div>)}
+      {React.if(() => ifTest, () => <div>Shown</div>)}
+    </main>
+  })
+
 function testSpaApp() {
-  const app = true ? new ServerApp : new SpaApp, React = app
-  const todoApp = () => {
-    const todos = [
-      { text: "Buy milk", done: false },
-      { text: "Buy eggs", done: true },
-      { text: "Buy bread", done: false },
-    ]
-    const Todo = ({todo}: { todo: typeof todos[0]}) => 
-      <li $opacity={() => todo.done ? 0.5 : 1}>
-        <input type="checkbox" _me_1 checked={() => todo.done} onclick={() => todo.done = !todo.done} />
-        <span innerText={todo.text} $textDecoration={() => todo.done ? "line-through" : "none"} />
-      </li>
-    return  <main>
-              <h1>Todo list</h1>
-              <ul>
-                {app.for(() => todos, todo => <Todo todo={todo} />)}
-              </ul>
-              {/* demo of 'alpine' feature */}
-              <div $$="{shown: false}" $padding="0.5em">
-                <h4 $$onclick="shown=!shown">Click for detail</h4>
-                <p $$:$display="shown ? '' : 'none'">This is detail</p>
-              </div>
-              <input $$="$el.focus()" value="Should be focused"></input>
-              <h3 _mt-4>Fragment test: make sure the following divs are parallel to me</h3>
-              <>
-                <div>1</div>
-                <div>2</div>
-                <div>3</div>
-              </>
-              <h3>CSS Test</h3>
-              <div bg="purple" c="white">Shorthand Inline</div>
-              <div css="background: blue; color: white">Ad-hoc CSS shorthand</div>
-              <div css="& { background: purple; color: white } &:hover { background: green }">Ad-hoc CSS long form with hover</div>
-              <div bg$="blue" c$="white" bg:hover$="green">Sheet styles</div>
-              <div bg="purple | green" c="white">Combined form</div>
-              <h3 _mt-4>If Test</h3>
-              {React.if(() => ifTest, () => <div>Yes</div>, () => <div>No</div>)}
-              {React.if(() => ifTest, () => <div>Shown</div>)}
-            </main>
-  }
   // destroy existing
   for (const el of document.getElementsByTagName('main')) el.remove()
   // create new
-  const root = todoApp()
+  const app = true ? new ServerApp() : new SpaApp()
+  const root = TodoApp({ app })
   if (app instanceof ServerApp) {
     const client = new ServerClient()
     client.setUp(root as ServerElement)
