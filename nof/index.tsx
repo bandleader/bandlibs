@@ -146,7 +146,7 @@ function testSpaApp() {
       { text: "Buy bread", done: false },
     ]
     return  <main>
-              <h1 $color="green">Todo list</h1>,
+              <h1 $color="green">Todo list</h1>
                 <ul>
                   {...todos.map(todo => 
                     <li $opacity={() => todo.done ? 0.5 : 1}>
