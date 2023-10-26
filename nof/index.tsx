@@ -153,7 +153,22 @@ abstract class App {
 
 const docEl = (tag: string): Node => 
   tag === "text" ? document.createTextNode("") :
+  tag === "fragment" ? createFragment() :
   document.createElement(tag)
+
+function createFragment() {
+  const el = document.createComment("fragment")
+  // const el = document.createElement("div") // document.createComment("fragment")
+  // el.style.display = "none" // Just a placeholder. Could use a comment node, but we can't assign an ID to it so can't find it. Later we can make a map of IDs
+  // el.innerText = "fragment"
+  const oldRemoveUs = el.remove.bind(el)
+  const children: Element[] = []
+  const el2 = Object.assign(el, {
+    appendChild(x: any) { window.last = x ; console.log("ADDING",el,x); children.push(x); setTimeout(() => el.before(x)); return x },
+    remove() { for (const x of children) x.remove(); oldRemoveUs() }
+  })
+  return el2
+}
 
 class SpaApp extends App {
   fx = new EffectsSystem()
@@ -260,6 +275,12 @@ function testSpaApp() {
                 <p $$:$display="shown ? '' : 'none'">This is detail</p>
               </div>
               <input $$="$el.focus()" value="Should be focused"></input>
+              <h3 _mt-4>Fragment test: make sure the following divs are parallel to me</h3>
+              <fragment>
+                <div>1</div>
+                <div>2</div>
+                <div>3</div>
+              </fragment>
             </main>
   }
   // destroy existing
