@@ -12,7 +12,7 @@
 - [ ] Vug
 - [x] CSS via stylesheet (ad-hoc CSS)
 - [ ] Fragments
-- [ ] Actual text nodes. Or at least if single child string, don't wrap in span, do innerText
+- [x] Actual text nodes. Or at least if single child string, don't wrap in span, do innerText
 - [ ] Transitions (for now can do in the For component)
 - [ ] Teleport?
 - "Alpine" -- client-side stuff for Blazor mode:
