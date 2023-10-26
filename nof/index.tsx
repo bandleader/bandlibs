@@ -3,7 +3,7 @@
 - [ ] For/If
 - [x] Components that can be written for any app
 - [x] Support for multiple components
-  - [ ] How to give them access to App, which is `React` but which is scoped to app creator? Can store it globally but what about when we add stuff later?
+  - [ ] How to give them access to App (if they're outside of where the app was created), which is `React` but which is scoped to app creator? Can store it globally but what about when we add stuff later?
 - [ ] Server/Blazor apps:
   - [ ] SSR support (renderToString and remove commands).
   - [ ] Emit element IDs only if there are effects
