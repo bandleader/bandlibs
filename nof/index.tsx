@@ -22,7 +22,7 @@ function set(el: HTMLElement, key: string, value: any) {
 class EffectsSystem {
   effects = new Map<HTMLElement, Function[]>()
   rerun() {
-    console.log("REREUNNING", this.effects.values.length)
+    console.log("REREUNNING", Array.from(this.effects.values()).length)
     for (const [el, fns] of this.effects) {
       if (!el.isConnected) this.effects.delete(el)
       else for (const fn of fns) {
