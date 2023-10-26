@@ -140,7 +140,7 @@ alpine.fx = new EffectsSystem()
 abstract class App {
   fx = new EffectsSystem()
   abstract h(tag: any, attrs: any, ...children: any[]): any
-  createElement(tag: any, attrs: any, ...children: any[]) { 
+  createElement(tag: any, attrs: any = {}, ...children: any[]) { 
     children = children.map(x => this.transformChild(x))
     return typeof tag === 'string' ? this.h(tag, attrs, ...children) :
       tag({...attrs, children })
