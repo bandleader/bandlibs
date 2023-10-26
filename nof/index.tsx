@@ -161,7 +161,7 @@ function testSpaApp() {
     const client = new ServerClient()
     client.setUp(root as ServerElement)
     console.log(app.cmds)
-    app.cmds.forEach(cmd => client.doCmd(cmd))
+    app.fx.effect(root, () => { for (const cmd of app.cmds) client.doCmd(cmd); app.cmds = [] })
   } else {
     document.body.appendChild(root)
   }
