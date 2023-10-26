@@ -15,6 +15,9 @@
 - [x] Actual text nodes. Or at least if single child string, don't wrap in span, do innerText
 - [ ] Transitions (for now can do in the For component)
 - [ ] Teleport?
+- [ ] Shorthands etc
+  - [ ] Multiple classes
+  - [ ] Custom tag types for flex, ib, etc.? Or just use "display" overloading, or the flex shorthand property in SP
 - "Alpine" -- client-side stuff for Blazor mode:
   - [x] Run arbitrary JS when component (your element) is initialized. Return an object. Or make it a class?
     - [x] Shortcut for adding CSS to head ('style' element?)
@@ -25,6 +28,8 @@
         OK, alpine doesn't have components at all. So it's OK
   - [x] Run arbitrary JS when element is inserted (removed?): c@click, c@inserted, c@removed
 */
+
+import * as SP from "./style-processing";
 
 const randId = () => Math.random().toString(36).slice(2)
 const comparer = (fn: (x: Cmd) => string|number) => (a: Cmd, b: Cmd) => { const x = fn(a), y = fn(b); return x === y ? 0 : x < y ? -1 : 1 }
@@ -140,10 +145,12 @@ function alpine(el: HTMLElement, key: string, value: string) {
 alpine.fx = new EffectsSystem()
 
 abstract class App {
+  static sp = Object.assign(new SP.StyleProcessor(), { styleEmitPrefix: "$" })
   fx = new EffectsSystem()
   abstract h(tag: any, attrs: any, ...children: any[]): any
   createElement(tag: any, attrs: any = {}, ...children: any[]) { 
     children = children.map(x => this.transformChild(x))
+    attrs = App.sp.wholeObject(attrs)
     return typeof tag === 'string' ? this.h(tag, attrs, ...children) :
       tag({...attrs, children })
   }
@@ -289,9 +296,7 @@ function testSpaApp() {
         <span innerText={todo.text} $textDecoration={() => todo.done ? "line-through" : "none"} />
       </li>
     return  <main>
-              <h1 $color="green" css="& { background: lightblue }" css:hover="background: red" >Todo list</h1>
-              <h1 $color="green" css:background_hover="yellow" css:hover="background: purple" >Todo list</h1>
-              <h1 $color="green" css:background="pink | orange">Todo list</h1>
+              <h1>Todo list</h1>
               <ul>
                 {app.for(() => todos, todo => <Todo todo={todo} />)}
               </ul>
@@ -307,6 +312,12 @@ function testSpaApp() {
                 <div>2</div>
                 <div>3</div>
               </>
+              <h3>CSS Test</h3>
+              <div bg="purple" c="white">Shorthand Inline</div>
+              <div css="background: blue; color: white">Ad-hoc CSS shorthand</div>
+              <div css="& { background: purple; color: white } &:hover { background: green }">Ad-hoc CSS long form with hover</div>
+              <div bg$="blue" c$="white" bg:hover$="green">Sheet styles</div>
+              <div bg="purple | green" c="white">Combined form</div>
             </main>
   }
   // destroy existing
