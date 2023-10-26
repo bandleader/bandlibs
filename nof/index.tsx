@@ -228,6 +228,7 @@ class ServerElement {
   isConnected = true
   constructor(public app: ServerApp, public tag: string) { this.id = app.nextId() }
   set(key: string, value: any) { this.app.cmds.push(new Cmd(this.id, key, value)) }
+  remove() { this.app.cmds.push(new Cmd(this.id, "!REMOVE", null))}
   appendChild(child: ServerElement) {
     if (!(child instanceof ServerElement)) throw console.error("Only ServerElement can be appended", child)    
     
@@ -273,7 +274,9 @@ class ServerClient {
   doCmd(cmd: Cmd) {
     const el = this.els.get(cmd.id)
     if (!el) throw console.error("Element not found", cmd)
-    if (cmd.key === "!APPENDCHILD") {
+    if (cmd.key === "!REMOVE") {
+      el.remove()
+    } else if (cmd.key === "!APPENDCHILD") {
       const [tag, id] = String(cmd.value).split('|')
       const child = docEl(tag)
       this.els.set(id, child)
