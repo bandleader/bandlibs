@@ -34,14 +34,25 @@ const seqIder = () => { let id = 0; return () => String(id++) }
 function set(el: HTMLElement, key: string, value: any) {
   // Pure frontend side
   if (key.startsWith("$$")) alpine(el, key.slice(2), value)
-  else if (key.split(':')[0] === "css") adhocCss(el, key.split(":")[1] || '', value)
+  else if (key[0] === '$' && key.endsWith("$")) sheetStyle(el, key.slice(1,-1), value)
+  else if (key === 'css') adhocCss(el, value)
   else if (key[0] === '$') el.style[key.slice(1)] = value // supports both camelCase and kebab-case
   else if (key[0] === '_') el.classList.toggle(key.slice(1).replace(/_/g, '-'), !!value)
   else if (key.startsWith("on")) el.addEventListener(key.slice(2), value)
   else el[key] = value
 }
 
-function adhocCss(el: HTMLElement, args: string, css: string) {
+function sheetStyle(el: HTMLElement, propAndModifiers: string, value: string) {
+  /* Lets you do:
+  $bg$="green"
+  $bg:hover$="red"
+  Uses adhocCss under the hood
+  */
+  const [prop, ...modifiers] =  propAndModifiers.split(":")
+  adhocCss(el, `${prop}: ${value}`, modifiers.length ? `:${modifiers.join(':')}` : "")
+}
+
+function adhocCss(el: HTMLElement, css: string, suffix = "") {
   /* Supports: 
         css="body { color: blue }" (global)
         css="& { color: blue }" (anonymous selector)
@@ -58,22 +69,13 @@ function adhocCss(el: HTMLElement, args: string, css: string) {
   - TODO more modifiers like from Vug and Tailwind
   - TODO remove when the element gets removed?
   */
-  const modifiers = args.split("_").filter(x => x), selectors = modifiers.filter(x => ['hover', 'focus', 'active'].includes(x)), others = modifiers.filter(x => !selectors.includes(x))
-  if (others.length) {
-    if (css.includes(":")) throw `Can't use CSS property ${others[0]} because your CSS already includes a colon`
-    if (others.length > 1) throw `Can't use multiple CSS properties: ${others.join(':')}`
-    const prop = others[0].replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase() // convert camelCase to kebab-case
-    css = css.split("|").map((x,i) => `&${['',':hover',':focus'][i]} { ${prop}: ${x} }`).join("\n")
-  }
   if (!css.includes('{')) css = `& { ${css} }` // allow shorthand of just the attributes, using the default selector
   if (css.includes('&')) { // TODO this should go by absolute note, not element inserted. i.e. if a component is inserted X times... but we can't do that without Vug
     const symb = "_a"
     let id = el.getAttribute(symb)
     if (!id) { id = adhocCss.ider(); el.setAttribute(symb, id) }
-    
-    let selector = `[${symb}="${id}"]`
-    for (const s of selectors) selector += `:${s}`
-    css = css.replace(/&/g, selector)
+        
+    css = css.replace(/&/g, `[${symb}="${id}"]${suffix}`)
   }
   if (adhocCss.cssAdded.includes(css)) return;
   adhocCss.cssAdded.push(css)
