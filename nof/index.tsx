@@ -38,7 +38,12 @@ function set(el: HTMLElement, key: string, value: any) {
   else if (key[0] === '$') el.style[key.slice(1)] = value // supports both camelCase and kebab-case
   else if (key[0] === '_') el.classList.toggle(key.slice(1).replace(/_/g, '-'), !!value)
   else if (key.startsWith("on")) el.addEventListener(key.slice(2), value)
-  else el[key] = value
+  else if (key === "!APPENDCHILD") {
+    const [tag, id] = String(value).split('|')
+    const child = document.createElement(tag)
+    child.setAttribute("_n", id)
+    el.appendChild(child)
+  } else el[key] = value
 }
 
 function adhocCss(el: HTMLElement, args: string, css: string) {
@@ -220,12 +225,7 @@ class ServerClient {
   doCmd(cmd: Cmd) {
     const el = document.querySelector(`[_n="${cmd.id}"]`) as HTMLElement
     if (!el) throw console.error("Element not found", cmd)
-    if (cmd.key === "!APPENDCHILD") {
-      const [tag, id] = cmd.value.split('|')
-      const child = document.createElement(tag)
-      child.setAttribute("_n", id)
-      el.appendChild(child)
-    } else set(el, cmd.key, cmd.value)
+    set(el, cmd.key, cmd.value)
   }
 }
 
