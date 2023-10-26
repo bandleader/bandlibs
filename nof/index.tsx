@@ -1,13 +1,17 @@
 /*
 - [x] JSX support
 - [ ] For/If
-- [ ] Server app that produces an element that can be serialized to HTML
-- [ ] Components that can be written for any app
-- [ ] Blazor apps:
-  - [ ] Server support effects, just log when re-running
-  - [ ] Server assign element IDs if there are any effects
-  - [ ] Client stub to get latest changes from server
+- [x] Components that can be written for any app
+- [ ] Support for multiple components. How to give them access to App, which is `React` but which is scoped to app creator? Can store it globally but what about when we add stuff later?
+- [ ] Server/Blazor apps:
+  - [ ] SSR support (renderToString and remove commands).
+  - [ ] Emit element IDs only if there are effects
   - [ ] Server app manager that prunes copies that are not in touch
+  - [ ] And emit client stub
+- [ ] Fragments
+- [ ] Actual text nodes. Or at least if single child string, don't wrap in span, do innerText
+- [ ] Transitions (for now can do in the For component)
+- [ ] Teleport?
 */
 
 function set(el: HTMLElement, key: string, value: any) {
