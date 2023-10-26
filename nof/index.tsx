@@ -2,7 +2,8 @@
 - [x] JSX support
 - [ ] For/If
 - [x] Components that can be written for any app
-- [ ] Support for multiple components. How to give them access to App, which is `React` but which is scoped to app creator? Can store it globally but what about when we add stuff later?
+- [x] Support for multiple components
+  - [ ] How to give them access to App, which is `React` but which is scoped to app creator? Can store it globally but what about when we add stuff later?
 - [ ] Server/Blazor apps:
   - [ ] SSR support (renderToString and remove commands).
   - [ ] Emit element IDs only if there are effects
@@ -138,7 +139,11 @@ alpine.fx = new EffectsSystem()
 
 abstract class App {
   abstract h(tag: any, attrs: any, ...children: any[]): any
-  createElement(tag: any, attrs: any, ...children: any[]) { return this.h(tag, attrs, ...children.map(x => this.transformChild(x))) }
+  createElement(tag: any, attrs: any, ...children: any[]) { 
+    children = children.map(x => this.transformChild(x))
+    return typeof tag === 'string' ? this.h(tag, attrs, ...children) :
+      tag({...attrs, children })
+  }
   private transformChild(x: any) { 
     return typeof x === 'string' ? this.h('span', { innerText: x }) : 
       Array.isArray(x) ? this.h('div', { $display: "contents" }, ...x.map(y => this.transformChild(y))) :
@@ -232,17 +237,17 @@ function testSpaApp() {
       { text: "Buy eggs", done: true },
       { text: "Buy bread", done: false },
     ]
+    const Todo = ({todo}: { todo: typeof todos[0]}) => 
+      <li $opacity={() => todo.done ? 0.5 : 1}>
+        <input type="checkbox" _me_1 checked={() => todo.done} onclick={() => todo.done = !todo.done} />
+        <span innerText={todo.text} $textDecoration={() => todo.done ? "line-through" : "none"} />
+      </li>
     return  <main>
               <h1 $color="green" css="& { background: lightblue }" css:hover="background: red" >Todo list</h1>
               <h1 $color="green" css:background_hover="yellow" css:hover="background: purple" >Todo list</h1>
               <h1 $color="green" css:background="pink | orange">Todo list</h1>
               <ul>
-                {...todos.map(todo =>
-                  <li $opacity={() => todo.done ? 0.5 : 1}>
-                    <input type="checkbox" _me_1 checked={() => todo.done} onclick={() => todo.done = !todo.done} />
-                    <span innerText={todo.text} $textDecoration={() => todo.done ? "line-through" : "none"} />
-                  </li>
-                )}
+                {...todos.map(todo => <Todo todo={todo} />)}
               </ul>
               {/* demo of 'alpine' feature */}
               <div $$="{shown: false}" $padding="0.5em">
