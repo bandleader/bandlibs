@@ -152,6 +152,29 @@ abstract class App {
   }
   // To support React interface
   Fragment = (attrs: any) => this.createElement('fragment', {}, ...attrs.children)
+  for<T>(lister: () => T[], elementor: (i: T) => any, keyer: (item: T, ind: number) => string|number = (_,i)=>i, tag = "fragment") {
+    // TODO also re-order
+    const el = this.createElement(tag)
+    let existing = new Map<string, any>()
+    this.fx.effect(el, () => {
+      const items = lister(), toDelete = new Set(existing.keys())
+      items.forEach((x, i) => {
+        const key = String(keyer(x, i))
+        toDelete.delete(key)
+        if (!existing.has(key)) {
+          const child = elementor(x)
+          existing.set(key, child)
+          el.appendChild(child)
+        }
+      })
+      for (const key of toDelete) {
+        const el = existing.get(key)
+        el.remove()
+        existing.delete(key)
+      }
+    })
+    return el
+  }
 }
 
 const docEl = (tag: string): Node => 
@@ -268,7 +291,7 @@ function testSpaApp() {
               <h1 $color="green" css:background_hover="yellow" css:hover="background: purple" >Todo list</h1>
               <h1 $color="green" css:background="pink | orange">Todo list</h1>
               <ul>
-                {...todos.map(todo => <Todo todo={todo} />)}
+                {app.for(() => todos, todo => <Todo todo={todo} />)}
               </ul>
               {/* demo of 'alpine' feature */}
               <div $$="{shown: false}" $padding="0.5em">
