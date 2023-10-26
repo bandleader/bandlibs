@@ -212,18 +212,19 @@ class ServerApp extends App {
 }
 
 class ServerClient {
+  els = new Map<string, Node>() // TODO prune if element is removed. Or can weakmap help? But need an object key
   setUp(el: ServerElement) {
     const main = document.createElement(el.tag)
-    main.setAttribute('_n', el.id)
+    this.els.set(el.id, main)
     document.body.appendChild(main)
   }
   doCmd(cmd: Cmd) {
-    const el = document.querySelector(`[_n="${cmd.id}"]`) as HTMLElement
+    const el = this.els.get(cmd.id)
     if (!el) throw console.error("Element not found", cmd)
     if (cmd.key === "!APPENDCHILD") {
       const [tag, id] = cmd.value.split('|')
       const child = document.createElement(tag)
-      child.setAttribute("_n", id)
+      this.els.set(id, child)
       el.appendChild(child)
     } else set(el, cmd.key, cmd.value)
   }
