@@ -138,6 +138,7 @@ function alpine(el: HTMLElement, key: string, value: string) {
 alpine.fx = new EffectsSystem()
 
 abstract class App {
+  fx = new EffectsSystem()
   abstract h(tag: any, attrs: any, ...children: any[]): any
   createElement(tag: any, attrs: any, ...children: any[]) { 
     children = children.map(x => this.transformChild(x))
@@ -173,7 +174,6 @@ function createFragment() {
 }
 
 class SpaApp extends App {
-  fx = new EffectsSystem()
   h(tag: any, attrs: any, ...children: any[]) {
     const el = docEl(tag)
     for (const key in attrs) this.clientSetEx(el, key, attrs[key])
@@ -216,7 +216,6 @@ class ServerElement {
 }
 class ServerApp extends App {
   cmds: Cmd[] = []
-  fx = new EffectsSystem()
   h(tag: any, attrs: any, ...children: any[]) {
     const el = new ServerElement(this, tag)
     for (const child of children) el.appendChild(child)
