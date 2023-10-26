@@ -32,7 +32,7 @@ export class StyleProcessor {
       ret = groups[key].map(k => [k, value])
     }
     if (!ret) return null
-    if (this.allowQUnits) ret = ret.map(x => this.qUnits(x))
+    if (this.allowQUnits) ret = ret.map(([k,v]) => [k, this.qUnits(v)])
     if (this.allowHoverEtc && typeof value === 'string' && value.includes("|")) ret = ret.flatMap(([k, v]) => typeof v !== 'string' ? [[k,v] as [string,any]] : v.split("|").map((subValue,i) => [k + ["$", ":hover$", ":focus$", ":active$"][i], subValue] as [string,any]))
     return ret
   }

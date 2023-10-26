@@ -322,7 +322,7 @@ const TodoApp = comp(({app}) => {
         <div>2</div>
         <div>3</div>
       </>
-      <h3>CSS Test</h3>
+      <h3 mt="4q">CSS Test</h3>
       <div bg="purple" c="white">Shorthand Inline</div>
       <div css="background: blue; color: white">Ad-hoc CSS shorthand</div>
       <div css="& { background: purple; color: white } &:hover { background: green }">Ad-hoc CSS long form with hover</div>
