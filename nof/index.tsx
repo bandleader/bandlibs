@@ -8,6 +8,7 @@
   - [ ] Emit element IDs only if there are effects
   - [ ] Server app manager that prunes copies that are not in touch
   - [ ] And emit client stub
+- [ ] Vug
 - [x] CSS via stylesheet (ad-hoc CSS)
 - [ ] Fragments
 - [ ] Actual text nodes. Or at least if single child string, don't wrap in span, do innerText
