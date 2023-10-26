@@ -17,7 +17,7 @@
 - [ ] Teleport?
 - "Alpine" -- client-side stuff for Blazor mode:
   - [x] Run arbitrary JS when component (your element) is initialized. Return an object. Or make it a class?
-    - [ ] Shortcut for adding CSS to head ('style' element?)
+    - [x] Shortcut for adding CSS to head ('style' element?)
     - [ ] Do a 'script' element as an easier way to do it
   - [x] Bind client-side events -- it should 'with' the object
   - [x] But how should it know which object? Nearest component? But there might be slots etc.
