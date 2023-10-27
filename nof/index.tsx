@@ -1,23 +1,24 @@
 /*
-- [x] JSX support
-- [x] For/If
-- [x] Components that can be written for any app
-- [x] Support for multiple components
-  - [x] How to give them access to App (if they're outside of where the app was created), which is `React` but which is scoped to app creator? Can store it globally but what about when we add stuff later?
+- [ ] Suspense
+- [ ] Transitions (for now can do in the For component)
+- [ ] Teleport?
+- [ ] Vug
 - [ ] Server/Blazor apps:
   - [ ] SSR support (renderToString and remove commands).
   - [ ] Emit element IDs only if there are effects
   - [ ] Server app manager that prunes copies that are not in touch
   - [ ] And emit client stub
-- [ ] Vug
-- [x] CSS via stylesheet (ad-hoc CSS)
-- [x] Fragments
-- [x] Actual text nodes. Or at least if single child string, don't wrap in span, do innerText
-- [ ] Transitions (for now can do in the For component)
-- [ ] Teleport?
 - [ ] Shorthands etc
   - [ ] Multiple classes
   - [ ] Custom tag types for flex, ib, etc.? Or just use "display" overloading, or the flex shorthand property in SP
+- [x] JSX support
+- [x] For/If
+- [x] Components that can be written for any app
+- [x] Support for multiple components
+  - [x] How to give them access to App (if they're outside of where the app was created), which is `React` but which is scoped to app creator? Can store it globally but what about when we add stuff later?
+- [x] CSS via stylesheet (ad-hoc CSS)
+- [x] Fragments
+- [x] Actual text nodes. Or at least if single child string, don't wrap in span, do innerText
 - "Alpine" -- client-side stuff for Blazor mode:
   - [x] Run arbitrary JS when component (your element) is initialized. Return an object. Or make it a class?
     - [x] Shortcut for adding CSS to head ('style' element?)
