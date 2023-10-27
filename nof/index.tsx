@@ -88,7 +88,7 @@ adhocCss.ider = seqIder()
 class EffectsSystem {
   effects = new Map<HTMLElement, Function[]>()
   rerun() {
-    console.log("RERUNNING", Array.from(this.effects.values()).length)
+    // console.log("RERUNNING", Array.from(this.effects.values()).length)
     for (const [el, fns] of this.effects) {
       if (!el.isConnected) this.effects.delete(el)
       else for (const fn of fns) {
@@ -112,7 +112,7 @@ class EffectsSystem {
 function alpine(el: HTMLElement, key: string, value: string) {
   // Client-side alpine stuff
   const run = (code: string, scope: any = {}) => Function(...Object.keys(scope), code)(...Object.values(scope))
-  const runEx = (code: string, scope: any = {}) => { if (!code.includes('return')) code = `return (\n${code}\n)`; if (scope.wif) { console.log("WIF:", scope.wif); code = `with (wif) {\n${code}\n} ` }; return run(code, scope) }
+  const runEx = (code: string, scope: any = {}) => { if (!code.includes('return')) code = `return (\n${code}\n)`; if (scope.wif) { code = `with (wif) {\n${code}\n} ` }; return run(code, scope) }
   const nearestScope = (): any => { // Find nearest parent with a scope
     let ret = el.nofClientSideScope, __el = el
     while (ret === undefined && __el.parentElement) { 
@@ -124,10 +124,8 @@ function alpine(el: HTMLElement, key: string, value: string) {
   if (key === "") { // just plain prefix
     const scope: any = runEx(value, { $el: el })
     el.nofClientSideScope = scope || undefined
-    console.log("SCOPE", scope, el)
   } else if (key.startsWith("on")) {
     setTimeout(() => {
-      console.log(key,"!!",value, nearestScope())
       if (key === "oninsert") runEx(value, { $el: el, wif: nearestScope() })
       else el.addEventListener(key.slice(2), (e: any) => (runEx(value, { $event: e, $el: el, wif: nearestScope() }), alpine.fx.rerun()))
     })
