@@ -156,13 +156,13 @@ abstract class App {
       tag({...attrs, children, app: this })
   }
   private transformChild(x: any) { 
-    return typeof x === 'string' ? this.h('text', { textContent: x }) : 
+    return typeof x === 'string' ? this.h("TEXT", { textContent: x }) : 
       Array.isArray(x) ? this.h('div', { $display: "contents" }, ...x.map(y => this.transformChild(y))) :
       x 
   }
   // To support React interface
-  Fragment = (attrs: any) => this.createElement('fragment', {}, ...attrs.children)
-  for<T>(lister: () => T[], elementor: (i: T) => any, keyer: (item: T, ind: number) => string|number = (_,i)=>i, tag = "fragment") {
+  Fragment = (attrs: any) => this.createElement("FRAGMENT", {}, ...attrs.children)
+  for<T>(lister: () => T[], elementor: (i: T) => any, keyer: (item: T, ind: number) => string|number = (_,i)=>i, tag = "FRAGMENT") {
     // TODO also re-order
     const el = this.createElement(tag)
     let existing = new Map<string, any>()
@@ -189,15 +189,15 @@ abstract class App {
 }
 
 const docEl = (tag: string): Node => 
-  tag === "text" ? document.createTextNode("") :
-  tag === "fragment" ? createFragment() :
+  tag === "TEXT" ? document.createTextNode("") :
+  tag === "FRAGMENT" ? createFragment() :
   document.createElement(tag)
 
 function createFragment() {
-  const el = document.createComment("fragment")
-  // const el = document.createElement("div") // document.createComment("fragment")
+  const el = document.createComment("FRAGMENT")
+  // const el = document.createElement("div") // document.createComment("FRAGMENT")
   // el.style.display = "none" // Just a placeholder. Could use a comment node, but we can't assign an ID to it so can't find it. Later we can make a map of IDs
-  // el.innerText = "fragment"
+  // el.innerText = "FRAGMENT"
   const oldRemoveUs = el.remove.bind(el)
   const children: Element[] = []
   const el2 = Object.assign(el, {
