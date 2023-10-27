@@ -53,6 +53,7 @@ function sheetStyle(el: HTMLElement, propAndModifiers: string, value: string) {
   $bg$="green"
   $bg:hover$="red"
   Uses adhocCss under the hood
+  - TODO more modifiers like from Vug and Tailwind
   */
   const [prop, ...modifiers] =  propAndModifiers.split(":")
   adhocCss(el, `${prop}: ${value}`, modifiers.length ? `:${modifiers.join(':')}` : "")
@@ -65,14 +66,7 @@ function adhocCss(el: HTMLElement, css: string, suffix = "") {
         css="color: blue" (shorthand for above)
         css="color: blue; margin: 1em" (multiple is OK of course)
         css="&:hover { color: blue }" (of course modify the & as you wish)
-        css:hover="color: red" (adds to the &. Supports active & focus too)
-        css:hover="color: red" (adds to the &. Supports active & focus too)
-        css:color="red" (cleaner)
-        css:color_hover="red" (combination)
-        css:color="red | green" (set regular/hover at once)
-        css:color="red | green | blue" (set regular/hover/focus at once)
   - TODO can use a single stylesheet and just append to it? Or is that slower?
-  - TODO more modifiers like from Vug and Tailwind
   - TODO remove when the element gets removed?
   */
   if (!css.includes('{')) css = `& { ${css} }` // allow shorthand of just the attributes, using the default selector
@@ -160,7 +154,7 @@ abstract class App {
       Array.isArray(x) ? this.h('div', { $display: "contents" }, ...x.map(y => this.transformChild(y))) :
       x 
   }
-  // To support React interface
+  // To support React fragment interface
   Fragment = (attrs: any) => this.createElement("FRAGMENT", {}, ...attrs.children)
   for<T>(lister: () => T[], elementor: (i: T) => any, keyer: (item: T, ind: number) => string|number = (_,i)=>i, tag = "FRAGMENT") {
     // TODO also re-order
