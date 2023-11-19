@@ -22,6 +22,8 @@ export function processCssProp(key: string, value: string): null | Record<string
     if (key === "py") return { "padding-top": allowQUnits(value), "padding-bottom": allowQUnits(value) }
     if (key === "mx") return { "margin-left": allowQUnits(value), "margin-right": allowQUnits(value) }
     if (key === "my") return { "margin-top": allowQUnits(value), "margin-bottom": allowQUnits(value) }
+    // if (key === "vis") return { "visibility": value } // Can maybe make our own shorthand map instead of this
+    // if (key === "sho") return { "visibility": `(${value}) ? null : 'hidden'` } // Not sure if this is a good idea. (It can be done with a Vue directive.) And even if it is, we should check if the word is an expr, which is not possible in our current design
     if (key === "circ" && !value) return { "border-radius": "100%" }
 
     return null;
