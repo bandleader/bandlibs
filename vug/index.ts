@@ -50,9 +50,21 @@ export function ViteTransformPlugin(opts: VugOptions = {}) {
     name: 'vite-plugin-vue-vug',
     enforce: "pre" as const,
     transform(code: string, id: string) {
+      const compile = (what: string) => (opts._tempLangVersion||1.2) >= 2 ? V2.Parsing.compile(what) : V1.v1Load(what)
+      if (id.endsWith(".astro")) {
+        // console.log("CODE:",code.replace(/\r/g, '/r'))
+        const astroDelim = "$$render`Vug:\n", styleDelim = "`;\n}"
+        if (!code.includes(astroDelim)) return;
+        let [top, middle] = code.split(astroDelim), bottom = ""
+        top = top.replace('Vug:\n', "")
+        ;[middle, bottom] = middle.split(styleDelim)
+        bottom ||= ""
+        middle = compile(middle).toVueTemplate()
+        // console.log("DOING", middle.length)
+        return top + astroDelim + middle + styleDelim + bottom
+      }
       const isVueFile = id.endsWith('.vue')
       if (!isVueFile && !/\.m?(j|t)sx?$/.test(id)) return;
-      const compile = (what: string) => (opts._tempLangVersion||1.2) >= 2 ? V2.Parsing.compile(what) : V1.v1Load(what)
       
       code = transformVugTemplateStrings(code)
 
