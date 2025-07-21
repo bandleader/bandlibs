@@ -1,4 +1,4 @@
-/*! *****************************************************************************
+/******************************************************************************
 Copyright (c) Microsoft Corporation.
 
 Permission to use, copy, modify, and/or distribute this software for any
@@ -62,6 +62,11 @@ function __spreadArray(to, from, pack) {
     }
     return to.concat(ar || Array.prototype.slice.call(from));
 }
+
+typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
+    var e = new Error(message);
+    return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
+};
 
 function partition(arr, fn, minGroups) {
     var e_1, _a;
@@ -2978,6 +2983,12 @@ var emit = /*#__PURE__*/Object.freeze({
   marked.Tokenizer = Tokenizer;
   marked.Slugger = Slugger;
   marked.parse = marked;
+  
+  marked.options;
+  marked.setOptions;
+  marked.use;
+  marked.walkTokens;
+  marked.parseInline;
   Parser.parse;
   Lexer.lex;
 
@@ -3253,7 +3264,7 @@ function splitThree(what, sepChar) {
             var ch = _c.value;
             var starter = "'\"({[`".indexOf(ch);
             if (escaping) {
-                ret[ret.length - 1] += ch;
+                ret[ret.length - 1] += ch; // Add to current item
                 escaping = false;
                 continue;
             }
@@ -3294,12 +3305,15 @@ function parseValue(value) {
         (1 + 2)         (expr)
         {obj: 'foo'}    (expr)
         345.2           (expr)
+        {{foo}}         (expr)
     */
     if (!value.length)
         return [false, '']; // If there is no value, it's not an expr.
     var first = value[0], last = value[value.length - 1], same = first === last && value.length > 1;
     if (same && (first === '"' || first === "'"))
         return [false, value.slice(1, value.length - 1)]; // Quoted values
+    if (value.startsWith("{{") && value.endsWith("}}"))
+        return [true, value.slice(2, value.length - 2)]; // Vue-style expressions. Because of TS
     var opener = "({`".indexOf(first), closer = ")}`".indexOf(last);
     if (opener >= 0 && opener === closer && value.length > 1)
         return [true, (first === '(') ? value.slice(1, value.length - 1) : value]; // parens, objects, template strings. Cut off parens
@@ -3825,6 +3839,8 @@ function processCssProp(key, value) {
         return { "margin-left": allowQUnits(value), "margin-right": allowQUnits(value) };
     if (key === "my")
         return { "margin-top": allowQUnits(value), "margin-bottom": allowQUnits(value) };
+    // if (key === "vis") return { "visibility": value } // Can maybe make our own shorthand map instead of this
+    // if (key === "sho") return { "visibility": `(${value}) ? null : 'hidden'` } // Not sure if this is a good idea. (It can be done with a Vue directive.) And even if it is, we should check if the word is an expr, which is not possible in our current design
     if (key === "circ" && !value)
         return { "border-radius": "100%" };
     return null;
@@ -4311,15 +4327,29 @@ function ViteTransformPlugin(opts) {
         name: 'vite-plugin-vue-vug',
         enforce: "pre",
         transform: function (code, id) {
+            var _a;
+            var compile = function (what) { return (opts._tempLangVersion || 1.2) >= 2 ? compile$1(what) : v1Load(what); };
+            if (id.endsWith(".astro")) {
+                // console.log("CODE:",code.replace(/\r/g, '/r'))
+                var astroDelim = "$$render`Vug:\n", styleDelim = "`;\n}";
+                if (!code.includes(astroDelim))
+                    return;
+                var _b = __read(code.split(astroDelim), 2), top_1 = _b[0], middle = _b[1], bottom = "";
+                top_1 = top_1.replace('Vug:\n', "");
+                _a = __read(middle.split(styleDelim), 2), middle = _a[0], bottom = _a[1];
+                bottom || (bottom = "");
+                middle = compile(middle).toVueTemplate();
+                // console.log("DOING", middle.length)
+                return top_1 + astroDelim + middle + styleDelim + bottom;
+            }
             var isVueFile = id.endsWith('.vue');
             if (!isVueFile && !/\.m?(j|t)sx?$/.test(id))
                 return;
-            var compile = function (what) { return (opts._tempLangVersion || 1.2) >= 2 ? compile$1(what) : v1Load(what); };
             code = transformVugTemplateStrings(code);
             if (!id.endsWith(".vue"))
                 return;
             var origCode = code;
-            var findTemplateTag = /<template lang=['"]?vug['" >]/g.exec(code);
+            var findTemplateTag = /<template lang=['"]?vug['" >]|<template vug[ >]/g.exec(code);
             if (!findTemplateTag)
                 return;
             var startOfTemplateTag = findTemplateTag.index;
@@ -4354,10 +4384,6 @@ function load(vugCode, opts) {
     return compile$1(vugCode);
 }
 function vug(vugCode) {
-    var args = [];
-    for (var _i = 1; _i < arguments.length; _i++) {
-        args[_i - 1] = arguments[_i];
-    }
     throw "Vug.vug() template-tag function was called at runtime -- this means that you haven't properly set up a compile-time plugin to replace calls to it. If you meant to convert Vug code at runtime, use one of the provided methods for doing so.";
 }
 function transformVugTemplateStrings(code, opts) {

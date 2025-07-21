@@ -72,10 +72,12 @@ function parseValue(value: string): [boolean, string] { // returns [isExpr, valu
         (1 + 2)         (expr)
         {obj: 'foo'}    (expr)
         345.2           (expr)
+        {{foo}}         (expr)
     */
     if (!value.length) return [false, ''] // If there is no value, it's not an expr.
     const first = value[0], last = value[value.length - 1], same = first === last && value.length > 1
     if (same && (first === '"' || first === "'")) return [false, value.slice(1, value.length - 1)] // Quoted values
+    if (value.startsWith("{{") && value.endsWith("}}")) return [true, value.slice(2, value.length - 2)] // Vue-style expressions. Because of TS
     const opener = "({`".indexOf(first), closer = ")}`".indexOf(last)
     if (opener >= 0 && opener === closer && value.length > 1) return [true, (first === '(') ? value.slice(1, value.length - 1) : value] // parens, objects, template strings. Cut off parens
     if (!isNaN(Number(value))) return [true, value] // numbers

@@ -71,7 +71,7 @@ export function ViteTransformPlugin(opts: VugOptions = {}) {
       if (!id.endsWith(".vue")) return;
       const origCode = code
 
-      const findTemplateTag = /<template lang=['"]?vug['" >]/g.exec(code)
+      const findTemplateTag = /<template lang=['"]?vug['" >]|<template vug[ >]/g.exec(code)
       if (!findTemplateTag) return;
       const startOfTemplateTag = findTemplateTag.index
       const startOfCode = code.indexOf(">", startOfTemplateTag) + 1

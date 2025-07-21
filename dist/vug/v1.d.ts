@@ -1,10 +1,10 @@
-export declare type VugAttr = {
+export type VugAttr = {
     key: string;
     value?: string;
     isExpr: boolean;
     kind: string;
 };
-export declare type VugNode = {
+export type VugNode = {
     tag: string;
     attrs: VugAttr[];
     innerHtml?: string;
@@ -34,7 +34,7 @@ export declare function v1Load(text: string): {
     toVueTemplate: (whitespace?: boolean) => string;
     toRenderFunc: () => string;
 };
-declare type WithChildren<T> = T & {
+type WithChildren<T> = T & {
     children: WithChildren<T>[];
 };
 export {};
